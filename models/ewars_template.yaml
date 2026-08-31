@@ -1,0 +1,73 @@
+schema_version: 1
+
+id: ewars_template
+display_name: EWARS
+maturity: stable
+
+summary: >-
+  Bayesian early-warning template fitted with INLA, using lagged climate
+  covariates on top of the automatically supplied population covariate.
+
+source:
+  repository: https://github.com/dhis2-chap/ewars_template
+
+maintainers: []   # TODO: list GitHub handles of the responsible maintainers
+
+compatibility:
+  period_types: [monthly]
+
+covariates:
+  # Supplied automatically by chap; not repeated in configurations.
+  required:
+    - population
+  additional_continuous:
+    - rainfall
+    - mean_temperature
+
+# Channel pointers into `versions`. `stable` is the newest verified pin —
+# what production chap instances should use. `latest` is the newest pin of
+# any status; it diverges from `stable` while a new version is under review.
+channels:
+  stable: v6
+  latest: v6
+
+versions:
+  - version: v6
+    commit: cdd06ed61ee0f6eccab1fc9b9d74eb52cb122539
+    status: verified
+    verified_by: []   # TODO: the three approving maintainers
+    changelog: null
+    notes: >-
+      Pinned to the same commit that chap's default.yaml already seeds.
+
+# Verified configurations. Each block is a valid standalone
+# --model-configuration-yaml file for `chap eval` and
+# `chap evaluate-ensemble`: copy the inner keys (user_option_values,
+# additional_continuous_covariates) into their own file.
+configurations:
+  monthly_climate:
+    description: >-
+      Reference climate-driven configuration. n_lags is positional: one entry
+      per additional_continuous_covariates entry, in the same order.
+      population is a required covariate and is supplied automatically, so it
+      is not repeated here.
+    user_option_values:
+      n_lags: [3, 3]
+      precision: 1
+      region_seasonal: false
+    additional_continuous_covariates:
+      - rainfall
+      - mean_temperature
+  monthly_region_seasonal:
+    description: >-
+      Region-specific seasonal effects. Needs enough complete seasons per
+      location to identify the effects (13 were enough on the 18- and
+      63-location ensemble datasets), at the cost of a noticeably slower
+      INLA fit.
+    user_option_values:
+      n_lags: [3, 3]
+      precision: 1
+      region_seasonal: true
+    additional_continuous_covariates:
+      - rainfall
+      - mean_temperature

@@ -1,0 +1,86 @@
+schema_version: 1
+
+id: auto_regressive_monthly_v2
+display_name: AutoRegressive Monthly v2
+maturity: stable
+
+summary: >-
+  Recurrent neural network (GRU) ensemble forecaster with climate covariates
+  and a fixed maximum prediction horizon.
+
+source:
+  repository: https://github.com/chap-models/auto_regressive_monthly_v2
+  # The MLproject name in the repository is "auto_regressive_monthly", so an
+  # explicit name is needed to keep this template separate from the v1 model,
+  # exactly as in chap's default.yaml.
+  mlproject_name: auto_regressive_monthly
+
+maintainers: []   # TODO: list GitHub handles of the responsible maintainers
+
+compatibility:
+  period_types: [monthly]
+  # Declared by the model; the forecast horizon cannot be raised above this
+  # without dropping the model.
+  max_prediction_length: 3
+
+covariates:
+  # Required and supplied automatically by chap.
+  required:
+    - rainfall
+    - mean_temperature
+    - population
+  additional_continuous:
+    - mean_relative_humidity
+
+channels:
+  stable: stable
+  latest: stable
+
+versions:
+  # The upstream version key is literally named "stable"; kept as-is.
+  - version: stable
+    commit: d4d6b78212c7079b3d151bb8aba7e042c2393953
+    status: verified
+    verified_by: []   # TODO: the three approving maintainers
+    changelog: null
+    notes: >-
+      Pinned to the same commit that chap's default.yaml already seeds.
+
+# Verified configurations. Each block is a valid standalone
+# --model-configuration-yaml file for `chap eval` and
+# `chap evaluate-ensemble`.
+configurations:
+  monthly_h3:
+    description: >-
+      Reference configuration for a 3-period horizon. prediction_length must
+      equal --backtest-params.n-periods. context_length 36 gives three
+      seasons of context. rainfall, mean_temperature and population are
+      required and supplied automatically.
+    user_option_values:
+      prediction_length: 3
+      context_length: 36
+      n_iter: 400
+      n_ensemble: 5
+      learning_rate: 0.001
+      cell: gru
+      rnn_features: 16
+      head_features: 24
+      rnn_layers: 1
+      recursive_decode: false
+      dropout_rate: 0.2
+    additional_continuous_covariates:
+      - mean_relative_humidity
+  monthly_h3_light:
+    description: >-
+      Lighter fit for wide sweeps: shorter context and fewer ensemble
+      members.
+    user_option_values:
+      prediction_length: 3
+      context_length: 24
+      n_iter: 300
+      n_ensemble: 3
+      learning_rate: 0.001
+      cell: gru
+      dropout_rate: 0.2
+    additional_continuous_covariates:
+      - mean_relative_humidity

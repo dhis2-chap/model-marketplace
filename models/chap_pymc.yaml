@@ -1,0 +1,79 @@
+schema_version: 1
+
+id: chap_pymc
+display_name: CHAP PyMC
+maturity: stable
+
+summary: >-
+  Bayesian probabilistic model built on PyMC with seasonal harmonics and
+  lagged climate effects. Supports a full HMC fit and a cheaper variational
+  (ADVI) fit for wide backtest sweeps.
+
+source:
+  repository: https://github.com/dhis2-chap/chap_pymc
+
+maintainers: []   # TODO: list GitHub handles of the responsible maintainers
+
+compatibility:
+  period_types: [monthly]
+
+covariates:
+  # mean_temperature is required and supplied automatically by chap.
+  required:
+    - mean_temperature
+  additional_continuous:
+    - rainfall
+
+channels:
+  stable: uv
+  latest: uv
+
+versions:
+  - version: uv
+    commit: cce2e8c7e73980b3c8b63884802f8342e584eb9f
+    status: verified
+    verified_by: []   # TODO: the three approving maintainers
+    changelog: null
+    notes: >-
+      Pinned to the same commit that chap's default.yaml already seeds.
+
+# Verified configurations. Each block is a valid standalone
+# --model-configuration-yaml file for `chap eval` and
+# `chap evaluate-ensemble`.
+configurations:
+  monthly_hmc:
+    description: >-
+      Reference HMC fit. skip_bottom_n_seasons drops the weakest seasons of
+      those available; the model card warns about very high upper quantiles
+      when predicting across a season boundary, and this is the shipped
+      mitigation.
+    user_option_values:
+      method: hmc
+      draws: 500
+      tune: 500
+      chains: 4
+      target_accept: 0.95
+      n_harmonics: 3
+      lag: 3
+      use_prev_year: true
+      do_ar_effect: false
+      prior_strength: 1.0
+      skip_bottom_n_seasons: 2
+      random_seed: 42
+    additional_continuous_covariates:
+      - rainfall
+  monthly_advi:
+    description: >-
+      Variational fit for backtest sweeps, where a 4-chain HMC run per split
+      is the dominant cost. Cheaper, and less reliable in the tails.
+    user_option_values:
+      method: advi
+      n_iterations: 200000
+      n_samples: 500
+      n_harmonics: 3
+      lag: 3
+      use_prev_year: true
+      skip_bottom_n_seasons: 2
+      random_seed: 42
+    additional_continuous_covariates:
+      - rainfall

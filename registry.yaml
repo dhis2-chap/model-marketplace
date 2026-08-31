@@ -1,0 +1,38 @@
+# CHAP Model Marketplace — registry index
+#
+# This file is the entry point for the marketplace site. Every model listed
+# here has been reviewed and verified by the CHAP maintainers; a model (or a
+# new version of one) only lands in this repo through a pull request approved
+# by three maintainers.
+#
+# The site renders this repo — the repo stays the source of truth and the
+# review gate. See models/README.md for the per-model file format.
+
+schema_version: 1
+
+marketplace:
+  name: CHAP Model Marketplace
+  description: >-
+    Curated, verified forecasting models for CHAP, the Climate & Health
+    Analytics Platform. Every listed model and every version pin is reviewed
+    by the CHAP maintainers before it appears here.
+  documentation:
+    chap: https://chap.dhis2.org
+    # The marketplace install flow is not settled yet; until it is, the site
+    # points at the existing integration instructions in the chap docs.
+    install: https://chap.dhis2.org/chap-modeling-platform/external_models/
+
+review_policy:
+  required_approvals: 3
+  note: >-
+    New models and new version pins are proposed as pull requests against this
+    repository and must be approved by three maintainers before merge.
+
+# Ordered list of whitelisted models. Each entry is a standalone YAML file;
+# the model's maturity set (stable | experimental) is declared inside the file.
+models:
+  - models/ewars_template.yaml
+  - models/chap_pymc.yaml
+  - models/auto_regressive_monthly_v2.yaml
+  - models/mstl_arima.yaml
+  - models/mstl_multistep_model.yaml
