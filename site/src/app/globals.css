@@ -1,0 +1,124 @@
+@import "tailwindcss";
+
+/* Marketplace design tokens — ported 1:1 from the Claude Design canvas
+   ("CHAP Model Marketplace.dc.html"). Light is the default; an explicit
+   [data-theme="dark"] swaps the palette. */
+:root {
+  --mp-surface: #ffffff;
+  --mp-surface-2: #f6fbfb;
+  --mp-surface-3: #eef3f7;
+  --mp-border: #e4e7eb;
+  --mp-border-strong: #d2d8e0;
+  --mp-text: #1f2230;
+  --mp-text-2: #5b6170;
+  --mp-text-3: #8a91a0;
+  --mp-brand: #147cd7;
+  --mp-brand-dark: #0f5fa8;
+  --mp-brand-tint: #eaf3fc;
+  --mp-verified: #1b7a3e;
+  --mp-verified-tint: #e8f6ee;
+  --mp-exp: #b36200;
+  --mp-exp-tint: #fdf2e3;
+  --mp-danger: #c84141;
+  --mp-danger-tint: #fbecec;
+  --mp-code-bg: #0f1420;
+  --mp-code-fg: #d8dee9;
+  --mp-code-key: #6fb4f0;
+  --mp-code-str: #8fd79a;
+  --mp-code-num: #e9b872;
+  --mp-code-com: #6b7488;
+  --mp-shadow: 0 1px 2px rgba(17, 24, 39, 0.05);
+  --mp-shadow-lift: 0 8px 24px rgba(17, 24, 39, 0.1);
+}
+
+[data-theme="dark"] {
+  --mp-surface: #101420;
+  --mp-surface-2: #161b29;
+  --mp-surface-3: #1e2536;
+  --mp-border: #28303f;
+  --mp-border-strong: #374156;
+  --mp-text: #edf0f6;
+  --mp-text-2: #a3abbc;
+  --mp-text-3: #7c859a;
+  --mp-brand: #5aa8ee;
+  --mp-brand-dark: #8cc5f5;
+  --mp-brand-tint: #132639;
+  --mp-verified: #63c183;
+  --mp-verified-tint: #12291c;
+  --mp-exp: #eda648;
+  --mp-exp-tint: #2e2210;
+  --mp-danger: #e58484;
+  --mp-danger-tint: #2e1717;
+  --mp-code-bg: #080b12;
+  --mp-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --mp-shadow-lift: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+@theme inline {
+  --color-surface: var(--mp-surface);
+  --color-surface-2: var(--mp-surface-2);
+  --color-surface-3: var(--mp-surface-3);
+  --color-line: var(--mp-border);
+  --color-line-strong: var(--mp-border-strong);
+  --color-ink: var(--mp-text);
+  --color-ink-2: var(--mp-text-2);
+  --color-ink-3: var(--mp-text-3);
+  --color-brand: var(--mp-brand);
+  --color-brand-dark: var(--mp-brand-dark);
+  --color-brand-tint: var(--mp-brand-tint);
+  --color-verified: var(--mp-verified);
+  --color-verified-tint: var(--mp-verified-tint);
+  --color-exp: var(--mp-exp);
+  --color-exp-tint: var(--mp-exp-tint);
+  --color-danger: var(--mp-danger);
+  --color-danger-tint: var(--mp-danger-tint);
+  --color-code-bg: var(--mp-code-bg);
+  --color-code-fg: var(--mp-code-fg);
+  --color-code-key: var(--mp-code-key);
+  --color-code-str: var(--mp-code-str);
+  --color-code-num: var(--mp-code-num);
+  --color-code-com: var(--mp-code-com);
+  --font-brand: var(--font-rubik);
+  --font-body: var(--font-lato);
+  --font-mono: var(--font-roboto-mono);
+  --shadow-mp: var(--mp-shadow);
+  --shadow-lift: var(--mp-shadow-lift);
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--mp-surface);
+  color: var(--mp-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  font-family: var(--font-body);
+}
+
+::selection {
+  background: var(--mp-brand);
+  color: #fff;
+}
+
+@keyframes mp-draw {
+  from {
+    stroke-dashoffset: 900;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes mp-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
