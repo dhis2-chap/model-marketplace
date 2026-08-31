@@ -122,3 +122,25 @@ body {
     opacity: 0;
   }
 }
+
+@keyframes mp-pipeline-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.review-pipeline-progress {
+  animation-name: mp-pipeline-progress;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .review-pipeline-progress {
+    animation: none;
+    transform: scaleX(1);
+  }
+}
