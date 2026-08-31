@@ -11,7 +11,12 @@ summary: >-
 source:
   repository: https://github.com/dhis2-chap/ewars_template
 
-maintainers: []   # TODO: list GitHub handles of the responsible maintainers
+# GitHub handles responsible for this listing — backfilled from the source
+# repository's contributors; corrections welcome by PR.
+maintainers:
+  - knutdrand
+  - Halvardgithub
+  - ivargr
 
 compatibility:
   period_types: [monthly]
@@ -35,7 +40,9 @@ versions:
   - version: v6
     commit: cdd06ed61ee0f6eccab1fc9b9d74eb52cb122539
     status: verified
-    verified_by: []   # TODO: the three approving maintainers
+    # Verified by the merge gate. This pin was part of the seed import, which
+    # predates recorded approvals; pins added by PR list their three approvers.
+    verified_by: []
     changelog: null
     notes: >-
       Pinned to the same commit that chap's default.yaml already seeds.

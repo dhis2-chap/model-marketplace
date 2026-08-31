@@ -155,10 +155,64 @@ function OverviewTab({ view, goInstall }: { view: ModelDetailView; goInstall: ()
   );
 }
 
+/** Open-PR pins for this model: experimental until merged, shown with n/3. */
+function InReviewSection({ view }: { view: ModelDetailView }) {
+  return (
+    <div className="mb-6 overflow-hidden rounded-lg border border-dashed border-exp bg-surface">
+      <div className="flex flex-wrap items-baseline justify-between gap-3 border-b border-line bg-exp-tint px-[18px] py-3">
+        <span className="font-brand text-[13px] font-medium text-ink">
+          In review — proposed pins from open pull requests
+        </span>
+        {view.inReviewAsOf ? (
+          <span className="font-mono text-[11px] text-ink-3">
+            PR state as of the last site build · {view.inReviewAsOf}
+          </span>
+        ) : null}
+      </div>
+      {view.inReview.map((pin) => (
+        <a
+          key={`${pin.prNumber}-${pin.label}`}
+          href={pin.prUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="grid items-center gap-3 border-b border-line px-[18px] py-3.5 last:border-b-0 hover:bg-surface-2 md:grid-cols-[130px_130px_150px_1fr_auto]"
+        >
+          <span className="font-mono text-[13.5px] font-bold text-ink">
+            {pin.label}
+            {pin.commitShort ? (
+              <span className="ml-1.5 font-normal text-ink-3">
+                @{pin.commitShort}
+              </span>
+            ) : null}
+          </span>
+          <span>
+            <StatusBadge status="in review" />
+          </span>
+          <span className="font-mono text-[12px] text-exp">
+            {pin.approvals} approvals
+          </span>
+          <span className="truncate text-[12.5px] text-ink-2">
+            #{pin.prNumber} {pin.prTitle}
+          </span>
+          <span className="font-mono text-[11.5px] text-ink-3">
+            by {pin.author} · {pin.updatedAt}
+          </span>
+        </a>
+      ))}
+      <p className="border-t border-line px-[18px] py-2.5 text-[11.5px] text-ink-3">
+        A proposed pin becomes verified — and eligible for the{" "}
+        <code className="font-mono text-ink-2">stable</code> channel — only
+        when its pull request merges with three approvals.
+      </p>
+    </div>
+  );
+}
+
 function VersionsTab({ view }: { view: ModelDetailView }) {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   return (
     <div>
+      {view.inReview.length > 0 ? <InReviewSection view={view} /> : null}
       <div className="mb-[18px] flex flex-wrap items-end justify-between gap-6">
         <div>
           <h2 className="mb-1.5 font-brand text-[20px] font-medium text-ink">
@@ -330,10 +384,14 @@ function BenchmarksTab({ view }: { view: ModelDetailView }) {
   if (!b) {
     return (
       <p className="text-[13.5px] text-ink-2">
-        No benchmark record yet for this model.
+        No benchmark record yet for this model. Results land in the repo&apos;s{" "}
+        <code className="font-mono text-[12.5px] text-ink">benchmarks/</code>{" "}
+        directory by pull request, like everything else.
       </p>
     );
   }
+  const real = b.source === "real";
+  const p = b.provenance;
   return (
     <div>
       <div className="mb-[22px] flex flex-wrap items-end justify-between gap-6">
@@ -347,40 +405,88 @@ function BenchmarksTab({ view }: { view: ModelDetailView }) {
             backtests at the pinned commit.
           </p>
         </div>
-        <MockDataChip />
+        {real && p ? (
+          <span className="inline-block rounded-[3px] border border-verified bg-verified-tint px-[9px] py-[5px] font-mono text-[11px] text-verified">
+            measured · {p.dataset} @ {p.versionTag}
+          </span>
+        ) : (
+          <MockDataChip />
+        )}
       </div>
+      {real && p ? (
+        <p className="mb-[18px] font-mono text-[12px] text-ink-3">
+          evaluated {p.evaluatedAt} · {p.harnessTool}
+          {p.runUrl ? (
+            <>
+              {" · "}
+              <a
+                href={p.runUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="text-brand hover:underline"
+              >
+                raw output
+              </a>
+            </>
+          ) : null}
+          {" · "}source: benchmarks/{view.id}/{p.versionTag}/{p.dataset}.yaml
+        </p>
+      ) : null}
+      {b.headline.length > 0 ? (
+        <div className="mb-5 grid gap-4 rounded-lg border border-line bg-surface-2 px-5 py-4 sm:grid-cols-4">
+          {b.headline.map((h) => (
+            <div key={h.label}>
+              <div className="font-brand text-[22px] font-medium leading-none text-ink">
+                {h.value}
+              </div>
+              <div className="mt-1.5 font-brand text-[10px] font-medium uppercase tracking-[0.1em] text-ink-3">
+                {h.label}
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : null}
       <div className="grid gap-5 lg:grid-cols-3">
-        <div className="rounded-lg border border-line bg-surface p-[18px]">
-          <div className="font-brand text-[13.5px] font-medium text-ink">
-            CRPS by forecast horizon
+        {b.crpsByHorizon.length > 0 ? (
+          <div className="rounded-lg border border-line bg-surface p-[18px]">
+            <div className="font-brand text-[13.5px] font-medium text-ink">
+              CRPS by forecast horizon
+            </div>
+            <div className="mb-3.5 text-[11.5px] text-ink-3">
+              {b.baseline.length > 0
+                ? "This model vs. the seasonal-naive baseline"
+                : "This model"}
+            </div>
+            <CrpsByHorizonChart
+              crps={b.crpsByHorizon}
+              baseline={b.baseline}
+              shortName={view.shortName}
+              withSpreadBand={!real}
+            />
           </div>
-          <div className="mb-3.5 text-[11.5px] text-ink-3">
-            This model vs. the seasonal-naive baseline
+        ) : null}
+        {b.comparison.length > 0 ? (
+          <div className="rounded-lg border border-line bg-surface p-[18px]">
+            <div className="font-brand text-[13.5px] font-medium text-ink">
+              Model comparison
+            </div>
+            <div className="mb-3.5 text-[11.5px] text-ink-3">
+              Mean CRPS · {real && p ? p.dataset : "dengue-brazil-monthly"}
+            </div>
+            <ComparisonChart items={b.comparison} />
           </div>
-          <CrpsByHorizonChart
-            crps={b.crpsByHorizon}
-            baseline={b.baseline}
-            shortName={view.shortName}
-          />
-        </div>
-        <div className="rounded-lg border border-line bg-surface p-[18px]">
-          <div className="font-brand text-[13.5px] font-medium text-ink">
-            Model comparison
+        ) : null}
+        {b.countrySkill.length > 0 ? (
+          <div className="rounded-lg border border-line bg-surface p-[18px]">
+            <div className="font-brand text-[13.5px] font-medium text-ink">
+              Per-country performance
+            </div>
+            <div className="mb-3.5 text-[11.5px] text-ink-3">
+              Skill vs. baseline · positive is better
+            </div>
+            <CountrySkillBars rows={b.countrySkill} />
           </div>
-          <div className="mb-3.5 text-[11.5px] text-ink-3">
-            Mean CRPS · dengue-brazil-monthly
-          </div>
-          <ComparisonChart items={b.comparison} />
-        </div>
-        <div className="rounded-lg border border-line bg-surface p-[18px]">
-          <div className="font-brand text-[13.5px] font-medium text-ink">
-            Per-country performance
-          </div>
-          <div className="mb-3.5 text-[11.5px] text-ink-3">
-            Skill vs. baseline · positive is better
-          </div>
-          <CountrySkillBars rows={b.countrySkill} />
-        </div>
+        ) : null}
       </div>
       <Link
         href="/leaderboard"
@@ -391,7 +497,7 @@ function BenchmarksTab({ view }: { view: ModelDetailView }) {
             <span className="font-brand text-[16px] font-medium text-ink">
               Cross-model leaderboard
             </span>
-            <SoonPill label="coming soon" />
+            {real ? null : <SoonPill label="coming soon" />}
           </div>
           <p className="max-w-[80ch] text-[13px] text-ink-2">
             Every verified pin scored on the same datasets, ranked, with
@@ -399,7 +505,7 @@ function BenchmarksTab({ view }: { view: ModelDetailView }) {
           </p>
         </div>
         <span className="font-brand text-[13px] font-medium text-brand">
-          Preview the design →
+          {real ? "See the leaderboard →" : "Preview the design →"}
         </span>
       </Link>
     </div>

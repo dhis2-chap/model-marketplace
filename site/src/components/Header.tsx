@@ -6,12 +6,14 @@ import { useState, useSyncExternalStore, type FormEvent } from "react";
 import { Dhis2Mark, GitHubMark, MagnifierIcon } from "./icons";
 import { SoonPill } from "./badges";
 
-const NAV: { href: string; label: string; soon?: boolean }[] = [
-  { href: "/", label: "Models" },
-  { href: "/leaderboard", label: "Leaderboard", soon: true },
-  { href: "/contribute", label: "Contribute" },
-  { href: "/docs", label: "Docs" },
-];
+function nav(leaderboardLive: boolean) {
+  return [
+    { href: "/", label: "Models", soon: false },
+    { href: "/leaderboard", label: "Leaderboard", soon: !leaderboardLive },
+    { href: "/contribute", label: "Contribute", soon: false },
+    { href: "/docs", label: "Docs", soon: false },
+  ];
+}
 
 function subscribeToTheme(callback: () => void) {
   const observer = new MutationObserver(callback);
@@ -68,7 +70,7 @@ function ThemeToggle() {
   );
 }
 
-export function Header() {
+export function Header({ leaderboardLive }: { leaderboardLive: boolean }) {
   const pathname = usePathname();
   const router = useRouter();
   const [q, setQ] = useState("");
@@ -91,7 +93,7 @@ export function Header() {
           </span>
         </Link>
         <nav className="hidden items-center gap-1 md:flex">
-          {NAV.map((item) => {
+          {nav(leaderboardLive).map((item) => {
             const active =
               item.href === "/"
                 ? pathname === "/" || pathname.startsWith("/models")

@@ -5,11 +5,14 @@ import {
   latestVersion,
   repoOrg,
   repoSlug,
+  shortCommit,
   stableVersion,
   verifiedCount,
   type Registry,
 } from "./registry";
-import type { Model, ModelVersion } from "./schema";
+import type { Benchmark, Model, ModelVersion } from "./schema";
+import { benchmarksFor, skillOf } from "./benchmarks";
+import type { Proposals } from "./proposals";
 import { COV_LABEL, presentationFor, type CovariateMode } from "./presentation";
 import { BASELINE_CRPS, mockBenchmarksFor } from "./mock-benchmarks";
 
@@ -34,13 +37,27 @@ export interface ModelCardView {
   stablePinDisplay: string;
   stablePinFull: string;
   approvals: string;
-  /** MOCK — illustrative CRPS series for the card sparkline. */
+  /** Real CRPS-by-horizon when the store has it; labeled mock otherwise. */
   spark: number[];
+  sparkLabel: string;
 }
 
-export function toCardView(model: Model): ModelCardView {
+/** The model's stored results, stable-channel pin first, then by dataset. */
+function recordsFor(model: Model, benchmarks: Benchmark[]): Benchmark[] {
+  return benchmarksFor(benchmarks, model.id).sort(
+    (a, b) =>
+      Number(b.version === model.channels.stable) -
+        Number(a.version === model.channels.stable) ||
+      a.dataset.localeCompare(b.dataset),
+  );
+}
+
+export function toCardView(model: Model, benchmarks: Benchmark[]): ModelCardView {
   const pres = presentationFor(model.id);
   const stable = stableVersion(model);
+  const real = recordsFor(model, benchmarks).find(
+    (b) => b.metrics.crps_by_horizon,
+  );
   return {
     id: model.id,
     name: model.display_name,
@@ -57,8 +74,65 @@ export function toCardView(model: Model): ModelCardView {
     stablePinDisplay: displayPin(model, stable),
     stablePinFull: fullPin(model, stable),
     approvals: `${verifiedCount(model) > 0 ? "3/3" : "0/3"}`,
-    spark: mockBenchmarksFor(model.id)?.spark ?? [],
+    spark: real
+      ? real.metrics.crps_by_horizon!
+      : (mockBenchmarksFor(model.id)?.spark ?? []),
+    sparkLabel: real ? `CRPS by horizon · ${real.dataset}` : "CRPS · illustrative",
   };
+}
+
+/* ---------- in-review (open PR) views ---------- */
+
+export interface InReviewPinView {
+  modelId: string;
+  /** On the model's own Versions tab: the proposed tag (or the model name). */
+  label: string;
+  /** On the catalog strip, where the model needs naming too. */
+  catalogLabel: string;
+  commitShort: string | null;
+  isNewModel: boolean;
+  approvals: string;
+  prNumber: number;
+  prTitle: string;
+  prUrl: string;
+  author: string;
+  updatedAt: string;
+}
+
+function approvalsLabel(count: number, required: number): string {
+  return `${Math.min(count, required)}/${required}`;
+}
+
+/** "as of" label for PR-derived data — the fetch happens once per build. */
+export function fetchedAtLabel(fetchedAt: string | null): string | null {
+  return fetchedAt
+    ? `${fetchedAt.slice(0, 16).replace("T", " ")} UTC`
+    : null;
+}
+
+export function toInReviewViews(
+  proposals: Proposals,
+  required: number,
+): InReviewPinView[] {
+  return proposals.proposals.flatMap((pr) =>
+    pr.pins.map((pin) => ({
+      modelId: pin.modelId,
+      label: pin.versionTag ?? pin.displayName,
+      catalogLabel: pin.isNewModel
+        ? pin.versionTag
+          ? `${pin.displayName} · ${pin.versionTag}`
+          : pin.displayName
+        : `${pin.modelId} · ${pin.versionTag ?? "?"}`,
+      commitShort: pin.commit ? shortCommit(pin.commit) : null,
+      isNewModel: pin.isNewModel,
+      approvals: approvalsLabel(pr.approvedBy.length, required),
+      prNumber: pr.number,
+      prTitle: pr.title,
+      prUrl: pr.url,
+      author: pr.author,
+      updatedAt: pr.updatedAt.slice(0, 10),
+    })),
+  );
 }
 
 /* ---------- detail view ---------- */
@@ -90,10 +164,21 @@ export interface ConfigurationView {
 }
 
 export interface BenchmarksView {
+  /** "real" renders from the benchmarks/ store; "mock" from labeled fixtures. */
+  source: "real" | "mock";
   crpsByHorizon: number[];
   baseline: number[];
   comparison: { name: string; mean: number; self: boolean }[];
   countrySkill: [string, number][];
+  /** Real only: provenance + headline metrics of the primary record. */
+  provenance: {
+    dataset: string;
+    versionTag: string;
+    evaluatedAt: string;
+    harnessTool: string;
+    runUrl: string | null;
+  } | null;
+  headline: { label: string; value: string }[];
 }
 
 export interface ModelDetailView {
@@ -105,6 +190,7 @@ export interface ModelDetailView {
   repo: string;
   repoUrl: string;
   org: string;
+  maintainers: string[];
   mlprojectName: string | null;
   framework: string;
   covLabel: string;
@@ -116,6 +202,8 @@ export interface ModelDetailView {
   latest: ChannelView;
   latestSameAsStable: boolean;
   versions: VersionRowView[];
+  inReview: InReviewPinView[];
+  inReviewAsOf: string | null;
   configurations: ConfigurationView[];
   benchmarks: BenchmarksView | null;
   verifiedPins: number;
@@ -153,17 +241,67 @@ function configYaml(config: {
   return stringify(doc, { lineWidth: 0 });
 }
 
-export function toDetailView(
+function realBenchmarksView(
   model: Model,
   registry: Registry,
-): ModelDetailView {
-  const pres = presentationFor(model.id);
-  const stable = stableVersion(model);
-  const latest = latestVersion(model);
-  const mocks = mockBenchmarksFor(model.id);
-  const required = registry.index.review_policy.required_approvals;
-  const verifiedPins = verifiedCount(model);
+  benchmarks: Benchmark[],
+): BenchmarksView | null {
+  const records = recordsFor(model, benchmarks);
+  const primary = records.find((b) => b.metrics.crps_by_horizon) ?? records[0];
+  if (!primary) return null;
 
+  const comparison = registry.models
+    .map((m) => {
+      const onDataset = benchmarksFor(benchmarks, m.id).filter(
+        (b) => b.dataset === primary.dataset,
+      );
+      const mean =
+        onDataset.length > 0
+          ? onDataset.reduce((s, b) => s + b.metrics.crps, 0) / onDataset.length
+          : null;
+      return { name: presentationFor(m.id).abbrev, mean, self: m.id === model.id };
+    })
+    .filter((c): c is { name: string; mean: number; self: boolean } =>
+      typeof c.mean === "number",
+    );
+
+  const skill = skillOf(primary);
+  const headline: { label: string; value: string }[] = [
+    { label: "Mean CRPS", value: primary.metrics.crps.toFixed(2) },
+    ...(primary.metrics.mae !== undefined
+      ? [{ label: "MAE", value: primary.metrics.mae.toFixed(1) }]
+      : []),
+    ...(primary.metrics.coverage_80 !== undefined
+      ? [{ label: "Coverage 80%", value: primary.metrics.coverage_80.toFixed(2) }]
+      : []),
+    ...(skill !== null
+      ? [{ label: "Skill vs baseline", value: `+${skill.toFixed(2)}` }]
+      : []),
+  ];
+
+  return {
+    source: "real",
+    crpsByHorizon: primary.metrics.crps_by_horizon ?? [],
+    baseline: primary.metrics.baseline_crps_by_horizon ?? [],
+    comparison: comparison.length > 1 ? comparison : [],
+    countrySkill: [],
+    provenance: {
+      dataset: primary.dataset,
+      versionTag: primary.version,
+      evaluatedAt: primary.evaluated_at,
+      harnessTool: primary.harness.tool,
+      runUrl: primary.harness.run ?? null,
+    },
+    headline,
+  };
+}
+
+function mockBenchmarksView(
+  model: Model,
+  registry: Registry,
+): BenchmarksView | null {
+  const mocks = mockBenchmarksFor(model.id);
+  if (!mocks) return null;
   const comparison = registry.models
     .map((m) => ({
       name: presentationFor(m.id).abbrev,
@@ -173,6 +311,28 @@ export function toDetailView(
     .filter((c): c is { name: string; mean: number; self: boolean } =>
       typeof c.mean === "number",
     );
+  return {
+    source: "mock",
+    crpsByHorizon: mocks.crpsByHorizon,
+    baseline: BASELINE_CRPS,
+    comparison,
+    countrySkill: mocks.countrySkill,
+    provenance: null,
+    headline: [],
+  };
+}
+
+export function toDetailView(
+  model: Model,
+  registry: Registry,
+  benchmarks: Benchmark[],
+  proposals: Proposals,
+): ModelDetailView {
+  const pres = presentationFor(model.id);
+  const stable = stableVersion(model);
+  const latest = latestVersion(model);
+  const required = registry.index.review_policy.required_approvals;
+  const verifiedPins = verifiedCount(model);
 
   return {
     id: model.id,
@@ -183,6 +343,7 @@ export function toDetailView(
     repo: repoSlug(model),
     repoUrl: model.source.repository,
     org: repoOrg(model),
+    maintainers: model.maintainers,
     mlprojectName: model.source.mlproject_name ?? null,
     framework: pres.framework,
     covLabel: COV_LABEL[pres.covMode],
@@ -204,6 +365,10 @@ export function toDetailView(
       isStable: v.version === model.channels.stable,
       isLatest: v.version === model.channels.latest,
     })),
+    inReview: toInReviewViews(proposals, required).filter(
+      (pin) => pin.modelId === model.id,
+    ),
+    inReviewAsOf: fetchedAtLabel(proposals.fetchedAt),
     configurations: Object.entries(model.configurations).map(
       ([key, config]) => ({
         key,
@@ -211,14 +376,9 @@ export function toDetailView(
         yaml: configYaml(config),
       }),
     ),
-    benchmarks: mocks
-      ? {
-          crpsByHorizon: mocks.crpsByHorizon,
-          baseline: BASELINE_CRPS,
-          comparison,
-          countrySkill: mocks.countrySkill,
-        }
-      : null,
+    benchmarks:
+      realBenchmarksView(model, registry, benchmarks) ??
+      mockBenchmarksView(model, registry),
     verifiedPins,
     reviews: verifiedPins * required,
     installUrl:

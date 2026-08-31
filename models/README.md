@@ -100,18 +100,28 @@ configurations:                  # verified, copy-pasteable configurations
 ## Conventions
 
 - `channels.stable` must point at a version with `status: verified`.
-- `versions[].verified_by` lists the three approving maintainers. The current
-  files carry `[]` with a TODO until we backfill the actual approvals.
+- `maintainers` lists the GitHub handles responsible for the listing. The
+  current entries were backfilled from each source repository's contributors;
+  corrections land like everything else, by PR.
+- `versions[].verified_by` lists the three approving maintainers of the PR
+  that added the pin. `[]` on a verified pin means the pin was verified by
+  the merge gate itself without named approvals on record — true for the
+  seed import, which predates this repo's PR flow. Pins added by PR going
+  forward record their approvers.
 - Version keys are whatever upstream uses (`v6`, `uv`, `stable`, ...); we do
   not rename them, the channel pointers provide the uniform interface.
 - `changelog` is per-version, free text. `null` until we have one.
+
+## Benchmarks
+
+Benchmark results do not live in these files: they live in the sibling
+[`../benchmarks/`](../benchmarks/README.md) directory, one YAML file per
+(model, version, dataset), cross-checked against the pins here at build time.
 
 ## Open questions for this draft
 
 - Are `stable`/`experimental` the right sets, and is per-model maturity the
   right granularity (vs. per-version)?
-- Should benchmark results live in these files, in a sibling
-  `benchmarks/` directory keyed by model id + version, or outside the repo?
 - Do dataset-specific configuration bundles (like the original
   `ensemble_bases_monthly.yaml`) stay a separate concept, or are verified
   per-model configurations enough?

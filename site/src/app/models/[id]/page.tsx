@@ -5,6 +5,8 @@ import { MaturityBadge, VerifiedChip } from "@/components/badges";
 import { CopyButton } from "@/components/copy";
 import { GitHubMark } from "@/components/icons";
 import { ModelDetailTabs } from "@/components/ModelDetailTabs";
+import { getBenchmarks } from "@/lib/benchmarks";
+import { getProposals } from "@/lib/proposals";
 import { getModel, getRegistry } from "@/lib/registry";
 import { toDetailView, type ChannelView } from "@/lib/views";
 
@@ -88,7 +90,8 @@ export default async function ModelPage({
   const model = getModel(id);
   if (!model) notFound();
   const registry = getRegistry();
-  const view = toDetailView(model, registry);
+  const proposals = await getProposals(registry);
+  const view = toDetailView(model, registry, getBenchmarks(), proposals);
 
   const latestNote = view.latestSameAsStable
     ? "currently the same as stable"
@@ -121,7 +124,12 @@ export default async function ModelPage({
           </p>
           <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[12.5px] text-ink-2">
             <span>
-              Maintained by <strong className="text-ink">{view.org}</strong>
+              Maintained by{" "}
+              <strong className="text-ink">
+                {view.maintainers.length > 0
+                  ? view.maintainers.join(", ")
+                  : view.org}
+              </strong>
             </span>
             <a
               href={view.repoUrl}

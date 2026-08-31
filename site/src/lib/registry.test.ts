@@ -16,6 +16,12 @@ describe("the real registry", () => {
     expect(registry.index.review_policy.required_approvals).toBe(3);
   });
 
+  it("carries the marketplace's own repository for open-PR ingestion", () => {
+    expect(registry.index.marketplace.repository).toBe(
+      "https://github.com/dhis2-chap/model-marketplace",
+    );
+  });
+
   it("resolves both channels for every model", () => {
     for (const model of registry.models) {
       expect(stableVersion(model).status).toBe("verified");

@@ -114,6 +114,8 @@ export const registrySchema = z.object({
   marketplace: z.object({
     name: z.string().min(1),
     description: z.string().min(1),
+    /** The marketplace repo itself — the target of open-PR ingestion. */
+    repository: z.string().url().optional(),
     documentation: z.record(z.string(), z.string().url()),
   }),
   review_policy: z.object({
@@ -123,7 +125,39 @@ export const registrySchema = z.object({
   models: z.array(z.string().regex(/^models\/[a-z0-9_]+\.yaml$/)).min(1),
 });
 
+/**
+ * One benchmark result file: one (model, version, dataset) triple, stored at
+ * benchmarks/<model>/<version>/<dataset>.yaml. The loader additionally
+ * cross-checks model, version and commit against the registry.
+ */
+export const benchmarkSchema = z.object({
+  schema_version: z.literal(1),
+  model: z.string().regex(/^[a-z0-9_]+$/),
+  version: z.string().min(1),
+  commit: z
+    .string()
+    .regex(/^[0-9a-f]{40}$/, "commit must be a full 40-char git sha"),
+  dataset: z.string().regex(/^[a-z0-9][a-z0-9-]*$/),
+  evaluated_at: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "YYYY-MM-DD"),
+  harness: z.object({
+    tool: z.string().min(1),
+    run: z.string().url().optional(),
+  }),
+  metrics: z.object({
+    crps: z.number().nonnegative(),
+    crps_by_horizon: z.array(z.number().nonnegative()).min(1).optional(),
+    mae: z.number().nonnegative().optional(),
+    coverage_80: z.number().min(0).max(1).optional(),
+    baseline_crps: z.number().positive().optional(),
+    baseline_crps_by_horizon: z
+      .array(z.number().nonnegative())
+      .min(1)
+      .optional(),
+  }),
+});
+
 export type ModelVersion = z.infer<typeof versionSchema>;
 export type ModelConfiguration = z.infer<typeof configurationSchema>;
 export type Model = z.infer<typeof modelSchema>;
 export type RegistryIndex = z.infer<typeof registrySchema>;
+export type Benchmark = z.infer<typeof benchmarkSchema>;

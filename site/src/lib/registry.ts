@@ -16,6 +16,8 @@ import {
  */
 
 export interface Registry {
+  /** Repo root the registry was loaded from (benchmarks/ lives beside it). */
+  root: string;
   index: RegistryIndex;
   models: Model[];
 }
@@ -65,7 +67,7 @@ export function loadRegistry(root = findRepoRoot()): Registry {
     return model;
   });
 
-  return { index, models };
+  return { root, index, models };
 }
 
 let cached: Registry | null = null;

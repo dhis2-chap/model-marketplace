@@ -13,7 +13,10 @@ summary: >-
 source:
   repository: https://github.com/chap-models/mstl_arima
 
-maintainers: []   # TODO: list GitHub handles of the responsible maintainers
+# GitHub handles responsible for this listing — backfilled from the source
+# repository's contributors; corrections welcome by PR.
+maintainers:
+  - knutdrand
 
 compatibility:
   period_types: [monthly]
@@ -32,7 +35,9 @@ versions:
   - version: v1
     commit: 6cdec6fc7c512d5795ff888383762c39c903d55d
     status: verified
-    verified_by: []   # TODO: the three approving maintainers
+    # Verified by the merge gate. This pin was part of the seed import, which
+    # predates recorded approvals; pins added by PR list their three approvers.
+    verified_by: []
     changelog: null
 
 # Verified configurations. Each block is a valid standalone

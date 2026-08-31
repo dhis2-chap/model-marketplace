@@ -13,7 +13,10 @@ summary: >-
 source:
   repository: https://github.com/knutdrand/mstl_multistep_model
 
-maintainers: []   # TODO: list GitHub handles of the responsible maintainers
+# GitHub handles responsible for this listing — backfilled from the source
+# repository's contributors; corrections welcome by PR.
+maintainers:
+  - knutdrand
 
 compatibility:
   period_types: [monthly]
@@ -33,7 +36,9 @@ versions:
   - version: v1
     commit: c8174835a909107bd2f4a0069f4d743ea50b64a8
     status: verified
-    verified_by: []   # TODO: the three approving maintainers
+    # Verified by the merge gate. This pin was part of the seed import, which
+    # predates recorded approvals; pins added by PR list their three approvers.
+    verified_by: []
     changelog: null
 
 # Verified configurations. Each block is a valid standalone

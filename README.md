@@ -14,6 +14,8 @@ version pin, so a `stable` channel pointer is always a reviewed commit.
 ```
 registry.yaml       Marketplace index: metadata, review policy, model list
 models/*.yaml       One file per whitelisted model (see models/README.md)
+benchmarks/         Real evaluation output, one file per model + version +
+                    dataset (see benchmarks/README.md)
 site/               The marketplace website (Next.js, TypeScript, pnpm)
 docs/               Design brief and provenance material
 ```
@@ -34,9 +36,20 @@ pnpm install
 pnpm dev        # http://localhost:3000
 ```
 
-The site is fully static: at build time it loads the YAML through a zod
-schema (`site/src/lib/schema.ts`) and prerenders every page, so an invalid
-registry fails the build. Other scripts, all run from `site/`:
+The site is fully static: at build time it loads the YAML (registry, models
+and benchmarks) through a zod schema (`site/src/lib/schema.ts`) and
+prerenders every page, so an invalid file fails the build.
+
+The build also ingests this repo's **open pull requests** (via the GitHub
+API) so an in-review model or version pin appears on the site as an
+experimental, non-verified pin with its running approval count (n/3) — on
+the model's Versions tab and in an "In review" strip on the catalog. The
+registry stays the only hard gate: if GitHub is unreachable the build logs a
+warning and continues without in-review pins, and the rendered PR state is
+only as fresh as the last build (labeled as such in the UI). `GITHUB_TOKEN`
+is used when set; `MARKETPLACE_SKIP_PR_INGEST=1` skips ingestion entirely.
+
+Other scripts, all run from `site/`:
 
 ```bash
 pnpm validate   # check registry.yaml + models/*.yaml against the schema
@@ -52,19 +65,24 @@ available at build time by default).
 ### Honest-data rules
 
 - Everything rendered from the YAML is real: models, pins, channels,
-  configurations.
-- Benchmark numbers (sparklines, CRPS charts, the blurred leaderboard) are
-  **mock fixtures** in `site/src/lib/mock-benchmarks.ts`, labeled
-  "mock data · illustrative" in the UI, until real evaluation output exists.
+  configurations, maintainers — and benchmark results, once they exist in
+  `benchmarks/`.
+- A model with no real results yet falls back to **mock fixtures** in
+  `site/src/lib/mock-benchmarks.ts`, labeled "mock data · illustrative" in
+  the UI. The label comes off per model when its first real file lands, and
+  the leaderboard renders only from real results.
+- In-review pins come from real open PRs at build time and are labeled with
+  the build timestamp; the site never invents proposals.
 - Presentation-only metadata the schema doesn't carry yet (framework labels,
   covariate-mode grouping) lives in `site/src/lib/presentation.ts` and is a
   candidate for a future `schema_version` bump.
 
 ## Roadmap
 
-- Ingest open PRs so an in-review model/version can appear as an
-  experimental, non-verified pin showing its approval count (n/3); it becomes
-  stable + verified only on merge to `main`.
-- Backfill `maintainers` and `versions[].verified_by` in the model files.
-- Real benchmark storage (per model id + version) and the cross-model
-  leaderboard.
+- Populate `benchmarks/` with real harness output (`chap eval` /
+  `chap evaluate-ensemble`) for the verified pins; the per-model benchmark
+  pages and the leaderboard render it automatically.
+- Record `versions[].verified_by` from the actual PR approvals as new pins
+  land (the seed import predates the PR flow and stays merge-gate-verified
+  with no named approvers).
+- A one-click install flow; until then the site points at the chap docs.

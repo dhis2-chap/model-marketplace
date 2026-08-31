@@ -12,7 +12,10 @@ summary: >-
 source:
   repository: https://github.com/dhis2-chap/chap_pymc
 
-maintainers: []   # TODO: list GitHub handles of the responsible maintainers
+# GitHub handles responsible for this listing — backfilled from the source
+# repository's contributors; corrections welcome by PR.
+maintainers:
+  - knutdrand
 
 compatibility:
   period_types: [monthly]
@@ -32,7 +35,9 @@ versions:
   - version: uv
     commit: cce2e8c7e73980b3c8b63884802f8342e584eb9f
     status: verified
-    verified_by: []   # TODO: the three approving maintainers
+    # Verified by the merge gate. This pin was part of the seed import, which
+    # predates recorded approvals; pins added by PR list their three approvers.
+    verified_by: []
     changelog: null
     notes: >-
       Pinned to the same commit that chap's default.yaml already seeds.

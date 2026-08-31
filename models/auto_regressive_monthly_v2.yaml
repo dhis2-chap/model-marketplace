@@ -15,7 +15,11 @@ source:
   # exactly as in chap's default.yaml.
   mlproject_name: auto_regressive_monthly
 
-maintainers: []   # TODO: list GitHub handles of the responsible maintainers
+# GitHub handles responsible for this listing — backfilled from the source
+# repository's contributors; corrections welcome by PR.
+maintainers:
+  - mortenoh
+  - knutdrand
 
 compatibility:
   period_types: [monthly]
@@ -41,7 +45,9 @@ versions:
   - version: stable
     commit: d4d6b78212c7079b3d151bb8aba7e042c2393953
     status: verified
-    verified_by: []   # TODO: the three approving maintainers
+    # Verified by the merge gate. This pin was part of the seed import, which
+    # predates recorded approvals; pins added by PR list their three approvers.
+    verified_by: []
     changelog: null
     notes: >-
       Pinned to the same commit that chap's default.yaml already seeds.

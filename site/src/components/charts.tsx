@@ -61,16 +61,20 @@ export function CrpsByHorizonChart({
   crps,
   baseline,
   shortName,
+  withSpreadBand = true,
 }: {
   crps: number[];
   baseline: number[];
   shortName: string;
+  /** The illustrative spread band belongs to the mock fixtures only. */
+  withSpreadBand?: boolean;
 }) {
+  const hasBaseline = baseline.length > 0;
   const data = crps.map((v, i) => ({
     h: `h${i + 1}`,
     model: v,
     baseline: baseline[i],
-    band: [v * 0.8, v * 1.22] as [number, number],
+    band: withSpreadBand ? ([v * 0.8, v * 1.22] as [number, number]) : undefined,
   }));
   return (
     <div>
@@ -81,24 +85,28 @@ export function CrpsByHorizonChart({
             <XAxis dataKey="h" tick={AXIS_TICK} tickLine={false} axisLine={false} />
             <YAxis domain={[0, 1.4]} ticks={[0, 0.5, 0.9, 1.4]} tick={AXIS_TICK} tickLine={false} axisLine={false} />
             <Tooltip content={ChartTooltip} cursor={{ stroke: "var(--mp-border-strong)" }} />
-            <Area
-              dataKey="band"
-              name="spread"
-              stroke="none"
-              fill="var(--mp-brand)"
-              fillOpacity={0.12}
-              isAnimationActive={false}
-              tooltipType="none"
-            />
-            <Line
-              dataKey="baseline"
-              name="baseline"
-              stroke="var(--mp-text-3)"
-              strokeWidth={1.6}
-              strokeDasharray="4 3"
-              dot={false}
-              isAnimationActive={false}
-            />
+            {withSpreadBand ? (
+              <Area
+                dataKey="band"
+                name="spread"
+                stroke="none"
+                fill="var(--mp-brand)"
+                fillOpacity={0.12}
+                isAnimationActive={false}
+                tooltipType="none"
+              />
+            ) : null}
+            {hasBaseline ? (
+              <Line
+                dataKey="baseline"
+                name="baseline"
+                stroke="var(--mp-text-3)"
+                strokeWidth={1.6}
+                strokeDasharray="4 3"
+                dot={false}
+                isAnimationActive={false}
+              />
+            ) : null}
             <Line
               dataKey="model"
               name={shortName}
@@ -114,9 +122,11 @@ export function CrpsByHorizonChart({
         <span className="flex items-center gap-1.5">
           <span className="h-0.5 w-3 bg-brand" /> {shortName}
         </span>
-        <span className="flex items-center gap-1.5">
-          <span className="h-0.5 w-3 bg-ink-3" /> baseline
-        </span>
+        {hasBaseline ? (
+          <span className="flex items-center gap-1.5">
+            <span className="h-0.5 w-3 bg-ink-3" /> baseline
+          </span>
+        ) : null}
       </div>
     </div>
   );

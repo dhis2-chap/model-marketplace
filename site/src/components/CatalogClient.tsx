@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useMemo, useState, type ReactNode } from "react";
-import type { ModelCardView } from "@/lib/views";
+import type { InReviewPinView, ModelCardView } from "@/lib/views";
 import { MaturityBadge, VerifiedInline } from "./badges";
 import { PinChip } from "./copy";
 import { MagnifierIcon } from "./icons";
@@ -73,7 +73,7 @@ function ModelCard({ m }: { m: ModelCardView }) {
         <div className="px-[18px] pt-4">
           <div className="mb-1.5 flex items-baseline justify-between">
             <span className="font-brand text-[9.5px] font-medium uppercase tracking-[0.1em] text-ink-3">
-              CRPS · illustrative
+              {m.sparkLabel}
             </span>
             <span className="font-mono text-[11px] text-ink-2">
               {m.spark[m.spark.length - 1].toFixed(2)}
@@ -103,14 +103,74 @@ export interface MarketplaceStatsView {
   reviews: number;
 }
 
+/** Open proposals from PR ingestion — in-review pins with their n/3 count. */
+function InReviewStrip({
+  pins,
+  asOf,
+}: {
+  pins: InReviewPinView[];
+  asOf: string | null;
+}) {
+  return (
+    <div className="mt-10 overflow-hidden rounded-lg border border-dashed border-exp bg-surface">
+      <div className="flex flex-wrap items-baseline justify-between gap-3 border-b border-line bg-exp-tint px-5 py-3">
+        <span className="font-brand text-[13px] font-medium text-ink">
+          In review — open proposals
+        </span>
+        <span className="font-mono text-[11px] text-ink-3">
+          {asOf ? `PR state as of the last site build · ${asOf}` : null}
+        </span>
+      </div>
+      {pins.map((pin) => (
+        <a
+          key={`${pin.prNumber}-${pin.modelId}-${pin.label}`}
+          href={pin.prUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="grid items-center gap-3 border-b border-line px-5 py-3 last:border-b-0 hover:bg-surface-2 md:grid-cols-[minmax(200px,1fr)_110px_1fr_auto]"
+        >
+          <span className="flex items-baseline gap-2">
+            <span className="font-mono text-[13px] font-bold text-ink">
+              {pin.catalogLabel}
+            </span>
+            {pin.commitShort ? (
+              <span className="font-mono text-[11.5px] text-ink-3">
+                @{pin.commitShort}
+              </span>
+            ) : null}
+            {pin.isNewModel ? (
+              <span className="rounded-[3px] border border-dashed border-exp bg-exp-tint px-[6px] py-[2px] font-brand text-[9.5px] font-medium uppercase tracking-[0.06em] text-exp">
+                new model
+              </span>
+            ) : null}
+          </span>
+          <span className="font-mono text-[12px] text-exp">
+            {pin.approvals} approvals
+          </span>
+          <span className="truncate text-[12.5px] text-ink-2">
+            #{pin.prNumber} {pin.prTitle}
+          </span>
+          <span className="font-mono text-[11.5px] text-ink-3">
+            by {pin.author} · {pin.updatedAt}
+          </span>
+        </a>
+      ))}
+    </div>
+  );
+}
+
 export function CatalogClient({
   models,
   stats,
   heroChart,
+  inReview,
+  inReviewAsOf,
 }: {
   models: ModelCardView[];
   stats: MarketplaceStatsView;
   heroChart: ReactNode;
+  inReview: InReviewPinView[];
+  inReviewAsOf: string | null;
 }) {
   const searchParams = useSearchParams();
   const urlQuery = searchParams.get("q") ?? "";
@@ -288,6 +348,10 @@ export function CatalogClient({
             </button>
           </div>
         )}
+
+        {inReview.length > 0 ? (
+          <InReviewStrip pins={inReview} asOf={inReviewAsOf} />
+        ) : null}
 
         {/* Review gate CTA */}
         <div className="mt-10 grid items-center gap-7 rounded-lg border border-line bg-surface-2 px-7 py-[26px] md:grid-cols-[1fr_auto]">

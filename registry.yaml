@@ -16,6 +16,10 @@ marketplace:
     Curated, verified forecasting models for CHAP, the Climate & Health
     Analytics Platform. Every listed model and every version pin is reviewed
     by the CHAP maintainers before it appears here.
+  # The marketplace's own repository. The site build ingests this repo's open
+  # pull requests so an in-review model or version pin can appear on the site
+  # with its running approval count before it merges.
+  repository: https://github.com/dhis2-chap/model-marketplace
   documentation:
     chap: https://chap.dhis2.org
     # The marketplace install flow is not settled yet; until it is, the site

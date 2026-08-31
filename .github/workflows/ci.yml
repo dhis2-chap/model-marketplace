@@ -28,3 +28,7 @@ jobs:
       - run: pnpm lint
       - run: pnpm test
       - run: pnpm build
+        env:
+          # Open-PR ingestion at build time; fail-soft, but authenticated
+          # requests avoid the runners' shared unauthenticated rate limit.
+          GITHUB_TOKEN: ${{ github.token }}

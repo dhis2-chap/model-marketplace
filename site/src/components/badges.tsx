@@ -68,7 +68,7 @@ export function StatusBadge({ status }: { status: string }) {
   const tone =
     status === "verified"
       ? "border border-solid border-verified bg-verified-tint text-verified"
-      : status === "unstable"
+      : status === "unstable" || status === "in review"
         ? "border border-dashed border-exp bg-exp-tint text-exp"
         : "border border-solid border-line bg-surface-3 text-ink-3";
   return (
