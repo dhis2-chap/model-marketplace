@@ -3,39 +3,39 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Docs",
   description:
-    "Documentation for the marketplace catalog; everything about running models lives on the CHAP platform site.",
+    "Marketplace reference material and direct links to the CHAP modeling documentation.",
 };
 
 const CARDS = [
   {
     kicker: "marketplace",
-    title: "How listing works",
-    body: "The YAML schema, channels, sets, and what maintainers check during review.",
-    href: "https://github.com/dhis2-chap",
+    title: "Model registry format",
+    body: "The marketplace YAML schema, version pins, channels, configurations, and review conventions.",
+    href: "https://github.com/dhis2-chap/model-marketplace/blob/main/models/README.md",
   },
   {
     kicker: "marketplace",
-    title: "Version pins & channels",
-    body: "Why every version is a commit hash, and when to follow stable rather than latest.",
-    href: "https://github.com/dhis2-chap",
+    title: "Benchmark records",
+    body: "How benchmark results are produced, stored, validated, ranked, and rendered by the marketplace.",
+    href: "https://github.com/dhis2-chap/model-marketplace/blob/main/benchmarks/README.md",
   },
   {
     kicker: "platform",
-    title: "CHAP modeling platform",
-    body: "Running external models, runtime images, and the evaluation harness.",
-    href: "https://chap.dhis2.org",
+    title: "Evaluate models with CHAP",
+    body: "Run a local model or pinned GitHub repository through the CHAP evaluation workflow.",
+    href: "https://chap.dhis2.org/chap-modeling-platform/external_models/running_models_in_chap/",
   },
   {
     kicker: "platform",
     title: "DHIS2 CHAP app",
-    body: "Configuring forecasts inside a DHIS2 instance and reading the outputs.",
-    href: "https://chap.dhis2.org",
+    body: "Evaluate, predict, configure, and compare models from the DHIS2 Modeling App.",
+    href: "https://chap.dhis2.org/chap-modeling-platform/modeling-app/using-the-modeling-app/getting-started/",
   },
   {
     kicker: "data",
-    title: "Covariate pipelines",
-    body: "ERA5 climate data ingestion, org-unit population, and what chap supplies automatically.",
-    href: "https://chap.dhis2.org",
+    title: "Data and covariates",
+    body: "Required CSV fields, model-dependent climate covariates, population, periods, and missing-value rules.",
+    href: "https://chap.dhis2.org/chap-modeling-platform/external_models/data_formats/",
   },
   {
     kicker: "community",
@@ -52,9 +52,9 @@ export default function DocsPage() {
         Documentation
       </h1>
       <p className="mb-9 max-w-[70ch] text-[16px] leading-[1.65] text-ink-2">
-        The marketplace documents the catalog itself. Everything about running
-        models — the modeling platform, runtime images, the DHIS2 CHAP app —
-        lives on the platform site.
+        Marketplace formats are documented in this repository. The cards below
+        link directly to the relevant CHAP guides for running models, preparing
+        data, and working in the DHIS2 Modeling App.
       </p>
       <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
         {CARDS.map((card) => (

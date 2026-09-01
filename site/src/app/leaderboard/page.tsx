@@ -7,7 +7,7 @@ import { getRegistry } from "@/lib/registry";
 export const metadata: Metadata = {
   title: "Leaderboard",
   description:
-    "Recorded chap eval runs against pinned commits on the CHAP reference datasets — nothing is self-reported.",
+    "Recorded CHAP benchmark evaluations against pinned commits on the reference datasets — nothing is self-reported.",
 };
 
 export default function LeaderboardPage() {
@@ -31,9 +31,10 @@ export default function LeaderboardPage() {
               Leaderboard
             </h1>
             <p className="max-w-[62ch] text-[16px] leading-[1.65] text-ink-2">
-              Every score on this page comes from a{" "}
-              <span className="font-mono text-[14px]">chap eval</span> run
-              against a pinned commit — nothing is self-reported.{" "}
+              Every score on this page comes from a controlled{" "}
+              <span className="font-mono text-[14px]">chap bench</span> suite.
+              Each model–dataset pair is evaluated against its pinned commit
+              in a fresh container — nothing is self-reported.{" "}
               {records.length === 0
                 ? "No run has been recorded yet, so there is nothing to rank — a suite appears the moment its first result lands, by pull request like everything else."
                 : singleSplitSmoke

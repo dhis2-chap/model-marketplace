@@ -65,7 +65,7 @@ available at build time by default).
 ### Honest-data rules
 
 - Everything rendered from the YAML is real: models, pins, channels,
-  configurations, maintainers — and benchmark results, once they exist in
+  configurations, maintainers — and benchmark results present in
   `benchmarks/`.
 - A model with no real results yet falls back to **mock fixtures** in
   `site/src/lib/mock-benchmarks.ts`, labeled "mock data · illustrative" in
@@ -77,12 +77,13 @@ available at build time by default).
   covariate-mode grouping) lives in `site/src/lib/presentation.ts` and is a
   candidate for a future `schema_version` bump.
 
-## Roadmap
+## Benchmarking
 
-- Populate `benchmarks/` with real harness output (`chap eval` /
-  `chap evaluate-ensemble`) for the verified pins; the per-model benchmark
-  pages and the leaderboard render it automatically.
-- Record `versions[].verified_by` from the actual PR approvals as new pins
-  land (the seed import predates the PR flow and stays merge-gate-verified
-  with no named approvers).
-- A one-click install flow; until then the site points at the chap docs.
+The current comparison is launched from chap-core with `uv` and `chap bench`
+using `benchmark.yaml`. It evaluates the sequential Cartesian product of ten
+pinned model configurations and three monthly admin-1 datasets (Laos, Vietnam,
+and Thailand), with one repetition: 30 model–dataset evaluations in total.
+Each evaluation runs in a fresh Docker container and invokes `chap eval`
+against the exact pinned commit. See the [benchmark record and methodology
+documentation](benchmarks/README.md) and the CHAP guide to
+[evaluating models](https://chap.dhis2.org/chap-modeling-platform/external_models/running_models_in_chap/).

@@ -1,7 +1,7 @@
 # Design prompt — CHAP Model Marketplace
 
-Design a **model marketplace website for CHAP** (Climate & Health Analytics
-Platform, by DHIS2 / chap.dhis2.org) — a curated, verified catalog of
+Design a **model marketplace website for [CHAP](https://chap.dhis2.org/)**
+(Climate & Health Analytics Platform, by DHIS2) — a curated, verified catalog of
 epidemiological forecasting models. Think "npm meets Hugging Face, but for
 climate-health disease forecasting, curated by a review board." The site is a
 rendering of a git repository of YAML files (the repo is the source of truth
@@ -66,14 +66,15 @@ Sections/tabs:
 - **Configurations** — verified, copy-pasteable YAML configuration blocks
   (syntax-highlighted code panels with copy buttons) each with a short
   "when to use this" description.
-- **Benchmarks** — charts with mock data for now: e.g. CRPS by forecast
-  horizon (line), model-vs-model comparison on a dataset (grouped bars),
-  and per-country performance. Design the chart language (a leaderboard
-  page comes later — leave an obvious home for it in the nav, marked
-  "coming soon").
-- **Install** — "Add to your CHAP instance": for now a short step panel that
-  shows the pin to copy and links to the existing instructions at
-  chap.dhis2.org (chap-modeling-platform/external_models/). Design it as a
+- **Benchmarks** — charts backed by reviewed records in
+  [`benchmarks/`](../benchmarks/README.md): CRPS by forecast horizon (line),
+  model-vs-model comparison on a dataset (grouped bars), and per-country
+  performance. The cross-model leaderboard shows the controlled `chap bench`
+  suites and links each score to its pinned model version.
+- **Install** — "Add to your CHAP instance": a short step panel that shows the
+  pin to copy and links to the CHAP guide for
+  [evaluating external models](https://chap.dhis2.org/chap-modeling-platform/external_models/running_models_in_chap/).
+  Design it as a
   terminal-flavored panel so it can later become the real marketplace
   install flow without a redesign.
 
