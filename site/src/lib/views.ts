@@ -13,7 +13,12 @@ import {
 import type { Benchmark, Model, ModelVersion } from "./schema";
 import { benchmarksFor, skillOf } from "./benchmarks";
 import type { Proposals } from "./proposals";
-import { COV_LABEL, presentationFor, type CovariateMode } from "./presentation";
+import {
+  COV_LABEL,
+  datasetNameFor,
+  presentationFor,
+  type CovariateMode,
+} from "./presentation";
 import { BASELINE_CRPS, mockBenchmarksFor } from "./mock-benchmarks";
 
 /**
@@ -206,6 +211,12 @@ export interface ModelDetailView {
   inReviewAsOf: string | null;
   configurations: ConfigurationView[];
   benchmarks: BenchmarksView | null;
+  /** Cross-model leaderboard state for the CTA card; null while no run exists. */
+  leaderboard: {
+    measured: number;
+    listed: number;
+    suiteNames: string[];
+  } | null;
   verifiedPins: number;
   reviews: number;
   installUrl: string;
@@ -270,6 +281,17 @@ function realBenchmarksView(
     { label: "Mean CRPS", value: primary.metrics.crps.toFixed(2) },
     ...(primary.metrics.mae !== undefined
       ? [{ label: "MAE", value: primary.metrics.mae.toFixed(1) }]
+      : []),
+    ...(primary.metrics.rmse !== undefined
+      ? [{ label: "RMSE", value: primary.metrics.rmse.toFixed(1) }]
+      : []),
+    ...(primary.metrics.norm_crps !== undefined
+      ? [
+          {
+            label: "Normalised CRPS",
+            value: primary.metrics.norm_crps.toFixed(6),
+          },
+        ]
       : []),
     ...(primary.metrics.coverage_80 !== undefined
       ? [{ label: "Coverage 80%", value: primary.metrics.coverage_80.toFixed(2) }]
@@ -379,6 +401,16 @@ export function toDetailView(
     benchmarks:
       realBenchmarksView(model, registry, benchmarks) ??
       mockBenchmarksView(model, registry),
+    leaderboard:
+      benchmarks.length > 0
+        ? {
+            measured: new Set(benchmarks.map((b) => b.model)).size,
+            listed: registry.models.length,
+            suiteNames: [
+              ...new Set(benchmarks.map((b) => datasetNameFor(b.dataset))),
+            ],
+          }
+        : null,
     verifiedPins,
     reviews: verifiedPins * required,
     installUrl:

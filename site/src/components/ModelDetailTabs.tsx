@@ -392,6 +392,7 @@ function BenchmarksTab({ view }: { view: ModelDetailView }) {
   }
   const real = b.source === "real";
   const p = b.provenance;
+  const lb = view.leaderboard;
   return (
     <div>
       <div className="mb-[22px] flex flex-wrap items-end justify-between gap-6">
@@ -497,15 +498,28 @@ function BenchmarksTab({ view }: { view: ModelDetailView }) {
             <span className="font-brand text-[16px] font-medium text-ink">
               Cross-model leaderboard
             </span>
-            {real ? null : <SoonPill label="coming soon" />}
+            {lb ? (
+              <span className="whitespace-nowrap rounded-full border border-line-strong px-2 py-[3px] font-brand text-[9.5px] font-medium uppercase tracking-[0.08em] text-ink-3">
+                {lb.measured} of {lb.listed} evaluated
+              </span>
+            ) : (
+              <SoonPill label="coming soon" />
+            )}
           </div>
           <p className="max-w-[80ch] text-[13px] text-ink-2">
-            Every verified pin scored on the same datasets, ranked, with
-            per-country breakdowns and ensemble contributions.
+            {lb
+              ? `Recorded chap eval runs on ${
+                  lb.suiteNames.length === 1
+                    ? `the shared ${lb.suiteNames[0]} suite`
+                    : `${lb.suiteNames.length} reference suites`
+                } — ${
+                  lb.measured === 1 ? "one model" : `${lb.measured} models`
+                } measured so far, the rest empty until a run lands.`
+              : "Every verified pin scored on the same datasets, ranked, with per-country breakdowns and ensemble contributions."}
           </p>
         </div>
         <span className="font-brand text-[13px] font-medium text-brand">
-          {real ? "See the leaderboard →" : "Preview the design →"}
+          {lb ? "Open the leaderboard →" : "Preview the design →"}
         </span>
       </Link>
     </div>

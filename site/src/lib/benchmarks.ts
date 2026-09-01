@@ -1,7 +1,14 @@
 import fs from "node:fs";
 import path from "node:path";
 import { parse } from "yaml";
-import { getRegistry, versionByTag, type Registry } from "./registry";
+import {
+  getRegistry,
+  shortCommit,
+  stableVersion,
+  versionByTag,
+  type Registry,
+} from "./registry";
+import { datasetNameFor } from "./presentation";
 import { benchmarkSchema, type Benchmark } from "./schema";
 
 /**
@@ -71,6 +78,12 @@ export function loadBenchmarks(
         `${relPath}: commit does not match the pin for ${bench.model}@${bench.version} (${version.commit})`,
       );
     }
+    const config = bench.run?.configuration;
+    if (config && !(config in model.configurations)) {
+      throw new Error(
+        `${relPath}: configuration "${config}" is not in models/${bench.model}.yaml`,
+      );
+    }
     return bench;
   });
 }
@@ -96,50 +109,200 @@ export function skillOf(bench: Benchmark): number | null {
   return baseline_crps ? 1 - crps / baseline_crps : null;
 }
 
-/* ---------- leaderboard ---------- */
+/* ---------- leaderboard: recorded runs, one suite per dataset ---------- */
 
-export interface LeaderboardRow {
+/**
+ * Serializable leaderboard views. A suite is a dataset every row shares; a
+ * row is either a recorded run or a listed pin with no run yet — the page
+ * never interpolates a score for the latter.
+ */
+export interface LeaderboardRowView {
+  /** Selection key: "<model>@<version>". */
+  id: string;
   modelId: string;
+  name: string;
   versionTag: string;
-  /** How many datasets the means below aggregate over. */
-  datasets: number;
-  crps: number;
+  /** "mstl_arima@6cdec6f · v1" */
+  pinLine: string;
+  measured: boolean;
+  ncrps: number | null;
+  crps: number | null;
   mae: number | null;
-  coverage80: number | null;
-  skill: number | null;
+  rmse: number | null;
+  wall: number | null;
+  cpu: number | null;
+  mem: number | null;
+  /** Run-record panel subtitle: suite + full-ish commit, or the bare pin. */
+  suiteLine: string;
+  /** The command that produced (or would produce) this row. */
+  cmd: string;
 }
 
-function meanOf(values: number[]): number | null {
-  if (values.length === 0) return null;
-  return values.reduce((s, v) => s + v, 0) / values.length;
+export interface LeaderboardSuiteView {
+  dataset: string;
+  datasetName: string;
+  /** "Laos admin-1 monthly · horizon 3" */
+  heading: string;
+  /** "1 of 5 listed models evaluated" */
+  countLine: string;
+  measured: number;
+  runContext: { k: string; v: string }[];
+  /** Under-table note about pins with no run yet; null when all are measured. */
+  pendingNote: string | null;
+  rows: LeaderboardRowView[];
+}
+
+const NUMBER_WORDS = [
+  "No", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine",
+];
+
+function periodUnit(periodType: string | undefined): string {
+  if (periodType === "monthly") return "months";
+  if (periodType === "weekly") return "weeks";
+  if (periodType === "yearly") return "years";
+  return "periods";
+}
+
+type RunParams = NonNullable<Benchmark["run"]>;
+
+function evalCmd(
+  modelId: string,
+  pinShort: string,
+  dataset: string,
+  run: RunParams | undefined,
+): string {
+  const flags = [
+    run?.horizon !== undefined ? `--horizon ${run.horizon}` : null,
+    run?.splits !== undefined ? `--splits ${run.splits}` : null,
+    run?.samples !== undefined ? `--samples ${run.samples}` : null,
+  ]
+    .filter(Boolean)
+    .join(" ");
+  return (
+    `chap eval --model ${modelId} \\\n  --commit ${pinShort} --dataset ${dataset}` +
+    (flags ? ` \\\n  ${flags}` : "")
+  );
+}
+
+function suiteIdOf(bench: Benchmark): string | null {
+  return bench.run?.configuration
+    ? `${bench.model}.${bench.run.configuration}`
+    : null;
 }
 
 /**
- * One row per (model, verified version) that has benchmark results, each
- * metric averaged over that pin's datasets, ranked by mean CRPS ascending.
+ * One suite per dataset that has recorded runs: measured rows first (best
+ * normalised CRPS first, plain CRPS as fallback), then every other listed
+ * model at its stable pin as an unmeasured row. Reproduce commands for
+ * unmeasured rows reuse the suite's run parameters so a filled-in row stays
+ * comparable.
  */
-export function buildLeaderboard(
+export function buildLeaderboardSuites(
   registry: Registry,
   records: Benchmark[],
-): LeaderboardRow[] {
-  const rows: LeaderboardRow[] = [];
-  for (const model of registry.models) {
-    for (const version of model.versions) {
-      if (version.status !== "verified") continue;
-      const runs = records.filter(
-        (b) => b.model === model.id && b.version === version.version,
+): LeaderboardSuiteView[] {
+  const byId = new Map(registry.models.map((m) => [m.id, m]));
+  const datasets = [...new Set(records.map((b) => b.dataset))].sort();
+
+  return datasets.map((dataset) => {
+    const runs = records.filter((b) => b.dataset === dataset);
+    const primary = runs[0];
+    const params = primary.run;
+    const datasetName = datasetNameFor(dataset);
+
+    const measuredRows = runs
+      .map((b): LeaderboardRowView => {
+        const model = byId.get(b.model)!;
+        return {
+          id: `${b.model}@${b.version}`,
+          modelId: b.model,
+          name: model.display_name,
+          versionTag: b.version,
+          pinLine: `${b.model}@${shortCommit(b.commit)} · ${b.version}`,
+          measured: true,
+          ncrps: b.metrics.norm_crps ?? null,
+          crps: b.metrics.crps,
+          mae: b.metrics.mae ?? null,
+          rmse: b.metrics.rmse ?? null,
+          wall: b.resources?.wall_seconds ?? null,
+          cpu: b.resources?.cpu_seconds ?? null,
+          mem: b.resources?.peak_memory_mb ?? null,
+          suiteLine: `${suiteIdOf(b) ?? b.harness.tool} · ${b.commit.slice(0, 12)}…`,
+          cmd: evalCmd(b.model, shortCommit(b.commit), dataset, b.run),
+        };
+      })
+      .sort(
+        (a, b) =>
+          (a.ncrps ?? a.crps ?? Infinity) - (b.ncrps ?? b.crps ?? Infinity),
       );
-      if (runs.length === 0) continue;
-      rows.push({
-        modelId: model.id,
-        versionTag: version.version,
-        datasets: runs.length,
-        crps: meanOf(runs.map((b) => b.metrics.crps))!,
-        mae: meanOf(runs.flatMap((b) => b.metrics.mae ?? [])),
-        coverage80: meanOf(runs.flatMap((b) => b.metrics.coverage_80 ?? [])),
-        skill: meanOf(runs.flatMap((b) => skillOf(b) ?? [])),
+
+    const measuredModels = new Set(runs.map((b) => b.model));
+    const pendingRows = registry.models
+      .filter((m) => !measuredModels.has(m.id))
+      .map((m): LeaderboardRowView => {
+        const stable = stableVersion(m);
+        return {
+          id: `${m.id}@${stable.version}`,
+          modelId: m.id,
+          name: m.display_name,
+          versionTag: stable.version,
+          pinLine: `${m.id}@${shortCommit(stable.commit)} · ${stable.version}`,
+          measured: false,
+          ncrps: null,
+          crps: null,
+          mae: null,
+          rmse: null,
+          wall: null,
+          cpu: null,
+          mem: null,
+          suiteLine: `${m.id}@${shortCommit(stable.commit)}`,
+          cmd: evalCmd(m.id, shortCommit(stable.commit), dataset, params),
+        };
+      });
+
+    const runContext: { k: string; v: string }[] = [];
+    const suiteId = suiteIdOf(primary);
+    if (suiteId) runContext.push({ k: "Suite", v: suiteId });
+    runContext.push({ k: "Dataset", v: datasetName });
+    if (params?.observations !== undefined) {
+      runContext.push({
+        k: "Observations",
+        v: `${params.observations.toLocaleString("en-US")} rows`,
       });
     }
-  }
-  return rows.sort((a, b) => a.crps - b.crps);
+    const unit = periodUnit(
+      byId.get(primary.model)?.compatibility.period_types[0],
+    );
+    if (params?.horizon !== undefined) {
+      runContext.push({ k: "Horizon", v: `${params.horizon} ${unit}` });
+    }
+    if (params?.splits !== undefined) {
+      runContext.push({ k: "Backtest splits", v: String(params.splits) });
+    }
+    if (params?.samples !== undefined) {
+      runContext.push({ k: "Predictive samples", v: String(params.samples) });
+    }
+    runContext.push({ k: "Harness", v: primary.harness.tool });
+
+    const pendingNote =
+      pendingRows.length === 0
+        ? null
+        : pendingRows.length === 1
+          ? "One listed model has no evaluation on this suite yet. A row appears the moment a run lands — the page never interpolates a score."
+          : `${NUMBER_WORDS[pendingRows.length] ?? pendingRows.length} listed models have no evaluation on this suite yet. A row appears the moment a run lands — the page never interpolates a score.`;
+
+    return {
+      dataset,
+      datasetName,
+      heading:
+        params?.horizon !== undefined
+          ? `${datasetName} · horizon ${params.horizon}`
+          : datasetName,
+      countLine: `${measuredModels.size} of ${registry.models.length} listed models evaluated`,
+      measured: measuredModels.size,
+      runContext,
+      pendingNote,
+      rows: [...measuredRows, ...pendingRows],
+    };
+  });
 }

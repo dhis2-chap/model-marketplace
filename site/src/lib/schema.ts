@@ -143,10 +143,24 @@ export const benchmarkSchema = z.object({
     tool: z.string().min(1),
     run: z.string().url().optional(),
   }),
+  /** Backtest parameters of the run — what makes two rows comparable. */
+  run: z
+    .object({
+      /** Configuration key inside the model file the run used. */
+      configuration: z.string().min(1).optional(),
+      observations: z.number().int().positive().optional(),
+      horizon: z.number().int().positive().optional(),
+      splits: z.number().int().positive().optional(),
+      samples: z.number().int().positive().optional(),
+    })
+    .optional(),
   metrics: z.object({
     crps: z.number().nonnegative(),
     crps_by_horizon: z.array(z.number().nonnegative()).min(1).optional(),
     mae: z.number().nonnegative().optional(),
+    rmse: z.number().nonnegative().optional(),
+    /** Normalised CRPS — the only figure comparable across datasets. */
+    norm_crps: z.number().nonnegative().optional(),
     coverage_80: z.number().min(0).max(1).optional(),
     baseline_crps: z.number().positive().optional(),
     baseline_crps_by_horizon: z
@@ -154,6 +168,14 @@ export const benchmarkSchema = z.object({
       .min(1)
       .optional(),
   }),
+  /** Machine figures from the run, unnormalised — an order of magnitude. */
+  resources: z
+    .object({
+      wall_seconds: z.number().nonnegative(),
+      cpu_seconds: z.number().nonnegative().optional(),
+      peak_memory_mb: z.number().nonnegative().optional(),
+    })
+    .optional(),
 });
 
 export type ModelVersion = z.infer<typeof versionSchema>;

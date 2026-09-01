@@ -1,14 +1,21 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { stringify } from "yaml";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { buildLeaderboard, loadBenchmarks, skillOf } from "./benchmarks";
-import { loadRegistry, stableVersion } from "./registry";
+import {
+  buildLeaderboardSuites,
+  loadBenchmarks,
+  skillOf,
+} from "./benchmarks";
+import { loadRegistry, shortCommit, stableVersion } from "./registry";
 import type { Benchmark } from "./schema";
 
 const registry = loadRegistry();
 const ewars = registry.models.find((m) => m.id === "ewars_template")!;
 const ewarsStable = stableVersion(ewars);
+const mstl = registry.models.find((m) => m.id === "mstl_arima")!;
+const mstlStable = stableVersion(mstl);
 
 function benchmark(overrides: Partial<Benchmark> = {}): Benchmark {
   return {
@@ -24,6 +31,27 @@ function benchmark(overrides: Partial<Benchmark> = {}): Benchmark {
   } as Benchmark;
 }
 
+/** The shape of the repo's first real record: a full chap eval run. */
+function smokeRun(overrides: Partial<Benchmark> = {}): Benchmark {
+  return benchmark({
+    model: mstl.id,
+    version: mstlStable.version,
+    commit: mstlStable.commit,
+    dataset: "laos-admin1-monthly",
+    harness: { tool: "chap eval" },
+    run: {
+      configuration: "monthly_fast",
+      observations: 2808,
+      horizon: 3,
+      splits: 1,
+      samples: 200,
+    },
+    metrics: { crps: 42.6692, mae: 57.0358, rmse: 108.3282, norm_crps: 0.045345 },
+    resources: { wall_seconds: 56.61, cpu_seconds: 22.05, peak_memory_mb: 2061.8 },
+    ...overrides,
+  });
+}
+
 describe("loadBenchmarks", () => {
   let root: string;
 
@@ -34,25 +62,13 @@ describe("loadBenchmarks", () => {
     fs.rmSync(root, { recursive: true, force: true });
   });
 
-  function write(relPath: string, content: string) {
-    const file = path.join(root, relPath);
+  function write(b: Benchmark, relPath?: string) {
+    const file = path.join(
+      root,
+      relPath ?? `benchmarks/${b.model}/${b.version}/${b.dataset}.yaml`,
+    );
     fs.mkdirSync(path.dirname(file), { recursive: true });
-    fs.writeFileSync(file, content);
-  }
-
-  function yamlFor(b: Benchmark): string {
-    return [
-      "schema_version: 1",
-      `model: ${b.model}`,
-      `version: ${b.version}`,
-      `commit: "${b.commit}"`,
-      `dataset: ${b.dataset}`,
-      `evaluated_at: "${b.evaluated_at}"`,
-      "harness:",
-      `  tool: ${b.harness.tool}`,
-      "metrics:",
-      `  crps: ${b.metrics.crps}`,
-    ].join("\n");
+    fs.writeFileSync(file, stringify(b));
   }
 
   it("returns [] when the benchmarks directory does not exist", () => {
@@ -60,34 +76,48 @@ describe("loadBenchmarks", () => {
   });
 
   it("loads a valid file addressed by its (model, version, dataset) path", () => {
-    const b = benchmark();
-    write(`benchmarks/${b.model}/${b.version}/${b.dataset}.yaml`, yamlFor(b));
+    write(benchmark());
     const loaded = loadBenchmarks(registry, root);
     expect(loaded).toHaveLength(1);
     expect(loaded[0].metrics.crps).toBe(0.5);
   });
 
+  it("round-trips the run, extra metric and resource fields", () => {
+    write(smokeRun());
+    const [loaded] = loadBenchmarks(registry, root);
+    expect(loaded.run?.configuration).toBe("monthly_fast");
+    expect(loaded.run?.samples).toBe(200);
+    expect(loaded.metrics.rmse).toBeCloseTo(108.3282);
+    expect(loaded.metrics.norm_crps).toBeCloseTo(0.045345);
+    expect(loaded.resources?.peak_memory_mb).toBeCloseTo(2061.8);
+  });
+
   it("rejects a file whose path disagrees with its content", () => {
     const b = benchmark();
-    write(`benchmarks/${b.model}/${b.version}/other-dataset.yaml`, yamlFor(b));
+    write(b, `benchmarks/${b.model}/${b.version}/other-dataset.yaml`);
     expect(() => loadBenchmarks(registry, root)).toThrow(/does not match the file path/);
   });
 
   it("rejects a file outside the <model>/<version>/<dataset> layout", () => {
-    write("benchmarks/loose.yaml", yamlFor(benchmark()));
+    write(benchmark(), "benchmarks/loose.yaml");
     expect(() => loadBenchmarks(registry, root)).toThrow(/must be benchmarks\//);
   });
 
   it("rejects a model the registry does not list", () => {
-    const b = benchmark({ model: "ghost_model" });
-    write(`benchmarks/${b.model}/${b.version}/${b.dataset}.yaml`, yamlFor(b));
+    write(benchmark({ model: "ghost_model" }));
     expect(() => loadBenchmarks(registry, root)).toThrow(/not in the registry/);
   });
 
   it("rejects a commit that does not match the registry pin", () => {
-    const b = benchmark({ commit: "0".repeat(40) });
-    write(`benchmarks/${b.model}/${b.version}/${b.dataset}.yaml`, yamlFor(b));
+    write(benchmark({ commit: "0".repeat(40) }));
     expect(() => loadBenchmarks(registry, root)).toThrow(/commit does not match the pin/);
+  });
+
+  it("rejects a run configuration the model file does not declare", () => {
+    write(smokeRun({ run: { configuration: "nightly" } }));
+    expect(() => loadBenchmarks(registry, root)).toThrow(
+      /configuration "nightly" is not in models\/mstl_arima\.yaml/,
+    );
   });
 });
 
@@ -98,32 +128,68 @@ describe("skillOf", () => {
   });
 });
 
-describe("buildLeaderboard", () => {
-  const pymc = registry.models.find((m) => m.id === "chap_pymc")!;
-  const pymcStable = stableVersion(pymc);
-
+describe("buildLeaderboardSuites", () => {
   it("is empty while the store is empty", () => {
-    expect(buildLeaderboard(registry, [])).toEqual([]);
+    expect(buildLeaderboardSuites(registry, [])).toEqual([]);
   });
 
-  it("averages per (model, version) over datasets and ranks by CRPS ascending", () => {
-    const records: Benchmark[] = [
-      benchmark({ dataset: "dataset-a", metrics: { crps: 0.6, mae: 12 } }),
-      benchmark({ dataset: "dataset-b", metrics: { crps: 0.4, baseline_crps: 0.8 } }),
-      benchmark({
+  it("builds one suite per dataset: measured rows, then every other pin as not run", () => {
+    const suites = buildLeaderboardSuites(registry, [smokeRun()]);
+    expect(suites).toHaveLength(1);
+    const suite = suites[0];
+
+    expect(suite.heading).toBe("Laos admin-1 monthly · horizon 3");
+    expect(suite.countLine).toBe("1 of 5 listed models evaluated");
+    expect(suite.runContext).toContainEqual({
+      k: "Suite",
+      v: "mstl_arima.monthly_fast",
+    });
+    expect(suite.runContext).toContainEqual({ k: "Observations", v: "2,808 rows" });
+    expect(suite.pendingNote).toMatch(/^Four listed models/);
+
+    expect(suite.rows).toHaveLength(registry.models.length);
+    const [first, ...rest] = suite.rows;
+    expect(first.measured).toBe(true);
+    expect(first.pinLine).toBe(
+      `mstl_arima@${shortCommit(mstlStable.commit)} · ${mstlStable.version}`,
+    );
+    expect(first.suiteLine).toBe(
+      `mstl_arima.monthly_fast · ${mstlStable.commit.slice(0, 12)}…`,
+    );
+    for (const row of rest) {
+      expect(row.measured).toBe(false);
+      expect(row.ncrps).toBeNull();
+      expect(row.crps).toBeNull();
+    }
+  });
+
+  it("reuses the suite's run parameters in an unmeasured row's command", () => {
+    const suite = buildLeaderboardSuites(registry, [smokeRun()])[0];
+    const pendingEwars = suite.rows.find((r) => r.modelId === ewars.id)!;
+    expect(pendingEwars.cmd).toBe(
+      `chap eval --model ewars_template \\\n  --commit ${shortCommit(ewarsStable.commit)} --dataset laos-admin1-monthly \\\n  --horizon 3 --splits 1 --samples 200`,
+    );
+  });
+
+  it("ranks measured rows by normalised CRPS ascending", () => {
+    const pymc = registry.models.find((m) => m.id === "chap_pymc")!;
+    const pymcStable = stableVersion(pymc);
+    const suite = buildLeaderboardSuites(registry, [
+      smokeRun(),
+      smokeRun({
         model: pymc.id,
         version: pymcStable.version,
         commit: pymcStable.commit,
-        metrics: { crps: 0.3 },
+        run: undefined,
+        metrics: { crps: 39.2, norm_crps: 0.041 },
+        resources: undefined,
       }),
-    ];
-    const rows = buildLeaderboard(registry, records);
-    expect(rows.map((r) => r.modelId)).toEqual(["chap_pymc", "ewars_template"]);
-    const ewarsRow = rows[1];
-    expect(ewarsRow.datasets).toBe(2);
-    expect(ewarsRow.crps).toBeCloseTo(0.5);
-    expect(ewarsRow.mae).toBe(12); // averaged over the files that carry it
-    expect(ewarsRow.skill).toBeCloseTo(0.5); // 1 - 0.4/0.8, from the one baseline
-    expect(rows[0].mae).toBeNull();
+    ])[0];
+    expect(suite.rows.slice(0, 2).map((r) => r.modelId)).toEqual([
+      "chap_pymc",
+      "mstl_arima",
+    ]);
+    expect(suite.countLine).toBe("2 of 5 listed models evaluated");
+    expect(suite.pendingNote).toMatch(/^Three listed models/);
   });
 });

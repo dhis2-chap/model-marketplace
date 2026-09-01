@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import { Lato, Roboto_Mono, Rubik } from "next/font/google";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { buildLeaderboard, getBenchmarks } from "@/lib/benchmarks";
-import { getRegistry } from "@/lib/registry";
+import { getBenchmarks } from "@/lib/benchmarks";
 import "./globals.css";
 
 const rubik = Rubik({
@@ -46,11 +45,7 @@ export default function RootLayout({
     >
       <body className="flex min-h-screen flex-col bg-surface font-body text-ink antialiased">
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT }} />
-        <Header
-          leaderboardLive={
-            buildLeaderboard(getRegistry(), getBenchmarks()).length > 0
-          }
-        />
+        <Header leaderboardLive={getBenchmarks().length > 0} />
         <div className="flex-1">{children}</div>
         <Footer />
       </body>

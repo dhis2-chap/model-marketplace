@@ -68,3 +68,12 @@ export function presentationFor(id: string): Presentation {
     }
   );
 }
+
+/** Display names for the dataset ids used in benchmarks/. */
+export const DATASET_NAME: Record<string, string> = {
+  "laos-admin1-monthly": "Laos admin-1 monthly",
+};
+
+export function datasetNameFor(id: string): string {
+  return DATASET_NAME[id] ?? id.replace(/-/g, " ");
+}

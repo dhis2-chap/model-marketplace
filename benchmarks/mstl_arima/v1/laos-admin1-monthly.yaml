@@ -1,0 +1,34 @@
+# First recorded run: single-split smoke suite of mstl_arima's monthly_fast
+# configuration. Read it as provenance rather than a ranking — see the
+# leaderboard page caveats. Runtime and memory are one-machine figures.
+schema_version: 1
+
+model: mstl_arima
+version: v1
+commit: 6cdec6fc7c512d5795ff888383762c39c903d55d
+dataset: laos-admin1-monthly
+
+evaluated_at: 2026-08-31
+
+harness:
+  tool: chap eval
+
+run:
+  configuration: monthly_fast
+  observations: 2808
+  horizon: 3
+  splits: 1
+  samples: 200
+
+metrics:
+  # MAE, RMSE and CRPS are in cases — comparable only within this dataset.
+  mae: 57.0358
+  rmse: 108.3282
+  crps: 42.6692
+  # The one figure comparable across datasets.
+  norm_crps: 0.045345
+
+resources:
+  wall_seconds: 56.61
+  cpu_seconds: 22.05
+  peak_memory_mb: 2061.8
