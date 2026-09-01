@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { CheckIcon, GitHubMark } from "@/components/icons";
+import { GitHubMark } from "@/components/icons";
 import { CodePanel } from "@/components/CodePanel";
 import { CopyButton } from "@/components/copy";
 import { Kicker } from "@/components/badges";
@@ -53,18 +53,37 @@ configurations:
     additional_continuous_covariates: [rainfall]
 `;
 
-const CHECKLIST = [
-  "The commit hash is a real, pushed, immutable commit — not a branch name.",
-  "Declared covariates match what the code actually reads.",
-  "The model runs end-to-end on at least one CHAP reference dataset.",
-  "A Dockerfile or environment spec is present and builds from a clean checkout.",
-  "Forecast output follows the CHAP quantile schema.",
-  "A maintainer is named and reachable for future version reviews.",
+const SUBMISSION_CHECKS = [
+  {
+    title: "Pin the exact revision",
+    body: "Use the full 40-character commit SHA, already pushed to the model repository.",
+  },
+  {
+    title: "Include a clean setup",
+    body: "Provide a Dockerfile or environment specification that builds from a fresh checkout.",
+  },
+  {
+    title: "Describe the inputs",
+    body: "List the required and optional covariates the model actually reads.",
+  },
+  {
+    title: "Show one complete run",
+    body: "Run the pinned revision end-to-end with at least one CHAP reference dataset.",
+  },
+  {
+    title: "Check the forecast output",
+    body: "Make sure the generated quantiles follow the CHAP forecast schema.",
+  },
+  {
+    title: "Name a maintainer",
+    body: "Add a GitHub handle for someone who can answer questions and review future updates.",
+  },
 ];
 
 export default function ContributePage() {
   const registry = getRegistry();
   const approvals = registry.index.review_policy.required_approvals;
+  const repository = registry.index.marketplace.repository;
   return (
     <>
       <section className="border-b border-line bg-surface-2">
@@ -117,51 +136,69 @@ export default function ContributePage() {
             <CodePanel code={EXAMPLE_YAML} gutterWidth={18} />
           </div>
         </div>
-        <div className="flex flex-col gap-4">
-          <div className="rounded-lg border border-verified bg-verified-tint p-5">
-            <div className="mb-2.5 font-brand text-[10.5px] font-medium uppercase tracking-[0.1em] text-verified">
-              The three-approval rule
+        <aside>
+          <div className="border-t-2 border-ink pt-5">
+            <div className="mb-2 flex items-baseline justify-between gap-4">
+              <h2 className="font-brand text-[20px] font-medium text-ink">
+                Prepare the pull request
+              </h2>
+              <span className="shrink-0 font-mono text-[11px] text-ink-3">
+                {SUBMISSION_CHECKS.length} checks
+              </span>
             </div>
-            <p className="text-[13.5px] leading-[1.65] text-ink">
-              A PR merges only with approving reviews from {approvals}{" "}
-              maintainers on the CHAP review board. Reviewers check that the
-              commit builds, the declared covariates match the code, and the
-              model runs end-to-end on a reference dataset. The merge to main
-              is the verification — nothing on this site got here any other
-              way.
+            <p className="mb-5 max-w-[52ch] text-[13.5px] leading-[1.65] text-ink-2">
+              Make the review reproducible. A maintainer should be able to
+              start at the pinned commit and finish with a valid CHAP forecast.
+            </p>
+            <ol className="border-y border-line">
+              {SUBMISSION_CHECKS.map((item, index) => (
+                <li
+                  key={item.title}
+                  className="grid grid-cols-[24px_1fr] gap-3 border-t border-line py-3.5 first:border-t-0"
+                >
+                  <span className="pt-0.5 font-mono text-[10.5px] text-brand">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <div>
+                    <h3 className="font-brand text-[13.5px] font-medium text-ink">
+                      {item.title}
+                    </h3>
+                    <p className="mt-0.5 text-[12.5px] leading-[1.55] text-ink-2">
+                      {item.body}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
+
+          <div className="mt-8 rounded-lg border border-line bg-surface-2 px-5 py-[18px]">
+            <Kicker className="mb-2.5">After you submit</Kicker>
+            <p className="text-[13px] leading-[1.65] text-ink-2">
+              {approvals} CHAP maintainers review the pinned code and the model
+              YAML. Once they approve and the PR merges, the model is listed as{" "}
+              <strong className="font-bold text-exp">Experimental</strong> with
+              its first verified version.
+            </p>
+            <div className="my-4 border-t border-line" />
+            <p className="text-[13px] leading-[1.65] text-ink-2">
+              A model can move to{" "}
+              <strong className="font-bold text-verified">Stable</strong> after
+              benchmark results have been recorded on the reference datasets
+              and an active maintainer is committed to keeping it current.
             </p>
           </div>
-          <div className="rounded-lg border border-line p-5">
-            <Kicker className="mb-3">Before you open the PR</Kicker>
-            {CHECKLIST.map((item) => (
-              <div key={item} className="grid grid-cols-[auto_1fr] gap-2.5 py-[7px]">
-                <CheckIcon className="mt-[3px] h-3.5 w-3.5 text-verified" />
-                <span className="text-[13px] leading-[1.55] text-ink-2">
-                  {item}
-                </span>
-              </div>
-            ))}
-          </div>
-          <div className="rounded-lg border border-line bg-surface-2 p-5">
-            <Kicker className="mb-3">Promotion to Stable</Kicker>
-            <p className="text-[13px] leading-relaxed text-ink-2">
-              Models enter as{" "}
-              <strong className="font-bold text-exp">Experimental</strong>.
-              Once a model has a benchmark record on the reference datasets and
-              a maintainer commitment for updates, the board may promote it to{" "}
-              <strong className="font-bold text-verified">Stable</strong>.
-            </p>
-          </div>
+
           <a
-            href="https://github.com/dhis2-chap"
+            href={`${repository}/compare`}
             target="_blank"
             rel="noreferrer"
-            className="flex h-11 items-center justify-center gap-2 rounded-[4px] bg-brand font-brand text-[14px] font-bold text-white transition-colors hover:bg-brand-dark"
+            className="mt-4 flex h-11 items-center justify-center gap-2 rounded-[4px] bg-brand font-brand text-[14px] font-bold text-white transition-colors hover:bg-brand-dark"
           >
             <GitHubMark className="h-[15px] w-[15px]" />
             Open a pull request
           </a>
-        </div>
+        </aside>
       </section>
     </>
   );
