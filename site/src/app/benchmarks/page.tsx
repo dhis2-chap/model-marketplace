@@ -1,18 +1,18 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { LeaderboardSuite } from "@/components/LeaderboardClient";
-import { buildLeaderboardSuites, getBenchmarks } from "@/lib/benchmarks";
+import { BenchmarkSuite } from "@/components/BenchmarksClient";
+import { buildBenchmarkSuites, getBenchmarks } from "@/lib/benchmarks";
 import { getRegistry } from "@/lib/registry";
 
 export const metadata: Metadata = {
-  title: "Leaderboard",
+  title: "Benchmarks",
   description:
     "Recorded CHAP benchmark evaluations against pinned commits on the reference datasets — nothing is self-reported.",
 };
 
-export default function LeaderboardPage() {
+export default function BenchmarksPage() {
   const records = getBenchmarks();
-  const suites = buildLeaderboardSuites(getRegistry(), records);
+  const suites = buildBenchmarkSuites(getRegistry(), records);
   const singleSplitSmoke = records.length === 1 && records[0].run?.splits === 1;
 
   return (
@@ -28,7 +28,7 @@ export default function LeaderboardPage() {
                   : `Early results · ${suites.length} suites`}
             </span>
             <h1 className="my-3.5 font-brand text-[40px] font-medium leading-[1.1] tracking-[-0.02em] text-ink">
-              Leaderboard
+              Benchmarks
             </h1>
             <p className="max-w-[62ch] text-[16px] leading-[1.65] text-ink-2">
               Every score on this page comes from a controlled{" "}
@@ -66,7 +66,7 @@ export default function LeaderboardPage() {
       </section>
 
       {suites.map((suite) => (
-        <LeaderboardSuite key={suite.dataset} suite={suite} />
+        <BenchmarkSuite key={suite.dataset} suite={suite} />
       ))}
 
       {suites.length === 0 ? (

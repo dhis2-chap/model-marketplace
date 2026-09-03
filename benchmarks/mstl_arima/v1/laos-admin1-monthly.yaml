@@ -1,6 +1,6 @@
 # First recorded run: single-split smoke suite of mstl_arima's monthly_fast
 # configuration. Read it as provenance rather than a ranking — see the
-# leaderboard page caveats. Runtime and memory are one-machine figures.
+# benchmarks page caveats. Runtime and memory are one-machine figures.
 schema_version: 1
 
 model: mstl_arima

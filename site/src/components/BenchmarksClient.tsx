@@ -3,13 +3,13 @@
 import Link from "next/link";
 import { useState } from "react";
 import type {
-  LeaderboardRowView,
-  LeaderboardSuiteView,
+  BenchmarkRowView,
+  BenchmarkSuiteView,
 } from "@/lib/benchmarks";
 import { useCopy } from "./copy";
 
 /**
- * One suite of the leaderboard: the sortable run table and the run-record
+ * One benchmark suite: the sortable run table and the run-record
  * panel below it. Sorting and row selection are the only client state;
  * everything rendered comes from the build-time suite view.
  */
@@ -99,7 +99,7 @@ function CommandBlock({ cmd }: { cmd: string }) {
   );
 }
 
-function RunRecord({ row }: { row: LeaderboardRowView }) {
+function RunRecord({ row }: { row: BenchmarkRowView }) {
   const metrics = row.measured
     ? [
         { k: "MAE", note: "cases", v: fmt(row.mae, 4) },
@@ -188,7 +188,7 @@ function RunRecord({ row }: { row: LeaderboardRowView }) {
   );
 }
 
-export function LeaderboardSuite({ suite }: { suite: LeaderboardSuiteView }) {
+export function BenchmarkSuite({ suite }: { suite: BenchmarkSuiteView }) {
   const [sortKey, setSortKey] = useState<SortKey>("ncrps");
   const [selectedId, setSelectedId] = useState<string | null>(null);
 

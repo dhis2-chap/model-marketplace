@@ -40,8 +40,8 @@ export function Footer() {
               </Link>
             </li>
             <li>
-              <Link href="/leaderboard" className="text-brand hover:text-brand-dark hover:underline">
-                Leaderboard
+              <Link href="/benchmarks" className="text-brand hover:text-brand-dark hover:underline">
+                Benchmarks
               </Link>
             </li>
           </ul>

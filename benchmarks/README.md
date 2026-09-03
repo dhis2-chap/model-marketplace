@@ -9,7 +9,7 @@ The site loads this directory at build time through the same zod gate as the
 registry (`site/src/lib/schema.ts`): an invalid or inconsistent benchmark
 file fails the build. Until a model has real results here, the site shows
 mock fixtures labeled "mock data · illustrative"; the per-model label comes
-off automatically when its first real file lands, and the leaderboard renders
+off automatically when its first real file lands, and the benchmarks page renders
 once any results exist.
 
 ## How the current comparison is run
@@ -57,7 +57,7 @@ combined by equally weighted mean dataset rank. Models with incomplete dataset
 coverage are placed after models that completed all three datasets.
 
 The portable output in `artifacts/` includes the resolved manifest, structured
-run records, leaderboard files, metric slices, pairwise comparisons, NetCDF
+run records, benchmark files, metric slices, pairwise comparisons, NetCDF
 evaluations, and complete logs. It also records commands, hashes, machine
 information, runtime, CPU consumption, and peak memory. Marketplace YAML is
 exported only after the complete suite succeeds and passes its export checks.
@@ -97,7 +97,7 @@ harness:
   run: https://github.com/...    # optional: CI run / artifact with the raw output
 
 # Optional: the backtest parameters of the run. This is what makes two rows
-# on the leaderboard comparable, so record it whenever the harness reports it.
+# on the benchmarks page comparable, so record it whenever the harness reports it.
 run:
   configuration: monthly         # configuration key inside the model file
   observations: 2808             # rows in the dataset
@@ -127,9 +127,9 @@ resources:
 Skill on a model's detail page is derived, never stored:
 `1 − crps / baseline_crps`, only where the file carries the baseline.
 
-## The leaderboard
+## Benchmarks
 
-The leaderboard groups this store by dataset: each dataset with at least one
+The benchmarks page groups this store by dataset: each dataset with at least one
 file becomes a suite section, listing its recorded runs ranked by normalised
 CRPS and every other listed model as an explicitly empty "not run" row. A
 score belongs to a commit — re-evaluating a different pin adds a row, it

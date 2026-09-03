@@ -392,7 +392,7 @@ function BenchmarksTab({ view }: { view: ModelDetailView }) {
   }
   const real = b.source === "real";
   const p = b.provenance;
-  const lb = view.leaderboard;
+  const benchmarkSummary = view.benchmarkSummary;
   return (
     <div>
       <div className="mb-[22px] flex flex-wrap items-end justify-between gap-6">
@@ -490,36 +490,38 @@ function BenchmarksTab({ view }: { view: ModelDetailView }) {
         ) : null}
       </div>
       <Link
-        href="/leaderboard"
+        href="/benchmarks"
         className="mt-5 grid items-center gap-6 rounded-lg border border-dashed border-line-strong bg-surface-2 px-[26px] py-[22px] transition-colors hover:border-brand md:grid-cols-[1fr_auto]"
       >
         <div>
           <div className="mb-1.5 flex items-center gap-2.5">
             <span className="font-brand text-[16px] font-medium text-ink">
-              Cross-model leaderboard
+              Cross-model benchmarks
             </span>
-            {lb ? (
+            {benchmarkSummary ? (
               <span className="whitespace-nowrap rounded-full border border-line-strong px-2 py-[3px] font-brand text-[9.5px] font-medium uppercase tracking-[0.08em] text-ink-3">
-                {lb.measured} of {lb.listed} evaluated
+                {benchmarkSummary.measured} of {benchmarkSummary.listed} evaluated
               </span>
             ) : (
               <SoonPill label="coming soon" />
             )}
           </div>
           <p className="max-w-[80ch] text-[13px] text-ink-2">
-            {lb
+            {benchmarkSummary
               ? `Recorded chap eval runs on ${
-                  lb.suiteNames.length === 1
-                    ? `the shared ${lb.suiteNames[0]} suite`
-                    : `${lb.suiteNames.length} reference suites`
+                  benchmarkSummary.suiteNames.length === 1
+                    ? `the shared ${benchmarkSummary.suiteNames[0]} suite`
+                    : `${benchmarkSummary.suiteNames.length} reference suites`
                 } — ${
-                  lb.measured === 1 ? "one model" : `${lb.measured} models`
+                  benchmarkSummary.measured === 1
+                    ? "one model"
+                    : `${benchmarkSummary.measured} models`
                 } measured so far, the rest empty until a run lands.`
               : "Every verified pin scored on the same datasets, ranked, with per-country breakdowns and ensemble contributions."}
           </p>
         </div>
         <span className="font-brand text-[13px] font-medium text-brand">
-          {lb ? "Open the leaderboard →" : "Preview the design →"}
+          {benchmarkSummary ? "Open benchmarks →" : "Preview the design →"}
         </span>
       </Link>
     </div>

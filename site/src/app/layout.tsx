@@ -45,7 +45,7 @@ export default function RootLayout({
     >
       <body className="flex min-h-screen flex-col bg-surface font-body text-ink antialiased">
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT }} />
-        <Header leaderboardLive={getBenchmarks().length > 0} />
+        <Header benchmarksLive={getBenchmarks().length > 0} />
         <div className="flex-1">{children}</div>
         <Footer />
       </body>

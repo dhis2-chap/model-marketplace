@@ -211,8 +211,8 @@ export interface ModelDetailView {
   inReviewAsOf: string | null;
   configurations: ConfigurationView[];
   benchmarks: BenchmarksView | null;
-  /** Cross-model leaderboard state for the CTA card; null while no run exists. */
-  leaderboard: {
+  /** Cross-model benchmark state for the CTA card; null while no run exists. */
+  benchmarkSummary: {
     measured: number;
     listed: number;
     suiteNames: string[];
@@ -401,7 +401,7 @@ export function toDetailView(
     benchmarks:
       realBenchmarksView(model, registry, benchmarks) ??
       mockBenchmarksView(model, registry),
-    leaderboard:
+    benchmarkSummary:
       benchmarks.length > 0
         ? {
             measured: new Set(benchmarks.map((b) => b.model)).size,

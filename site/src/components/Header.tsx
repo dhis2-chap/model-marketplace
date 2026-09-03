@@ -6,10 +6,10 @@ import { useState, useSyncExternalStore, type FormEvent } from "react";
 import { Dhis2Mark, GitHubMark, MagnifierIcon } from "./icons";
 import { SoonPill } from "./badges";
 
-function nav(leaderboardLive: boolean) {
+function nav(benchmarksLive: boolean) {
   return [
     { href: "/", label: "Models", soon: false },
-    { href: "/leaderboard", label: "Leaderboard", soon: !leaderboardLive },
+    { href: "/benchmarks", label: "Benchmarks", soon: !benchmarksLive },
     { href: "/contribute", label: "Contribute", soon: false },
     { href: "/docs", label: "Docs", soon: false },
   ];
@@ -70,7 +70,7 @@ function ThemeToggle() {
   );
 }
 
-export function Header({ leaderboardLive }: { leaderboardLive: boolean }) {
+export function Header({ benchmarksLive }: { benchmarksLive: boolean }) {
   const pathname = usePathname();
   const router = useRouter();
   const [q, setQ] = useState("");
@@ -93,7 +93,7 @@ export function Header({ leaderboardLive }: { leaderboardLive: boolean }) {
           </span>
         </Link>
         <nav className="hidden items-center gap-1 md:flex">
-          {nav(leaderboardLive).map((item) => {
+          {nav(benchmarksLive).map((item) => {
             const active =
               item.href === "/"
                 ? pathname === "/" || pathname.startsWith("/models")

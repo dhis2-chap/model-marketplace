@@ -69,7 +69,7 @@ Sections/tabs:
 - **Benchmarks** — charts backed by reviewed records in
   [`benchmarks/`](../benchmarks/README.md): CRPS by forecast horizon (line),
   model-vs-model comparison on a dataset (grouped bars), and per-country
-  performance. The cross-model leaderboard shows the controlled `chap bench`
+  performance. The cross-model benchmarks show the controlled `chap bench`
   suites and links each score to its pinned model version.
 - **Install** — "Add to your CHAP instance": a short step panel that shows the
   pin to copy and links to the CHAP guide for

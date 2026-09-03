@@ -70,7 +70,7 @@ available at build time by default).
 - A model with no real results yet falls back to **mock fixtures** in
   `site/src/lib/mock-benchmarks.ts`, labeled "mock data · illustrative" in
   the UI. The label comes off per model when its first real file lands, and
-  the leaderboard renders only from real results.
+  the benchmarks page renders only from real results.
 - In-review pins come from real open PRs at build time and are labeled with
   the build timestamp; the site never invents proposals.
 - Presentation-only metadata the schema doesn't carry yet (framework labels,

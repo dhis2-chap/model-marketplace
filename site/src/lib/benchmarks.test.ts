@@ -4,7 +4,7 @@ import path from "node:path";
 import { stringify } from "yaml";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
-  buildLeaderboardSuites,
+  buildBenchmarkSuites,
   loadBenchmarks,
   skillOf,
 } from "./benchmarks";
@@ -128,13 +128,13 @@ describe("skillOf", () => {
   });
 });
 
-describe("buildLeaderboardSuites", () => {
+describe("buildBenchmarkSuites", () => {
   it("is empty while the store is empty", () => {
-    expect(buildLeaderboardSuites(registry, [])).toEqual([]);
+    expect(buildBenchmarkSuites(registry, [])).toEqual([]);
   });
 
   it("builds one suite per dataset: measured rows, then every other pin as not run", () => {
-    const suites = buildLeaderboardSuites(registry, [smokeRun()]);
+    const suites = buildBenchmarkSuites(registry, [smokeRun()]);
     expect(suites).toHaveLength(1);
     const suite = suites[0];
 
@@ -164,7 +164,7 @@ describe("buildLeaderboardSuites", () => {
   });
 
   it("reuses the suite's run parameters in an unmeasured row's command", () => {
-    const suite = buildLeaderboardSuites(registry, [smokeRun()])[0];
+    const suite = buildBenchmarkSuites(registry, [smokeRun()])[0];
     const pendingEwars = suite.rows.find((r) => r.modelId === ewars.id)!;
     expect(pendingEwars.cmd).toBe(
       `chap eval --model ewars_template \\\n  --commit ${shortCommit(ewarsStable.commit)} --dataset laos-admin1-monthly \\\n  --horizon 3 --splits 1 --samples 200`,
@@ -174,7 +174,7 @@ describe("buildLeaderboardSuites", () => {
   it("ranks measured rows by normalised CRPS ascending", () => {
     const pymc = registry.models.find((m) => m.id === "chap_pymc")!;
     const pymcStable = stableVersion(pymc);
-    const suite = buildLeaderboardSuites(registry, [
+    const suite = buildBenchmarkSuites(registry, [
       smokeRun(),
       smokeRun({
         model: pymc.id,

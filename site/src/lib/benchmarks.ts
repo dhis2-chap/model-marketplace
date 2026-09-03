@@ -109,14 +109,14 @@ export function skillOf(bench: Benchmark): number | null {
   return baseline_crps ? 1 - crps / baseline_crps : null;
 }
 
-/* ---------- leaderboard: recorded runs, one suite per dataset ---------- */
+/* ---------- benchmark comparisons: recorded runs, one suite per dataset ---------- */
 
 /**
- * Serializable leaderboard views. A suite is a dataset every row shares; a
+ * Serializable benchmark views. A suite is a dataset every row shares; a
  * row is either a recorded run or a listed pin with no run yet — the page
  * never interpolates a score for the latter.
  */
-export interface LeaderboardRowView {
+export interface BenchmarkRowView {
   /** Selection key: "<model>@<version>". */
   id: string;
   modelId: string;
@@ -138,7 +138,7 @@ export interface LeaderboardRowView {
   cmd: string;
 }
 
-export interface LeaderboardSuiteView {
+export interface BenchmarkSuiteView {
   dataset: string;
   datasetName: string;
   /** "Laos admin-1 monthly · horizon 3" */
@@ -149,7 +149,7 @@ export interface LeaderboardSuiteView {
   runContext: { k: string; v: string }[];
   /** Under-table note about pins with no run yet; null when all are measured. */
   pendingNote: string | null;
-  rows: LeaderboardRowView[];
+  rows: BenchmarkRowView[];
 }
 
 const NUMBER_WORDS = [
@@ -197,10 +197,10 @@ function suiteIdOf(bench: Benchmark): string | null {
  * unmeasured rows reuse the suite's run parameters so a filled-in row stays
  * comparable.
  */
-export function buildLeaderboardSuites(
+export function buildBenchmarkSuites(
   registry: Registry,
   records: Benchmark[],
-): LeaderboardSuiteView[] {
+): BenchmarkSuiteView[] {
   const byId = new Map(registry.models.map((m) => [m.id, m]));
   const datasets = [...new Set(records.map((b) => b.dataset))].sort();
 
@@ -211,7 +211,7 @@ export function buildLeaderboardSuites(
     const datasetName = datasetNameFor(dataset);
 
     const measuredRows = runs
-      .map((b): LeaderboardRowView => {
+      .map((b): BenchmarkRowView => {
         const model = byId.get(b.model)!;
         return {
           id: `${b.model}@${b.version}`,
@@ -239,7 +239,7 @@ export function buildLeaderboardSuites(
     const measuredModels = new Set(runs.map((b) => b.model));
     const pendingRows = registry.models
       .filter((m) => !measuredModels.has(m.id))
-      .map((m): LeaderboardRowView => {
+      .map((m): BenchmarkRowView => {
         const stable = stableVersion(m);
         return {
           id: `${m.id}@${stable.version}`,
