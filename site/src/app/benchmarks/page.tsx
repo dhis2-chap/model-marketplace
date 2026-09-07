@@ -15,15 +15,15 @@ export const metadata: Metadata = {
 function BenchmarksComingSoon() {
   return (
     <main>
-      <section className="border-b border-line bg-gradient-to-b from-surface-2 to-surface">
-        <div className="mx-auto max-w-[1240px] px-8 pb-12 pt-14">
-          <span className="font-brand text-[10px] font-medium uppercase tracking-[0.12em] text-exp">
+      <section className="border-b border-line bg-surface">
+        <div className="mx-auto max-w-[1240px] px-8 pb-12 pt-16">
+          <span className="font-mono text-[10.5px] uppercase tracking-[0.18em] text-exp">
             Coming soon
           </span>
-          <h1 className="my-3.5 font-brand text-[40px] font-medium leading-[1.1] tracking-[-0.02em] text-ink">
+          <h1 className="my-4 font-brand text-[clamp(36px,4vw,50px)] font-extrabold leading-[1.02] tracking-[-0.03em] text-ink">
             Benchmarks
           </h1>
-          <p className="max-w-[62ch] text-[16px] leading-[1.65] text-ink-2">
+          <p className="max-w-[58ch] font-serif text-[16px] leading-[1.7] text-ink-2">
             Every score on this page will come from a controlled{" "}
             <span className="font-mono text-[14px]">chap bench</span> suite:
             each model–dataset pair evaluated against its pinned commit in a
@@ -79,20 +79,20 @@ export default function BenchmarksPage() {
 
   return (
     <main>
-      <section className="border-b border-line bg-gradient-to-b from-surface-2 to-surface">
-        <div className="mx-auto grid max-w-[1240px] items-end gap-x-14 gap-y-10 px-8 pb-10 pt-14 lg:grid-cols-[minmax(0,1fr)_400px]">
+      <section className="border-b border-line bg-surface">
+        <div className="mx-auto grid max-w-[1240px] items-end gap-x-14 gap-y-10 px-8 pb-10 pt-16 lg:grid-cols-[minmax(0,1fr)_400px]">
           <div>
-            <span className="font-brand text-[10px] font-medium uppercase tracking-[0.12em] text-exp">
+            <span className="font-mono text-[10.5px] uppercase tracking-[0.18em] text-exp">
               {records.length === 0
                 ? "Waiting for the first run"
                 : suites.length === 1
                   ? "Early results · one suite"
                   : `Early results · ${suites.length} suites`}
             </span>
-            <h1 className="my-3.5 font-brand text-[40px] font-medium leading-[1.1] tracking-[-0.02em] text-ink">
+            <h1 className="my-4 font-brand text-[clamp(36px,4vw,50px)] font-extrabold leading-[1.02] tracking-[-0.03em] text-ink">
               Benchmarks
             </h1>
-            <p className="max-w-[62ch] text-[16px] leading-[1.65] text-ink-2">
+            <p className="max-w-[58ch] font-serif text-[16px] leading-[1.7] text-ink-2">
               Every score on this page comes from a controlled{" "}
               <span className="font-mono text-[14px]">chap bench</span> suite.
               Each model–dataset pair is evaluated against its pinned commit

@@ -6,7 +6,7 @@ export const metadata: Metadata = {
     "Marketplace reference material and direct links to the CHAP modeling documentation.",
 };
 
-const CARDS = [
+const ENTRIES = [
   {
     kicker: "marketplace",
     title: "Model registry format",
@@ -48,33 +48,47 @@ const CARDS = [
 export default function DocsPage() {
   return (
     <main className="mx-auto max-w-[1240px] px-8 pb-24 pt-16">
-      <h1 className="mb-3.5 font-brand text-[32px] font-medium tracking-[-0.02em] text-ink md:text-[40px]">
-        Documentation
-      </h1>
-      <p className="mb-9 max-w-[70ch] text-[16px] leading-[1.65] text-ink-2">
-        Marketplace formats are documented in this repository. The cards below
-        link directly to the relevant CHAP and chapkit guides for running model
-        services, building your own, and working in the DHIS2 Modeling App.
-        Only models built with chapkit are supported for now.
-      </p>
-      <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-        {CARDS.map((card) => (
-          <a
-            key={card.title}
-            href={card.href}
-            target={card.href.startsWith("mailto:") ? undefined : "_blank"}
-            rel="noreferrer"
-            className="block rounded-lg border border-line bg-surface p-[22px] transition-[border-color,box-shadow] hover:border-brand hover:shadow-lift"
-          >
-            <div className="mb-3 font-mono text-[11px] text-ink-3">
-              {card.kicker}
-            </div>
-            <div className="mb-2 font-brand text-[16px] font-medium text-ink">
-              {card.title}
-            </div>
-            <p className="text-[13px] leading-relaxed text-ink-2">{card.body}</p>
-          </a>
-        ))}
+      <div className="grid gap-x-16 gap-y-10 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.45fr)]">
+        <div>
+          <div className="mb-4 font-mono text-[10.5px] uppercase tracking-[0.18em] text-brand">
+            Reference
+          </div>
+          <h1 className="mb-5 font-brand text-[clamp(34px,3.6vw,46px)] font-extrabold leading-[1.02] tracking-[-0.03em] text-ink">
+            Documentation
+          </h1>
+          <p className="max-w-[44ch] font-serif text-[16px] leading-[1.7] text-ink-2">
+            Marketplace formats are documented in this repository. The index
+            links directly to the relevant CHAP and chapkit guides for running
+            model services, building your own, and working in the DHIS2
+            Modeling App. Only models built with chapkit are supported for now.
+          </p>
+        </div>
+        <div className="border-t-2 border-ink">
+          {ENTRIES.map((entry) => (
+            <a
+              key={entry.title}
+              href={entry.href}
+              target={entry.href.startsWith("mailto:") ? undefined : "_blank"}
+              rel="noreferrer"
+              className="group grid grid-cols-[92px_minmax(0,1fr)_auto] items-start gap-x-6 border-b border-line py-[22px] transition-colors hover:bg-surface max-sm:grid-cols-[minmax(0,1fr)_auto]"
+            >
+              <span className="pt-[3px] font-mono text-[10px] uppercase tracking-[0.14em] text-ink-3 max-sm:col-span-2 max-sm:pb-1.5">
+                {entry.kicker}
+              </span>
+              <span className="min-w-0">
+                <span className="block font-brand text-[17px] font-bold tracking-[-0.01em] text-ink transition-colors group-hover:text-brand">
+                  {entry.title}
+                </span>
+                <span className="mt-1 block max-w-[62ch] font-serif text-[13.5px] leading-[1.6] text-ink-2">
+                  {entry.body}
+                </span>
+              </span>
+              <span className="self-center pl-4 font-brand text-[15px] text-ink-3 transition-colors group-hover:text-brand">
+                ↗
+              </span>
+            </a>
+          ))}
+        </div>
       </div>
     </main>
   );

@@ -1,27 +1,33 @@
 import type { Metadata } from "next";
-import { Lato, Roboto_Mono, Rubik } from "next/font/google";
+import {
+  Schibsted_Grotesk,
+  Source_Serif_4,
+  Spline_Sans_Mono,
+} from "next/font/google";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { getBenchmarks } from "@/lib/benchmarks";
 import { BENCHMARKS_LIVE } from "@/lib/flags";
 import "./globals.css";
 
-const rubik = Rubik({
+/* Schibsted Grotesk: display + UI. A Norwegian grotesque for an Oslo-built
+   platform — HISP Centre, University of Oslo. */
+const schibsted = Schibsted_Grotesk({
   subsets: ["latin"],
-  weight: ["400", "500", "700"],
-  variable: "--font-rubik",
+  variable: "--font-schibsted",
 });
 
-const lato = Lato({
+/* Source Serif 4: the prose voice — ledes, summaries, documentation. */
+const sourceSerif = Source_Serif_4({
   subsets: ["latin"],
-  weight: ["400", "700"],
-  variable: "--font-lato",
+  style: ["normal", "italic"],
+  variable: "--font-source-serif",
 });
 
-const robotoMono = Roboto_Mono({
+/* Spline Sans Mono: pins, SHAs, numerals, run records. */
+const splineMono = Spline_Sans_Mono({
   subsets: ["latin"],
-  weight: ["400", "700"],
-  variable: "--font-roboto-mono",
+  variable: "--font-spline-mono",
 });
 
 export const metadata: Metadata = {
@@ -42,9 +48,9 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${rubik.variable} ${lato.variable} ${robotoMono.variable}`}
+      className={`${schibsted.variable} ${sourceSerif.variable} ${splineMono.variable}`}
     >
-      <body className="flex min-h-screen flex-col bg-surface font-body text-ink antialiased">
+      <body className="flex min-h-screen flex-col bg-paper font-body text-ink antialiased">
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT }} />
         <Header benchmarksLive={BENCHMARKS_LIVE && getBenchmarks().length > 0} />
         <div className="flex-1">{children}</div>

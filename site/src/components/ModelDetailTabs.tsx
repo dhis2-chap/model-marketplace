@@ -76,7 +76,7 @@ function OverviewTab({ view, goInstall }: { view: ModelDetailView; goInstall: ()
   return (
     <div className="grid items-start gap-10 lg:grid-cols-[1.5fr_1fr]">
       <div>
-        <h2 className="mb-3 font-brand text-[20px] font-medium text-ink">
+        <h2 className="mb-3 font-brand text-[22px] font-bold tracking-[-0.01em] text-ink">
           About this model
         </h2>
         <p className="mb-3.5 max-w-[74ch] text-[15px] leading-[1.7] text-ink-2 [text-wrap:pretty]">
@@ -222,7 +222,7 @@ function VersionsTab({
       {view.inReview.length > 0 ? <InReviewSection view={view} /> : null}
       <div className="mb-[18px] flex flex-wrap items-end justify-between gap-6">
         <div>
-          <h2 className="mb-1.5 font-brand text-[20px] font-medium text-ink">
+          <h2 className="mb-1.5 font-brand text-[22px] font-bold tracking-[-0.01em] text-ink">
             Version pins
           </h2>
           <p className="max-w-[80ch] text-[13.5px] text-ink-2">
@@ -351,7 +351,7 @@ function VersionsTab({
 function ConfigsTab({ view }: { view: ModelDetailView }) {
   return (
     <div>
-      <h2 className="mb-1.5 font-brand text-[20px] font-medium text-ink">
+      <h2 className="mb-1.5 font-brand text-[22px] font-bold tracking-[-0.01em] text-ink">
         Verified configurations
       </h2>
       <p className="mb-6 max-w-[80ch] text-[13.5px] text-ink-2">
@@ -402,7 +402,7 @@ function BenchmarksTab({ view }: { view: ModelDetailView }) {
     return (
       <div>
         <div className="mb-1.5 flex items-center gap-2.5">
-          <h2 className="font-brand text-[20px] font-medium text-ink">
+          <h2 className="font-brand text-[22px] font-bold tracking-[-0.01em] text-ink">
             Benchmarks
           </h2>
           <SoonPill label="coming soon" />
@@ -446,7 +446,7 @@ function BenchmarksTab({ view }: { view: ModelDetailView }) {
     <div>
       <div className="mb-[22px] flex flex-wrap items-end justify-between gap-6">
         <div>
-          <h2 className="mb-1.5 font-brand text-[20px] font-medium text-ink">
+          <h2 className="mb-1.5 font-brand text-[22px] font-bold tracking-[-0.01em] text-ink">
             Benchmarks
           </h2>
           <p className="max-w-[80ch] text-[13.5px] text-ink-2">
@@ -619,7 +619,7 @@ function InstallTab({
   return (
     <div className="grid items-start gap-10 lg:grid-cols-[1.35fr_1fr]">
       <div>
-        <h2 className="mb-1.5 font-brand text-[20px] font-medium text-ink">
+        <h2 className="mb-1.5 font-brand text-[22px] font-bold tracking-[-0.01em] text-ink">
           Add to your CHAP instance
         </h2>
         <p className="mb-[18px] max-w-[76ch] text-[13.5px] text-ink-2">
@@ -779,7 +779,7 @@ export function ModelDetailTabs({
                 key={t.id}
                 type="button"
                 onClick={() => setTab(t.id)}
-                className={`flex shrink-0 cursor-pointer items-center gap-1.5 border-b-2 bg-transparent px-4 pb-3.5 pt-[11px] font-brand text-[14px] font-medium ${
+                className={`flex shrink-0 cursor-pointer items-center gap-1.5 border-b-[3px] bg-transparent px-4 pb-3 pt-[11px] font-brand text-[12px] font-bold uppercase tracking-[0.07em] ${
                   tab === t.id
                     ? "border-brand text-ink"
                     : "border-transparent text-ink-2 hover:text-ink"

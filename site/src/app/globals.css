@@ -1,60 +1,88 @@
 @import "tailwindcss";
 
-/* Marketplace design tokens — ported 1:1 from the Claude Design canvas
-   ("CHAP Model Marketplace.dc.html"). Light is the default; an explicit
-   [data-theme="dark"] swaps the palette. */
+/* ————————————————————————————————————————————————————————————————
+   CHAP Model Marketplace — "the chart room"
+
+   The identity is drawn from the subject: meteorological and
+   epidemiological plotting boards. Deep-marine "board" panels carry
+   fine plotted gridlines and the ensemble forecast fan; the page
+   ground is cool chart paper; catalog entries sit on white plates.
+   DHIS2 blue is the interactive color, one hot signal orange marks
+   the unverified/experimental lane, and verified green is the gate.
+
+   Light is the default; an explicit [data-theme="dark"] turns the
+   chart room into the night shift. The board itself barely changes
+   between themes — it is the constant.
+   ———————————————————————————————————————————————————————————————— */
 :root {
+  --mp-paper: #eef2f6;
   --mp-surface: #ffffff;
-  --mp-surface-2: #f6fbfb;
-  --mp-surface-3: #eef3f7;
-  --mp-border: #e4e7eb;
-  --mp-border-strong: #d2d8e0;
-  --mp-text: #1f2230;
-  --mp-text-2: #5b6170;
-  --mp-text-3: #8a91a0;
-  --mp-brand: #147cd7;
-  --mp-brand-dark: #0f5fa8;
-  --mp-brand-tint: #eaf3fc;
-  --mp-verified: #1b7a3e;
-  --mp-verified-tint: #e8f6ee;
-  --mp-exp: #b36200;
-  --mp-exp-tint: #fdf2e3;
+  --mp-surface-2: #f5f8fa;
+  --mp-surface-3: #e6edf3;
+  --mp-border: #d9e1e9;
+  --mp-border-strong: #b9c7d4;
+  --mp-text: #14293c;
+  --mp-text-2: #4c6377;
+  --mp-text-3: #78909f;
+  --mp-brand: #0e72c4;
+  --mp-brand-dark: #0a5697;
+  --mp-brand-tint: #e2f0fb;
+  --mp-verified: #157a44;
+  --mp-verified-tint: #e3f4ea;
+  --mp-exp: #c14e0d;
+  --mp-exp-tint: #fcefe4;
   --mp-danger: #c84141;
   --mp-danger-tint: #fbecec;
-  --mp-code-bg: #0f1420;
-  --mp-code-fg: #d8dee9;
-  --mp-code-key: #6fb4f0;
+
+  /* The plotting board — near-constant across themes. */
+  --mp-board: #0b2e4e;
+  --mp-board-2: #113e68;
+  --mp-board-line: rgba(158, 203, 238, 0.14);
+  --mp-board-ink: #ecf4fa;
+  --mp-board-ink-2: #9fbed8;
+  --mp-fan: #6fc3f2;
+
+  --mp-code-bg: #071a2c;
+  --mp-code-fg: #d9e4ef;
+  --mp-code-key: #7cc0f0;
   --mp-code-str: #8fd79a;
-  --mp-code-num: #e9b872;
-  --mp-code-com: #6b7488;
-  --mp-shadow: 0 1px 2px rgba(17, 24, 39, 0.05);
-  --mp-shadow-lift: 0 8px 24px rgba(17, 24, 39, 0.1);
+  --mp-code-num: #efb868;
+  --mp-code-com: #5e7a93;
+  --mp-shadow: 0 1px 2px rgba(11, 46, 78, 0.07);
+  --mp-shadow-lift: 0 14px 32px -12px rgba(11, 46, 78, 0.35);
 }
 
 [data-theme="dark"] {
-  --mp-surface: #101420;
-  --mp-surface-2: #161b29;
-  --mp-surface-3: #1e2536;
-  --mp-border: #28303f;
-  --mp-border-strong: #374156;
-  --mp-text: #edf0f6;
-  --mp-text-2: #a3abbc;
-  --mp-text-3: #7c859a;
-  --mp-brand: #5aa8ee;
-  --mp-brand-dark: #8cc5f5;
-  --mp-brand-tint: #132639;
-  --mp-verified: #63c183;
-  --mp-verified-tint: #12291c;
-  --mp-exp: #eda648;
-  --mp-exp-tint: #2e2210;
+  --mp-paper: #07131e;
+  --mp-surface: #0c1e2e;
+  --mp-surface-2: #102636;
+  --mp-surface-3: #17303f;
+  --mp-border: #1e3648;
+  --mp-border-strong: #2c4a61;
+  --mp-text: #e7eff6;
+  --mp-text-2: #a7bbcb;
+  --mp-text-3: #71889b;
+  --mp-brand: #54abe8;
+  --mp-brand-dark: #8ac7f3;
+  --mp-brand-tint: #10304a;
+  --mp-verified: #4cbe7e;
+  --mp-verified-tint: #0e2c1d;
+  --mp-exp: #f0813d;
+  --mp-exp-tint: #33200f;
   --mp-danger: #e58484;
   --mp-danger-tint: #2e1717;
-  --mp-code-bg: #080b12;
+
+  --mp-board: #0b2c49;
+  --mp-board-2: #12395e;
+  --mp-board-line: rgba(158, 203, 238, 0.11);
+
+  --mp-code-bg: #05121f;
   --mp-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --mp-shadow-lift: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --mp-shadow-lift: 0 14px 32px -10px rgba(0, 0, 0, 0.55);
 }
 
 @theme inline {
+  --color-paper: var(--mp-paper);
   --color-surface: var(--mp-surface);
   --color-surface-2: var(--mp-surface-2);
   --color-surface-3: var(--mp-surface-3);
@@ -72,15 +100,22 @@
   --color-exp-tint: var(--mp-exp-tint);
   --color-danger: var(--mp-danger);
   --color-danger-tint: var(--mp-danger-tint);
+  --color-board: var(--mp-board);
+  --color-board-2: var(--mp-board-2);
+  --color-board-line: var(--mp-board-line);
+  --color-board-ink: var(--mp-board-ink);
+  --color-board-ink-2: var(--mp-board-ink-2);
+  --color-fan: var(--mp-fan);
   --color-code-bg: var(--mp-code-bg);
   --color-code-fg: var(--mp-code-fg);
   --color-code-key: var(--mp-code-key);
   --color-code-str: var(--mp-code-str);
   --color-code-num: var(--mp-code-num);
   --color-code-com: var(--mp-code-com);
-  --font-brand: var(--font-rubik);
-  --font-body: var(--font-lato);
-  --font-mono: var(--font-roboto-mono);
+  --font-brand: var(--font-schibsted);
+  --font-body: var(--font-schibsted);
+  --font-serif: var(--font-source-serif);
+  --font-mono: var(--font-spline-mono);
   --shadow-mp: var(--mp-shadow);
   --shadow-lift: var(--mp-shadow-lift);
 }
@@ -89,7 +124,7 @@ html,
 body {
   margin: 0;
   padding: 0;
-  background: var(--mp-surface);
+  background: var(--mp-paper);
   color: var(--mp-text);
   -webkit-font-smoothing: antialiased;
 }
@@ -101,6 +136,28 @@ body {
 ::selection {
   background: var(--mp-brand);
   color: #fff;
+}
+
+:focus-visible {
+  outline: 2px solid var(--mp-brand);
+  outline-offset: 2px;
+}
+
+/* Plotted gridlines + one soft cyan light source — the board texture. */
+.board-grid {
+  background-color: var(--mp-board);
+  background-image:
+    radial-gradient(
+      90rem 42rem at 14% -16%,
+      rgba(111, 195, 242, 0.17),
+      transparent 58%
+    ),
+    linear-gradient(var(--mp-board-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--mp-board-line) 1px, transparent 1px);
+  background-size:
+    100% 100%,
+    44px 44px,
+    44px 44px;
 }
 
 @keyframes mp-draw {

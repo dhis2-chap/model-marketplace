@@ -37,7 +37,7 @@ function PinPanel({
 }) {
   return (
     <div
-      className={`overflow-hidden rounded-md border ${
+      className={`overflow-hidden rounded-[3px] border ${
         verifiedTone ? "border-verified" : "border-line-strong"
       }`}
     >
@@ -101,7 +101,7 @@ export default async function ModelPage({
 
   const header = (
     <>
-      <div className="mb-5 flex items-center gap-2 text-[12.5px] text-ink-3">
+      <div className="mb-6 flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.1em] text-ink-3">
         <Link href="/" className="text-brand hover:text-brand-dark hover:underline">
           Models
         </Link>
@@ -112,14 +112,14 @@ export default async function ModelPage({
       </div>
       <div className="grid items-start gap-10 pb-[22px] lg:grid-cols-[1fr_auto]">
         <div>
-          <div className="mb-2.5 flex flex-wrap items-center gap-2.5">
-            <h1 className="font-brand text-[28px] font-medium tracking-[-0.02em] text-ink md:text-[36px]">
+          <div className="mb-3 flex flex-wrap items-center gap-3">
+            <h1 className="font-brand text-[clamp(30px,3.4vw,40px)] font-extrabold leading-[1.02] tracking-[-0.025em] text-ink">
               {view.name}
             </h1>
             <MaturityBadge maturity={view.maturity} size="md" suffix=" set" />
             <VerifiedChip approvals="3/3" />
           </div>
-          <p className="mb-3.5 max-w-[70ch] text-[16px] leading-relaxed text-ink-2">
+          <p className="mb-3.5 max-w-[64ch] font-serif text-[16px] leading-[1.65] text-ink-2">
             {view.summary}
           </p>
           <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[12.5px] text-ink-2">

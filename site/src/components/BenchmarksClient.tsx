@@ -206,7 +206,7 @@ export function BenchmarkSuite({ suite }: { suite: BenchmarkSuiteView }) {
       <section className="mx-auto max-w-[1240px] px-8 pt-9">
         <div className="mb-3.5 flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
           <div>
-            <h2 className="mb-1.5 font-brand text-[20px] font-medium text-ink">
+            <h2 className="mb-1.5 font-brand text-[22px] font-bold tracking-[-0.01em] text-ink">
               {suite.heading}
             </h2>
             <p className="text-[13px] text-ink-2">
