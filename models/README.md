@@ -135,6 +135,5 @@ Benchmark results do not live in these files: they live in the sibling
 
 - Are `stable`/`experimental` the right sets, and is per-model maturity the
   right granularity (vs. per-version)?
-- Do dataset-specific configuration bundles (like the original
-  `ensemble_bases_monthly.yaml`) stay a separate concept, or are verified
-  per-model configurations enough?
+- Do dataset-specific configuration bundles stay a separate concept, or are
+  verified per-model configurations enough?
