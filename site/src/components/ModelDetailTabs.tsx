@@ -209,7 +209,13 @@ function InReviewSection({ view }: { view: ModelDetailView }) {
   );
 }
 
-function VersionsTab({ view }: { view: ModelDetailView }) {
+function VersionsTab({
+  view,
+  onInstall,
+}: {
+  view: ModelDetailView;
+  onInstall: (tag: string) => void;
+}) {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   return (
     <div>
@@ -244,13 +250,14 @@ function VersionsTab({ view }: { view: ModelDetailView }) {
         </div>
       </div>
       <div className="overflow-x-auto rounded-lg border border-line bg-surface">
-        <div className="min-w-[760px]">
-          <div className="grid grid-cols-[130px_minmax(220px,1fr)_116px_190px_100px] gap-4 border-b border-line bg-surface-2 px-[18px] py-2.5 font-brand text-[10px] font-medium uppercase tracking-[0.1em] text-ink-3">
+        <div className="min-w-[860px]">
+          <div className="grid grid-cols-[130px_minmax(220px,1fr)_116px_190px_100px_80px] gap-4 border-b border-line bg-surface-2 px-[18px] py-2.5 font-brand text-[10px] font-medium uppercase tracking-[0.1em] text-ink-3">
             <span>Version</span>
             <span>Commit pin</span>
             <span>Status</span>
             <span>Approved by</span>
             <span className="text-right">Changelog</span>
+            <span className="text-right">Install</span>
           </div>
           {view.versions.map((v) => {
             const hasDetails = Boolean(v.changelog || v.notes);
@@ -264,7 +271,7 @@ function VersionsTab({ view }: { view: ModelDetailView }) {
                     : "bg-surface"
                 }`}
               >
-                <div className="grid grid-cols-[130px_minmax(220px,1fr)_116px_190px_100px] items-center gap-4 px-[18px] py-4">
+                <div className="grid grid-cols-[130px_minmax(220px,1fr)_116px_190px_100px_80px] items-center gap-4 px-[18px] py-4">
                   <span className="flex flex-wrap items-center gap-1.5">
                     <span className="font-mono text-[13.5px] font-bold text-ink">
                       {v.tag}
@@ -295,6 +302,16 @@ function VersionsTab({ view }: { view: ModelDetailView }) {
                     ) : (
                       <span className="text-[11.5px] text-ink-3">—</span>
                     )}
+                  </span>
+                  <span className="text-right">
+                    <button
+                      type="button"
+                      onClick={() => onInstall(v.tag)}
+                      title={`Installation guide for ${v.tag} @ ${v.pinDisplay.split("@")[1]}`}
+                      className="h-7 cursor-pointer rounded-[3px] border border-line bg-transparent px-2.5 font-brand text-[11.5px] font-medium text-brand hover:border-brand"
+                    >
+                      Install
+                    </button>
                   </span>
                 </div>
                 {open ? (
@@ -560,13 +577,25 @@ function BenchmarksTab({ view }: { view: ModelDetailView }) {
   );
 }
 
-function InstallTab({ view }: { view: ModelDetailView }) {
+function InstallTab({
+  view,
+  selectedTag,
+  onSelect,
+}: {
+  view: ModelDetailView;
+  selectedTag: string;
+  onSelect: (tag: string) => void;
+}) {
   const { copied, copy } = useCopy();
-  const pin = view.stable.pinFull;
-  const shortPin = view.stable.pinDisplay.split("@")[1];
+  const selected = view.versions.find((v) => v.tag === selectedTag) ?? null;
+  const pin = selected?.pinFull ?? view.stable.pinFull;
+  const pinDisplay = selected?.pinDisplay ?? view.stable.pinDisplay;
+  const shortPin = pinDisplay.split("@")[1];
+  const tag = selected?.tag ?? view.stable.tag;
+  const verified = selected ? selected.status === "verified" : true;
   const steps = [
     {
-      title: "Copy the verified pin",
+      title: verified ? "Copy the verified pin" : "Copy the version pin",
       cmd: pin,
       note: "Repo URL plus commit hash — the pin identifies the exact revision of the model service you are about to run.",
     },
@@ -587,19 +616,55 @@ function InstallTab({ view }: { view: ModelDetailView }) {
         <h2 className="mb-1.5 font-brand text-[20px] font-medium text-ink">
           Add to your CHAP instance
         </h2>
-        <p className="mb-[22px] max-w-[76ch] text-[13.5px] text-ink-2">
+        <p className="mb-[18px] max-w-[76ch] text-[13.5px] text-ink-2">
           The marketplace lists chapkit models only — each one is a
           containerized REST service that CHAP talks to over HTTP. Run the
           pinned revision next to your CHAP instance. The pin is the
           contract — the same commit produces the same service everywhere.
         </p>
+        <div className="mb-3.5 flex flex-wrap items-center gap-2">
+          <Kicker>Version pin</Kicker>
+          {view.versions.map((v) => {
+            const active = v.tag === tag;
+            return (
+              <button
+                key={v.tag}
+                type="button"
+                onClick={() => onSelect(v.tag)}
+                title={v.pinDisplay}
+                className={`h-7 cursor-pointer rounded-[4px] border px-2.5 font-mono text-[12px] transition-colors ${
+                  active
+                    ? "border-ink bg-ink text-surface"
+                    : "border-line bg-surface text-ink-2 hover:border-line-strong"
+                }`}
+              >
+                {v.tag}
+                {v.isStable ? (
+                  <span
+                    className={`ml-1.5 font-brand text-[9px] font-medium uppercase tracking-[0.06em] ${
+                      active ? "text-surface/70" : "text-verified"
+                    }`}
+                  >
+                    stable
+                  </span>
+                ) : null}
+              </button>
+            );
+          })}
+        </div>
+        {!verified ? (
+          <p className="mb-3.5 max-w-[76ch] rounded-md border border-dashed border-exp bg-exp-tint px-3.5 py-2.5 text-[12.5px] leading-relaxed text-exp">
+            {tag} has not passed the 3/3 review gate — run this pin for
+            evaluation and development only, never on a production instance.
+          </p>
+        ) : null}
         <div className="overflow-hidden rounded-lg border border-line bg-code-bg">
           <div className="flex items-center gap-2 border-b border-white/10 px-4 py-[11px]">
             <span className="h-[9px] w-[9px] rounded-full bg-[#FF5F57]" />
             <span className="h-[9px] w-[9px] rounded-full bg-[#FEBC2E]" />
             <span className="h-[9px] w-[9px] rounded-full bg-[#28C840]" />
             <span className="ml-2 font-mono text-[11.5px] text-[#8A93A6]">
-              chap-modeling-platform / chapkit
+              {view.id} · {tag} @ {shortPin}
             </span>
           </div>
           <div className="px-5 pb-[22px] pt-[18px]">
@@ -628,7 +693,7 @@ function InstallTab({ view }: { view: ModelDetailView }) {
               className="flex h-9 w-full cursor-pointer items-center justify-center gap-2 rounded-[4px] border border-white/15 bg-white/5 font-brand text-[12.5px] font-medium text-[#D8DEE9] transition-colors hover:bg-white/10"
             >
               <CopyGlyph className="h-3 w-3" />
-              {copied === pin ? "Copied" : "Copy stable pin"}
+              {copied === pin ? "Copied" : `Copy ${tag} pin`}
             </button>
           </div>
         </div>
@@ -692,6 +757,11 @@ export function ModelDetailTabs({
   header: ReactNode;
 }) {
   const [tab, setTab] = useState<Tab>("versions");
+  const [installTag, setInstallTag] = useState<string>(view.stable.tag);
+  const openInstall = (tag: string) => {
+    setInstallTag(tag);
+    setTab("install");
+  };
   return (
     <>
       <div className="border-b border-line bg-surface-2">
@@ -718,12 +788,23 @@ export function ModelDetailTabs({
       </div>
       <main className="mx-auto max-w-[1240px] px-8 pb-20 pt-9">
         {tab === "overview" ? (
-          <OverviewTab view={view} goInstall={() => setTab("install")} />
+          <OverviewTab
+            view={view}
+            goInstall={() => openInstall(view.stable.tag)}
+          />
         ) : null}
-        {tab === "versions" ? <VersionsTab view={view} /> : null}
+        {tab === "versions" ? (
+          <VersionsTab view={view} onInstall={openInstall} />
+        ) : null}
         {tab === "configs" ? <ConfigsTab view={view} /> : null}
         {tab === "benchmarks" ? <BenchmarksTab view={view} /> : null}
-        {tab === "install" ? <InstallTab view={view} /> : null}
+        {tab === "install" ? (
+          <InstallTab
+            view={view}
+            selectedTag={installTag}
+            onSelect={setInstallTag}
+          />
+        ) : null}
       </main>
     </>
   );
