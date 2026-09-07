@@ -12,6 +12,9 @@ summary: >-
 
 source:
   repository: https://github.com/knutdrand/mstl_multistep_model
+  # The MLproject declares uv_env (pyproject.toml): chapkit runs it via
+  # `chapkit mlproject run` inside a uv-activated shell or the
+  # ghcr.io/dhis2-chap/chapkit-py-cli image.
 
 # GitHub handles responsible for this listing — backfilled from the source
 # repository's contributors; corrections welcome by PR.
@@ -39,7 +42,31 @@ versions:
     # Verified by the merge gate. This pin was part of the seed import, which
     # predates recorded approvals; pins added by PR list their three approvers.
     verified_by: []
+    changelog: >-
+      The model_config wrapper ignores unknown keys, so configuration files
+      carrying extra fields no longer fail the run.
+  # Historical upstream release tags, listed for provenance. All predate the
+  # v1 pin above and its config-wrapper fix, so configuration files with
+  # extra keys fail on them — hence deprecated rather than verified.
+  - version: v0.2.0
+    commit: f9a7134f23305b5a3a7073ff359d7e28ac791e73
+    status: deprecated
+    verified_by: []
+    changelog: >-
+      Adds a treat_missing_as_zero flag for weekly data and fixes the
+      MLproject YAML.
+  - version: v0.1.1
+    commit: 4e594f9f8dad3b509ab9f86926bddbd21da2b0d6
+    status: deprecated
+    verified_by: []
+    changelog: >-
+      Installs simple_multistep_model from its git repository.
+  - version: v0.1.0
+    commit: 46d7000c7aaeaaf46fc763b9a3337f78cf38bc77
+    status: deprecated
+    verified_by: []
     changelog: null
+    notes: First tagged upstream release.
 
 # Verified configurations. Each block is a valid standalone
 # --model-configuration-yaml file for `chap eval` and

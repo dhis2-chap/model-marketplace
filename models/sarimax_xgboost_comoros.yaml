@@ -1,0 +1,62 @@
+schema_version: 1
+
+id: sarimax_xgboost_comoros
+display_name: SARIMAX + XGBoost Ensemble
+maturity: experimental
+
+summary: >-
+  Probabilistic ensemble of two structurally orthogonal learners: SARIMAX
+  captures temporal autocorrelation and lagged climate signal, XGBoost
+  (native multi-quantile objective) captures non-linear climate response.
+  Forecasts are combined by sample concatenation. Validated on five Ngazidja
+  (Comoros) districts against ground-truth local station climate data.
+
+source:
+  repository: https://github.com/hisprwanda/sarimax-xgboost-malaria-model-comoros
+  # The MLproject name in the repository differs from the marketplace id.
+  mlproject_name: ensemble_sx_climate_health
+  # The MLproject declares uv_env (pyproject.toml): chapkit runs it via
+  # `chapkit mlproject run` inside a uv-activated shell or the
+  # ghcr.io/dhis2-chap/chapkit-py-cli image.
+
+# GitHub handles responsible for this listing — backfilled from the source
+# repository's contributors; corrections welcome by PR.
+maintainers:
+  - Nsarob
+
+compatibility:
+  # Developed and benchmarked on weekly malaria case data (26-week test
+  # horizon on 78 training weeks).
+  period_types: [weekly]
+
+covariates:
+  # Required and validated by chap before invoking the model. Note that the
+  # model declares `humidity`, not chap's usual `mean_relative_humidity`;
+  # the dataset must carry a column under that name.
+  required:
+    - rainfall
+    - mean_temperature
+    - humidity
+  additional_continuous: []
+
+channels:
+  stable: v1
+  latest: v1
+
+versions:
+  - version: v1
+    commit: 3b0419a95bb3c2bcae5b4936ca4fe07de52dc71c
+    status: verified
+    # Verified by the merge gate. This pin mirrors the approved entry in
+    # chap's model-repositories whitelist, which predates this marketplace's
+    # PR flow; pins added by PR list their three approvers.
+    verified_by: []
+    changelog: null
+    notes: >-
+      Pinned to the commit that chap's model-repositories whitelist
+      (dhis2-chap/model-repositories, main.yaml) approves as v1.
+
+# The MLproject exposes no user_options, so there are no tunable
+# configurations to verify: the model runs with its built-in
+# SARIMAX(1,0,1) + calibrated-XGBoost settings.
+configurations: {}

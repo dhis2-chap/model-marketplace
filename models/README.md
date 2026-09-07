@@ -95,6 +95,14 @@ configurations:                  # verified, copy-pasteable configurations
   and chap is pointed at the service URL with
   `chap eval --model-name <url> --run-config.is-chapkit-model`
   (see [the chap docs](https://chap.dhis2.org/chap-modeling-platform/external_models/chapkit/)).
+- A listed model must run under one of chapkit's published runtimes
+  ([dhis2-chap/chapkit-images](https://github.com/dhis2-chap/chapkit-images)):
+  Python MLprojects declare `uv_env` and run in `chapkit-py(-cli)`; R
+  MLprojects run in `chapkit-r(-cli)`, or `chapkit-r-tidyverse` /
+  `chapkit-r-inla` when they need those package stacks. A legacy `docker_env`
+  in the MLproject (as in `ewars_template`) is not used by chapkit — the
+  matching chapkit image provides the runtime instead. Each model file notes
+  its runtime in a comment under `source:`.
 - Every block under `configurations:` is a valid standalone
   `--model-configuration-yaml` file for `chap eval` and
   `chap evaluate-ensemble`: copy the inner keys (`user_option_values`,

@@ -12,6 +12,9 @@ summary: >-
 
 source:
   repository: https://github.com/chap-models/mstl_arima
+  # The MLproject declares uv_env (pyproject.toml): chapkit runs it via
+  # `chapkit mlproject run` inside a uv-activated shell or the
+  # ghcr.io/dhis2-chap/chapkit-py-cli image.
 
 # GitHub handles responsible for this listing — backfilled from the source
 # repository's contributors; corrections welcome by PR.

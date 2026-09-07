@@ -139,13 +139,13 @@ describe("buildBenchmarkSuites", () => {
     const suite = suites[0];
 
     expect(suite.heading).toBe("Laos admin-1 monthly · horizon 3");
-    expect(suite.countLine).toBe("1 of 5 listed models evaluated");
+    expect(suite.countLine).toBe("1 of 6 listed models evaluated");
     expect(suite.runContext).toContainEqual({
       k: "Suite",
       v: "mstl_arima.monthly_fast",
     });
     expect(suite.runContext).toContainEqual({ k: "Observations", v: "2,808 rows" });
-    expect(suite.pendingNote).toMatch(/^Four listed models/);
+    expect(suite.pendingNote).toMatch(/^Five listed models/);
 
     expect(suite.rows).toHaveLength(registry.models.length);
     const [first, ...rest] = suite.rows;
@@ -189,7 +189,7 @@ describe("buildBenchmarkSuites", () => {
       "chap_pymc",
       "mstl_arima",
     ]);
-    expect(suite.countLine).toBe("2 of 5 listed models evaluated");
-    expect(suite.pendingNote).toMatch(/^Three listed models/);
+    expect(suite.countLine).toBe("2 of 6 listed models evaluated");
+    expect(suite.pendingNote).toMatch(/^Four listed models/);
   });
 });

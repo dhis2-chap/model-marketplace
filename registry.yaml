@@ -25,6 +25,9 @@ marketplace:
     # Only chapkit model services are supported for now; the install guide
     # points at the chapkit integration page in the chap docs.
     install: https://chap.dhis2.org/chap-modeling-platform/external_models/chapkit/
+    # The container runtimes chapkit models run in (chapkit-py, chapkit-r,
+    # chapkit-r-tidyverse, chapkit-r-inla, each with a -cli variant).
+    runtimes: https://github.com/dhis2-chap/chapkit-images
 
 review_policy:
   required_approvals: 3
@@ -40,3 +43,4 @@ models:
   - models/auto_regressive_monthly_v2.yaml
   - models/mstl_arima.yaml
   - models/mstl_multistep_model.yaml
+  - models/sarimax_xgboost_comoros.yaml

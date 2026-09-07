@@ -14,6 +14,9 @@ source:
   # explicit name is needed to keep this template separate from the v1 model,
   # exactly as in chap's default.yaml.
   mlproject_name: auto_regressive_monthly
+  # The MLproject declares uv_env (pyproject.toml): chapkit runs it via
+  # `chapkit mlproject run` inside a uv-activated shell or the
+  # ghcr.io/dhis2-chap/chapkit-py-cli image.
 
 # GitHub handles responsible for this listing — backfilled from the source
 # repository's contributors; corrections welcome by PR.

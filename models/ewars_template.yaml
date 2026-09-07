@@ -10,6 +10,10 @@ summary: >-
 
 source:
   repository: https://github.com/dhis2-chap/ewars_template
+  # R + INLA model. The MLproject's docker_env points at the legacy
+  # docker_r_inla image, which chapkit does not use; chapkit runs the model
+  # via `chapkit mlproject run` inside ghcr.io/dhis2-chap/chapkit-r-inla-cli,
+  # which ships the full EWARS R stack (INLA, dlnm, sf, spdep, jsonlite).
 
 # GitHub handles responsible for this listing — backfilled from the source
 # repository's contributors; corrections welcome by PR.
@@ -46,6 +50,18 @@ versions:
     changelog: null
     notes: >-
       Pinned to the same commit that chap's default.yaml already seeds.
+  - version: v3
+    commit: e4520a2123a3228c10947f2b25029c3f7190e320
+    status: verified
+    # Verified by the merge gate. This pin mirrors the approved entry in
+    # chap's model-repositories whitelist, which predates this marketplace's
+    # PR flow; pins added by PR list their three approvers.
+    verified_by: []
+    changelog: null
+    notes: >-
+      Older pin still approved in chap's model-repositories whitelist
+      (dhis2-chap/model-repositories, main.yaml). Predates v6's scalar
+      n_lags broadcast; pass n_lags as an array on this version.
 
 # Verified configurations. Each block is a valid standalone
 # --model-configuration-yaml file for `chap eval` and
