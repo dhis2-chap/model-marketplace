@@ -59,8 +59,8 @@ const SUBMISSION_CHECKS = [
     body: "Use the full 40-character commit SHA, already pushed to the model repository.",
   },
   {
-    title: "Build it with chapkit",
-    body: "Only chapkit model services are listed for now — the pinned commit must build into a container exposing the chapkit REST interface.",
+    title: "Run it with chapkit",
+    body: "Only chapkit-run models are listed — the pinned commit must serve as a chapkit model service: an MLproject repository started with chapkit mlproject run, or a scaffolded chapkit service.",
   },
   {
     title: "Describe the inputs",
@@ -68,11 +68,11 @@ const SUBMISSION_CHECKS = [
   },
   {
     title: "Show one complete run",
-    body: "Run the pinned revision end-to-end with at least one CHAP reference dataset.",
+    body: "Serve the pinned revision with chapkit and run chap eval against it with at least one CHAP reference dataset.",
   },
   {
     title: "Check the forecast output",
-    body: "Make sure the generated quantiles follow the CHAP forecast schema.",
+    body: "Predict must write the output chapkit expects: the index columns plus sample_0, sample_1, … forecast sample columns.",
   },
   {
     title: "Name a maintainer",

@@ -23,8 +23,8 @@ docs/               Design brief and provenance material
 ## The registry
 
 Each model file pins versions as `repository URL + full commit hash` — the
-commit a model's [chapkit](https://dhis2-chap.github.io/chapkit/) service
-image is built from. Only chapkit models are listed for now. Channels
+commit [chapkit](https://dhis2-chap.github.io/chapkit/) serves the model
+from. Only chapkit-run models are listed for now. Channels
 (`stable` / `latest`) are named pointers into the version list;
 `channels.stable` must point at a version with `status: verified`. The format
 is documented with an annotated example in [models/README.md](models/README.md).

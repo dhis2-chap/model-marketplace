@@ -33,8 +33,9 @@ summary: >-                      # one paragraph for the catalog card and the
 source:
   repository: https://github.com/org/my_model
   mlproject_name: other_name     # optional: only when the MLproject name in
-                                 # the repo differs from `id` and chap needs
-                                 # an explicit name override
+                                 # the repo — the name chapkit's MLproject
+                                 # runner serves the model under — differs
+                                 # from `id`
 
 maintainers:                     # GitHub handles responsible for the listing
   - somebody
@@ -87,10 +88,13 @@ configurations:                  # verified, copy-pasteable configurations
 
 ## How the fields map to chap
 
-- A version pin resolves to `<source.repository>@<commit>`. Only models built
-  with [chapkit](https://dhis2-chap.github.io/chapkit/) are supported for now:
-  the pinned commit builds into the container image of the model's chapkit
-  service (see [the chap docs](https://chap.dhis2.org/chap-modeling-platform/external_models/chapkit/)).
+- A version pin resolves to `<source.repository>@<commit>`. Only models run by
+  [chapkit](https://dhis2-chap.github.io/chapkit/) are supported for now: the
+  pinned commit is served as a chapkit model service — an MLproject repository
+  started with `chapkit mlproject run`, or a scaffolded chapkit service image —
+  and chap is pointed at the service URL with
+  `chap eval --model-name <url> --run-config.is-chapkit-model`
+  (see [the chap docs](https://chap.dhis2.org/chap-modeling-platform/external_models/chapkit/)).
 - Every block under `configurations:` is a valid standalone
   `--model-configuration-yaml` file for `chap eval` and
   `chap evaluate-ensemble`: copy the inner keys (`user_option_values`,

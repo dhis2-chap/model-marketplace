@@ -86,7 +86,7 @@ function OverviewTab({ view, goInstall }: { view: ModelDetailView; goInstall: ()
           <p className="mb-3.5 max-w-[74ch] text-[13px] leading-relaxed text-ink-3">
             The MLproject name in the repository is{" "}
             <code className="font-mono text-ink-2">{view.mlprojectName}</code>,
-            so chap registers it under that name.
+            so chapkit serves it under that name.
           </p>
         ) : null}
         <h3 className="mb-3 mt-7 font-brand text-[15px] font-medium text-ink">
@@ -592,22 +592,28 @@ function InstallTab({
   const pinDisplay = selected?.pinDisplay ?? view.stable.pinDisplay;
   const shortPin = pinDisplay.split("@")[1];
   const tag = selected?.tag ?? view.stable.tag;
+  const fullCommit = pin.split("@")[1] ?? "";
   const verified = selected ? selected.status === "verified" : true;
   const steps = [
     {
       title: verified ? "Copy the verified pin" : "Copy the version pin",
       cmd: pin,
-      note: "Repo URL plus commit hash — the pin identifies the exact revision of the model service you are about to run.",
+      note: "Repo URL plus commit hash — the pin identifies the exact revision of the model you are about to run.",
     },
     {
-      title: "Start the model as a chapkit service",
-      cmd: `docker run -p 5001:8000 <image built from ${shortPin}>`,
-      note: "Chapkit models ship as container images built from the pinned commit — use the image tag from the model repository that carries this hash.",
+      title: "Check out the pinned revision",
+      cmd: `git clone ${view.repoUrl} ${view.id} && git -C ${view.id} checkout ${fullCommit}`,
+      note: "The pin is the contract — the same commit produces the same model everywhere.",
+    },
+    {
+      title: "Serve it with chapkit",
+      cmd: `chapkit mlproject run ./${view.id} --port 5001`,
+      note: "Run this from the model's own runtime environment (uv, conda or renv). Chapkit's MLproject runner turns the checked-out repository into a REST model service, no changes to the repo needed. A model that ships a prebuilt chapkit service image can be started with docker run -p 5001:8000 <image> instead.",
     },
     {
       title: "Point chap at the running service",
       cmd: "chap eval --model-name http://localhost:5001 --run-config.is-chapkit-model",
-      note: "The service registers itself with your CHAP instance on startup and appears in the Modeling App; chap talks to it over HTTP from here on.",
+      note: "chap talks to the service over HTTP from here on. To make it appear in the DHIS2 Modeling App, register the service with your CHAP instance — the chap docs cover registration.",
     },
   ];
   return (
@@ -617,10 +623,10 @@ function InstallTab({
           Add to your CHAP instance
         </h2>
         <p className="mb-[18px] max-w-[76ch] text-[13.5px] text-ink-2">
-          The marketplace lists chapkit models only — each one is a
-          containerized REST service that CHAP talks to over HTTP. Run the
-          pinned revision next to your CHAP instance. The pin is the
-          contract — the same commit produces the same service everywhere.
+          The marketplace lists chapkit-run models only — each one runs as a
+          chapkit REST service that CHAP talks to over HTTP. Run the pinned
+          revision next to your CHAP instance. The pin is the contract — the
+          same commit produces the same service everywhere.
         </p>
         <div className="mb-3.5 flex flex-wrap items-center gap-2">
           <Kicker>Version pin</Kicker>
@@ -722,7 +728,7 @@ function InstallTab({
         <div className="rounded-lg border border-line p-5">
           <Kicker className="mb-3.5">Full instructions</Kicker>
           <p className="text-[13px] leading-relaxed text-ink-2">
-            Only models built with{" "}
+            Only models run by{" "}
             <a
               href="https://dhis2-chap.github.io/chapkit/"
               target="_blank"
@@ -732,8 +738,8 @@ function InstallTab({
               chapkit
             </a>{" "}
             are supported for now. Running a chapkit service with CHAP —
-            images, ports, the data format and how the service registers
-            itself — is documented on the CHAP platform site.
+            images, ports, the data format and how a service registers with
+            your instance — is documented on the CHAP platform site.
           </p>
           <a
             href={view.installUrl}
