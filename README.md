@@ -23,7 +23,8 @@ docs/               Design brief and provenance material
 ## The registry
 
 Each model file pins versions as `repository URL + full commit hash` — the
-same `url@commit` reference chap's configured-models YAML uses. Channels
+commit a model's [chapkit](https://dhis2-chap.github.io/chapkit/) service
+image is built from. Only chapkit models are listed for now. Channels
 (`stable` / `latest`) are named pointers into the version list;
 `channels.stable` must point at a version with `status: verified`. The format
 is documented with an annotated example in [models/README.md](models/README.md).
@@ -78,6 +79,11 @@ available at build time by default).
   candidate for a future `schema_version` bump.
 
 ## Benchmarking
+
+The benchmark views on the site (the benchmarks page and each model's
+Benchmarks tab) are gated behind a "coming soon" state while the CHAP
+benchmarking backend is implemented — flip `BENCHMARKS_LIVE` in
+`site/src/lib/flags.ts` when it lands.
 
 The current comparison is launched from chap-core with `uv` and `chap bench`
 using `benchmark.yaml`. It evaluates the sequential Cartesian product of ten

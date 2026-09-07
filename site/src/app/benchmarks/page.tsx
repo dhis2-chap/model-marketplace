@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { BenchmarkSuite } from "@/components/BenchmarksClient";
 import { buildBenchmarkSuites, getBenchmarks } from "@/lib/benchmarks";
+import { BENCHMARKS_LIVE } from "@/lib/flags";
 import { getRegistry } from "@/lib/registry";
 
 export const metadata: Metadata = {
@@ -10,7 +11,68 @@ export const metadata: Metadata = {
     "Recorded CHAP benchmark evaluations against pinned commits on the reference datasets — nothing is self-reported.",
 };
 
+/** Rendered while the CHAP benchmarking backend is still being implemented. */
+function BenchmarksComingSoon() {
+  return (
+    <main>
+      <section className="border-b border-line bg-gradient-to-b from-surface-2 to-surface">
+        <div className="mx-auto max-w-[1240px] px-8 pb-12 pt-14">
+          <span className="font-brand text-[10px] font-medium uppercase tracking-[0.12em] text-exp">
+            Coming soon
+          </span>
+          <h1 className="my-3.5 font-brand text-[40px] font-medium leading-[1.1] tracking-[-0.02em] text-ink">
+            Benchmarks
+          </h1>
+          <p className="max-w-[62ch] text-[16px] leading-[1.65] text-ink-2">
+            Every score on this page will come from a controlled{" "}
+            <span className="font-mono text-[14px]">chap bench</span> suite:
+            each model–dataset pair evaluated against its pinned commit in a
+            fresh container — nothing self-reported. The CHAP benchmarking
+            backend that executes these suites is still being implemented, so
+            results are not published yet.
+          </p>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-[1240px] px-8 pt-9">
+        <div className="rounded-lg border border-dashed border-line-strong bg-surface px-[26px] py-6">
+          <div className="font-brand text-[15px] font-medium text-ink">
+            What will appear here
+          </div>
+          <p className="mt-1 max-w-[72ch] text-[13px] leading-[1.6] text-ink-2">
+            One ranked table per reference dataset — normalised CRPS, CRPS,
+            MAE, RMSE, wall time and peak memory per verified pin — with a
+            full run record and a reproduce command behind every row. Results
+            land in the repo&apos;s{" "}
+            <code className="font-mono text-[12px] text-ink">benchmarks/</code>{" "}
+            directory by pull request, like everything else, the moment the
+            backend ships.
+          </p>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-[1240px] px-8 pb-24 pt-9">
+        <div className="flex flex-wrap items-center justify-between gap-5 border-t border-line pt-5">
+          <span className="text-[13px] text-ink-2">
+            Per-model benchmark charts get the same treatment — they appear on
+            each model&apos;s detail page together with the first recorded
+            runs.
+          </span>
+          <Link
+            href="/"
+            className="inline-flex h-9 items-center rounded-[4px] border border-line-strong bg-surface px-4 font-brand text-[13px] font-medium text-ink transition-colors hover:border-brand hover:text-brand"
+          >
+            Browse models
+          </Link>
+        </div>
+      </section>
+    </main>
+  );
+}
+
 export default function BenchmarksPage() {
+  if (!BENCHMARKS_LIVE) return <BenchmarksComingSoon />;
+
   const records = getBenchmarks();
   const suites = buildBenchmarkSuites(getRegistry(), records);
   const singleSplitSmoke = records.length === 1 && records[0].run?.splits === 1;

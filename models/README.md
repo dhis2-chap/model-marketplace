@@ -87,9 +87,10 @@ configurations:                  # verified, copy-pasteable configurations
 
 ## How the fields map to chap
 
-- A version pin resolves to `<source.repository>@<commit>` — the same
-  `url` + `@commit` reference that chap's configured-models YAML uses today
-  (see [the chap docs](https://chap.dhis2.org/chap-modeling-platform/external_models/)).
+- A version pin resolves to `<source.repository>@<commit>`. Only models built
+  with [chapkit](https://dhis2-chap.github.io/chapkit/) are supported for now:
+  the pinned commit builds into the container image of the model's chapkit
+  service (see [the chap docs](https://chap.dhis2.org/chap-modeling-platform/external_models/chapkit/)).
 - Every block under `configurations:` is a valid standalone
   `--model-configuration-yaml` file for `chap eval` and
   `chap evaluate-ensemble`: copy the inner keys (`user_option_values`,

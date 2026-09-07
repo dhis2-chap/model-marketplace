@@ -3,6 +3,7 @@ import { Lato, Roboto_Mono, Rubik } from "next/font/google";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { getBenchmarks } from "@/lib/benchmarks";
+import { BENCHMARKS_LIVE } from "@/lib/flags";
 import "./globals.css";
 
 const rubik = Rubik({
@@ -45,7 +46,7 @@ export default function RootLayout({
     >
       <body className="flex min-h-screen flex-col bg-surface font-body text-ink antialiased">
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT }} />
-        <Header benchmarksLive={getBenchmarks().length > 0} />
+        <Header benchmarksLive={BENCHMARKS_LIVE && getBenchmarks().length > 0} />
         <div className="flex-1">{children}</div>
         <Footer />
       </body>

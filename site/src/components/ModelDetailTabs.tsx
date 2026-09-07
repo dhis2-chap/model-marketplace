@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState, type ReactNode } from "react";
+import { BENCHMARKS_LIVE } from "@/lib/flags";
 import type { ModelDetailView } from "@/lib/views";
 import {
   ChannelChip,
@@ -21,11 +22,11 @@ import {
 
 type Tab = "overview" | "versions" | "configs" | "benchmarks" | "install";
 
-const TABS: { id: Tab; label: string }[] = [
+const TABS: { id: Tab; label: string; soon?: boolean }[] = [
   { id: "overview", label: "Overview" },
   { id: "versions", label: "Versions" },
   { id: "configs", label: "Configurations" },
-  { id: "benchmarks", label: "Benchmarks" },
+  { id: "benchmarks", label: "Benchmarks", soon: !BENCHMARKS_LIVE },
   { id: "install", label: "Install" },
 ];
 
@@ -380,6 +381,37 @@ function ConfigsTab({ view }: { view: ModelDetailView }) {
 }
 
 function BenchmarksTab({ view }: { view: ModelDetailView }) {
+  if (!BENCHMARKS_LIVE) {
+    return (
+      <div>
+        <div className="mb-1.5 flex items-center gap-2.5">
+          <h2 className="font-brand text-[20px] font-medium text-ink">
+            Benchmarks
+          </h2>
+          <SoonPill label="coming soon" />
+        </div>
+        <p className="mb-6 max-w-[80ch] text-[13.5px] text-ink-2">
+          Benchmark results are not published yet — the CHAP benchmarking
+          backend that runs the suites is still being implemented. When it
+          lands, every score here will come from a controlled{" "}
+          <code className="font-mono text-[12.5px] text-ink">chap bench</code>{" "}
+          run against this model&apos;s pinned commits — nothing self-reported.
+        </p>
+        <div className="rounded-lg border border-dashed border-line-strong bg-surface px-[26px] py-6">
+          <div className="font-brand text-[15px] font-medium text-ink">
+            What will appear here
+          </div>
+          <p className="mt-1 max-w-[72ch] text-[13px] leading-[1.6] text-ink-2">
+            CRPS by forecast horizon against the seasonal-naive baseline, a
+            cross-model comparison on the shared reference datasets, and the
+            full run record — dataset, harness, runtime — for every evaluated
+            pin.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   const b = view.benchmarks;
   if (!b) {
     return (
@@ -531,16 +563,22 @@ function BenchmarksTab({ view }: { view: ModelDetailView }) {
 function InstallTab({ view }: { view: ModelDetailView }) {
   const { copied, copy } = useCopy();
   const pin = view.stable.pinFull;
+  const shortPin = view.stable.pinDisplay.split("@")[1];
   const steps = [
     {
       title: "Copy the verified pin",
       cmd: pin,
-      note: "Repo URL plus commit hash — the pin is the whole contract.",
+      note: "Repo URL plus commit hash — the pin identifies the exact revision of the model service you are about to run.",
     },
     {
-      title: "Add it to your instance's configured models",
-      cmd: `- url: "${pin}"`,
-      note: "The same url + @commit reference chap's configured-models YAML uses — full guide linked on this page.",
+      title: "Start the model as a chapkit service",
+      cmd: `docker run -p 5001:8000 <image built from ${shortPin}>`,
+      note: "Chapkit models ship as container images built from the pinned commit — use the image tag from the model repository that carries this hash.",
+    },
+    {
+      title: "Point chap at the running service",
+      cmd: "chap eval --model-name http://localhost:5001 --run-config.is-chapkit-model",
+      note: "The service registers itself with your CHAP instance on startup and appears in the Modeling App; chap talks to it over HTTP from here on.",
     },
   ];
   return (
@@ -550,9 +588,10 @@ function InstallTab({ view }: { view: ModelDetailView }) {
           Add to your CHAP instance
         </h2>
         <p className="mb-[22px] max-w-[76ch] text-[13.5px] text-ink-2">
-          Until one-click install lands, register the pinned commit with your
-          CHAP modeling platform. The pin is the contract — the same commit
-          produces the same model everywhere.
+          The marketplace lists chapkit models only — each one is a
+          containerized REST service that CHAP talks to over HTTP. Run the
+          pinned revision next to your CHAP instance. The pin is the
+          contract — the same commit produces the same service everywhere.
         </p>
         <div className="overflow-hidden rounded-lg border border-line bg-code-bg">
           <div className="flex items-center gap-2 border-b border-white/10 px-4 py-[11px]">
@@ -560,7 +599,7 @@ function InstallTab({ view }: { view: ModelDetailView }) {
             <span className="h-[9px] w-[9px] rounded-full bg-[#FEBC2E]" />
             <span className="h-[9px] w-[9px] rounded-full bg-[#28C840]" />
             <span className="ml-2 font-mono text-[11.5px] text-[#8A93A6]">
-              chap-modeling-platform / external_models
+              chap-modeling-platform / chapkit
             </span>
           </div>
           <div className="px-5 pb-[22px] pt-[18px]">
@@ -618,8 +657,18 @@ function InstallTab({ view }: { view: ModelDetailView }) {
         <div className="rounded-lg border border-line p-5">
           <Kicker className="mb-3.5">Full instructions</Kicker>
           <p className="text-[13px] leading-relaxed text-ink-2">
-            Registering external models is documented on the CHAP platform
-            site, including runtime requirements and Docker images.
+            Only models built with{" "}
+            <a
+              href="https://dhis2-chap.github.io/chapkit/"
+              target="_blank"
+              rel="noreferrer"
+              className="font-bold text-brand hover:text-brand-dark hover:underline"
+            >
+              chapkit
+            </a>{" "}
+            are supported for now. Running a chapkit service with CHAP —
+            images, ports, the data format and how the service registers
+            itself — is documented on the CHAP platform site.
           </p>
           <a
             href={view.installUrl}
@@ -627,7 +676,7 @@ function InstallTab({ view }: { view: ModelDetailView }) {
             rel="noreferrer"
             className="mt-3 inline-block text-[13px] font-bold text-brand hover:text-brand-dark hover:underline"
           >
-            chap.dhis2.org → external models
+            chap.dhis2.org → chapkit models
           </a>
         </div>
       </div>
@@ -654,13 +703,14 @@ export function ModelDetailTabs({
                 key={t.id}
                 type="button"
                 onClick={() => setTab(t.id)}
-                className={`shrink-0 cursor-pointer border-b-2 bg-transparent px-4 pb-3.5 pt-[11px] font-brand text-[14px] font-medium ${
+                className={`flex shrink-0 cursor-pointer items-center gap-1.5 border-b-2 bg-transparent px-4 pb-3.5 pt-[11px] font-brand text-[14px] font-medium ${
                   tab === t.id
                     ? "border-brand text-ink"
                     : "border-transparent text-ink-2 hover:text-ink"
                 }`}
               >
                 {t.label}
+                {t.soon ? <SoonPill /> : null}
               </button>
             ))}
           </div>

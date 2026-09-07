@@ -59,8 +59,8 @@ const SUBMISSION_CHECKS = [
     body: "Use the full 40-character commit SHA, already pushed to the model repository.",
   },
   {
-    title: "Include a clean setup",
-    body: "Provide a Dockerfile or environment specification that builds from a fresh checkout.",
+    title: "Build it with chapkit",
+    body: "Only chapkit model services are listed for now — the pinned commit must build into a container exposing the chapkit REST interface.",
   },
   {
     title: "Describe the inputs",

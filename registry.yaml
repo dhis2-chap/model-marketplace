@@ -22,9 +22,9 @@ marketplace:
   repository: https://github.com/dhis2-chap/model-marketplace
   documentation:
     chap: https://chap.dhis2.org
-    # The marketplace install flow is not settled yet; until it is, the site
-    # points at the existing integration instructions in the chap docs.
-    install: https://chap.dhis2.org/chap-modeling-platform/external_models/
+    # Only chapkit model services are supported for now; the install guide
+    # points at the chapkit integration page in the chap docs.
+    install: https://chap.dhis2.org/chap-modeling-platform/external_models/chapkit/
 
 review_policy:
   required_approvals: 3

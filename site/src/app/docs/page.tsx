@@ -21,9 +21,9 @@ const CARDS = [
   },
   {
     kicker: "platform",
-    title: "Evaluate models with CHAP",
-    body: "Run a local model or pinned GitHub repository through the CHAP evaluation workflow.",
-    href: "https://chap.dhis2.org/chap-modeling-platform/external_models/running_models_in_chap/",
+    title: "Run chapkit models in CHAP",
+    body: "Start a pinned model service and point chap at it — how CHAP talks to chapkit services over HTTP, including the data format.",
+    href: "https://chap.dhis2.org/chap-modeling-platform/external_models/chapkit/",
   },
   {
     kicker: "platform",
@@ -32,10 +32,10 @@ const CARDS = [
     href: "https://chap.dhis2.org/chap-modeling-platform/modeling-app/using-the-modeling-app/getting-started/",
   },
   {
-    kicker: "data",
-    title: "Data and covariates",
-    body: "Required CSV fields, model-dependent climate covariates, population, periods, and missing-value rules.",
-    href: "https://chap.dhis2.org/chap-modeling-platform/external_models/data_formats/",
+    kicker: "chapkit",
+    title: "Build a model with chapkit",
+    body: "Config, artifact and train/predict workflows for model services — the toolkit every listed model is built with.",
+    href: "https://dhis2-chap.github.io/chapkit/",
   },
   {
     kicker: "community",
@@ -53,8 +53,9 @@ export default function DocsPage() {
       </h1>
       <p className="mb-9 max-w-[70ch] text-[16px] leading-[1.65] text-ink-2">
         Marketplace formats are documented in this repository. The cards below
-        link directly to the relevant CHAP guides for running models, preparing
-        data, and working in the DHIS2 Modeling App.
+        link directly to the relevant CHAP and chapkit guides for running model
+        services, building your own, and working in the DHIS2 Modeling App.
+        Only models built with chapkit are supported for now.
       </p>
       <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
         {CARDS.map((card) => (
