@@ -81,15 +81,12 @@ available at build time by default).
 ## Benchmarking
 
 The benchmark views on the site (the benchmarks page and each model's
-Benchmarks tab) are gated behind a "coming soon" state while the CHAP
-benchmarking backend is implemented — flip `BENCHMARKS_LIVE` in
-`site/src/lib/flags.ts` when it lands.
+Benchmarks tab) are gated behind a "coming soon" state until real results
+exist — flip `BENCHMARKS_LIVE` in `site/src/lib/flags.ts` when they land.
 
-The current comparison is launched from chap-core with `uv` and `chap bench`
-using `benchmark.yaml`. It evaluates the sequential Cartesian product of ten
-pinned model configurations and three monthly admin-1 datasets (Laos, Vietnam,
-and Thailand), with one repetition: 30 model–dataset evaluations in total.
-Each evaluation runs in a fresh Docker container and invokes `chap eval`
-against the exact pinned commit. See the [benchmark record and methodology
-documentation](benchmarks/README.md) and the CHAP guide to
+No benchmarks have been run yet, and exactly how the comparison will be run —
+harness, datasets, backtest parameters, ranking — is still being decided. The
+methodology will be documented in the [benchmark record
+documentation](benchmarks/README.md) once it is settled and the first suite
+has run. For the underlying evaluation command, see the CHAP guide to
 [evaluating models](https://chap.dhis2.org/chap-modeling-platform/external_models/running_models_in_chap/).

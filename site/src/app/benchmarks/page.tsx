@@ -8,10 +8,10 @@ import { getRegistry } from "@/lib/registry";
 export const metadata: Metadata = {
   title: "Benchmarks",
   description:
-    "Recorded CHAP benchmark evaluations against pinned commits on the reference datasets — nothing is self-reported.",
+    "Benchmark results are added soon — controlled CHAP evaluations against pinned commits, nothing self-reported.",
 };
 
-/** Rendered while the CHAP benchmarking backend is still being implemented. */
+/** Rendered until real benchmark results exist — the methodology is still being decided. */
 function BenchmarksComingSoon() {
   return (
     <main>
@@ -24,12 +24,10 @@ function BenchmarksComingSoon() {
             Benchmarks
           </h1>
           <p className="max-w-[58ch] font-serif text-[16px] leading-[1.7] text-ink-2">
-            Every score on this page will come from a controlled{" "}
-            <span className="font-mono text-[14px]">chap bench</span> suite:
-            each model–dataset pair evaluated against its pinned commit in a
-            fresh container — nothing self-reported. The CHAP benchmarking
-            backend that executes these suites is still being implemented, so
-            results are not published yet.
+            Every score on this page will come from a controlled CHAP
+            evaluation of a pinned commit — nothing self-reported. No
+            benchmarks have been run yet, and exactly how they will be run is
+            still being decided, so results are not published yet.
           </p>
         </div>
       </section>
@@ -40,13 +38,12 @@ function BenchmarksComingSoon() {
             What will appear here
           </div>
           <p className="mt-1 max-w-[72ch] text-[13px] leading-[1.6] text-ink-2">
-            One ranked table per reference dataset — normalised CRPS, CRPS,
-            MAE, RMSE, wall time and peak memory per verified pin — with a
-            full run record and a reproduce command behind every row. Results
-            land in the repo&apos;s{" "}
+            One ranked table per reference dataset, with a full run record
+            behind every row. The exact datasets, metrics and run parameters
+            will be documented once the methodology is settled. Results land
+            in the repo&apos;s{" "}
             <code className="font-mono text-[12px] text-ink">benchmarks/</code>{" "}
-            directory by pull request, like everything else, the moment the
-            backend ships.
+            directory by pull request, like everything else.
           </p>
         </div>
       </section>
@@ -93,10 +90,8 @@ export default function BenchmarksPage() {
               Benchmarks
             </h1>
             <p className="max-w-[58ch] font-serif text-[16px] leading-[1.7] text-ink-2">
-              Every score on this page comes from a controlled{" "}
-              <span className="font-mono text-[14px]">chap bench</span> suite.
-              Each model–dataset pair is evaluated against its pinned commit
-              in a fresh container — nothing is self-reported.{" "}
+              Every score on this page comes from a controlled CHAP evaluation
+              of a pinned commit — nothing is self-reported.{" "}
               {records.length === 0
                 ? "No run has been recorded yet, so there is nothing to rank — a suite appears the moment its first result lands, by pull request like everything else."
                 : singleSplitSmoke

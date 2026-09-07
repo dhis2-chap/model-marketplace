@@ -28,44 +28,6 @@ const HEADERS: { key: SortKey | null; label: string }[] = [
   { key: null, label: "Status" },
 ];
 
-const BENCHMARK_NOTES = [
-  {
-    h: "Twelve forecast origins.",
-    b: "The expanding-window backtest advances one month at a time. Each origin forecasts the following three months, so forecast windows overlap.",
-  },
-  {
-    h: "The model is fitted once.",
-    b: "It is trained at the first split. Later splits receive an expanding history, but the estimator is not fitted again.",
-  },
-  {
-    h: "Normalised CRPS drives ranking.",
-    b: "MAE, RMSE and CRPS remain useful within a dataset; normalised CRPS is the primary metric across datasets. Lower is better.",
-  },
-  {
-    h: "Ranking starts within each dataset.",
-    b: "Models are ranked separately on Laos, Vietnam and Thailand, then combined using an equally weighted mean rank. Incomplete models follow models that completed all three.",
-  },
-];
-
-const RUN_FACTS = [
-  {
-    h: "Suite",
-    b: "10 pinned model configurations × 3 datasets × 1 repetition = 30 evaluations.",
-  },
-  {
-    h: "Scheduling",
-    b: "A sequential Cartesian product, following the model and dataset order in benchmark.yaml.",
-  },
-  {
-    h: "Datasets",
-    b: "laos-monthly, vietnam-monthly and thailand-monthly; all are monthly admin-1 datasets.",
-  },
-  {
-    h: "Isolation",
-    b: "One fresh disposable Docker container per evaluation, with 8 CPUs, 64 GB memory and a two-hour timeout.",
-  },
-];
-
 const GRID = "grid-cols-[36px_minmax(0,1.9fr)_repeat(6,minmax(0,1fr))_100px]";
 
 function fmt(v: number | null, digits: number): string {
@@ -312,58 +274,20 @@ export function BenchmarkSuite({ suite }: { suite: BenchmarkSuiteView }) {
         <div className="grid items-start gap-6 lg:grid-cols-2">
           <RunRecord row={selected} />
           <div className="flex flex-col gap-6">
-            <div className="rounded-lg border border-line bg-surface-2 p-5">
-              <div className="mb-3 font-brand text-[15px] font-medium text-ink">
-                Backtest and ranking
-              </div>
-              <div className="flex flex-col gap-2.5">
-                {BENCHMARK_NOTES.map((c) => (
-                  <div
-                    key={c.h}
-                    className="grid grid-cols-[auto_minmax(0,1fr)] gap-2.5 text-[13px] leading-[1.55] text-ink-2"
-                  >
-                    <span className="text-exp">•</span>
-                    <span>
-                      <span className="font-bold text-ink">{c.h}</span> {c.b}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
             <div className="rounded-lg border border-line bg-surface p-5">
               <div className="mb-3 font-brand text-[15px] font-medium text-ink">
-                How this benchmark was run
+                Methodology — added soon
               </div>
-              <p className="mb-3 text-[13px] leading-[1.6] text-ink-2">
-                <span className="font-mono text-[12px] text-ink">uv</span>{" "}
-                launches the locked environment, then{" "}
-                <span className="font-mono text-[12px] text-ink">
-                  chap bench
-                </span>{" "}
-                validates and executes the suite in{" "}
-                <span className="font-mono text-[12px] text-ink">
-                  benchmark.yaml
-                </span>
-                .
-              </p>
-              <div className="mb-3.5 flex flex-col gap-[9px]">
-                {RUN_FACTS.map((fact) => (
-                  <div
-                    key={fact.h}
-                    className="grid grid-cols-[72px_minmax(0,1fr)] items-baseline gap-2.5 text-[13px] leading-[1.55] text-ink-2"
-                  >
-                    <span className="font-mono text-[11px] text-ink-3">{fact.h}</span>
-                    <span>{fact.b}</span>
-                  </div>
-                ))}
-              </div>
-              <p className="border-t border-line pt-3 text-[13px] leading-[1.6] text-ink-2">
-                Inside each container, CHAP clones the exact pinned commit,
-                applies its configuration, and runs{" "}
-                <span className="font-mono text-[12px] text-ink">chap eval</span>
-                . Forecasts and observations are written to NetCDF, then CHAP
-                records overall, horizon and location metrics together with
-                logs, hashes, runtime, CPU use and peak memory.
+              <p className="text-[13px] leading-[1.6] text-ink-2">
+                Exactly how the benchmark suites are run — harness, datasets,
+                isolation, backtest parameters, ranking — is still being
+                decided. A full methodology description will be published here
+                and in the repo&apos;s{" "}
+                <code className="font-mono text-[12px] text-ink">
+                  benchmarks/README.md
+                </code>{" "}
+                once it is settled. Until then, each row&apos;s run record on
+                the left documents what its file actually recorded.
               </p>
               <a
                 href="https://chap.dhis2.org/chap-modeling-platform/external_models/running_models_in_chap/"

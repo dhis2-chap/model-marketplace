@@ -408,11 +408,11 @@ function BenchmarksTab({ view }: { view: ModelDetailView }) {
           <SoonPill label="coming soon" />
         </div>
         <p className="mb-6 max-w-[80ch] text-[13.5px] text-ink-2">
-          Benchmark results are not published yet — the CHAP benchmarking
-          backend that runs the suites is still being implemented. When it
-          lands, every score here will come from a controlled{" "}
-          <code className="font-mono text-[12.5px] text-ink">chap bench</code>{" "}
-          run against this model&apos;s pinned commits — nothing self-reported.
+          Benchmark results are not published yet — no benchmarks have been
+          run, and exactly how they will be run is still being decided. Once
+          that is settled, every score here will come from a controlled CHAP
+          evaluation of this model&apos;s pinned commits — nothing
+          self-reported.
         </p>
         <div className="rounded-lg border border-dashed border-line-strong bg-surface px-[26px] py-6">
           <div className="font-brand text-[15px] font-medium text-ink">

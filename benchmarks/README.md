@@ -12,55 +12,14 @@ mock fixtures labeled "mock data · illustrative"; the per-model label comes
 off automatically when its first real file lands, and the benchmarks page renders
 once any results exist.
 
-## How the current comparison is run
+## How the comparison is run — added soon
 
-The full comparison is launched with `uv` and `chap bench`, using
-`benchmark.yaml` as the suite definition. The suite is a sequential Cartesian
-product:
+No benchmarks have been run yet, and exactly how they will be run — harness,
+datasets, isolation, backtest parameters, ranking — has not been decided. A
+full methodology description will be added here once that is settled and the
+first official suite has run. Until then, the sections below describe only the
+file contract for recording results, not an existing process.
 
-- 10 pinned model configurations
-- 3 monthly admin-1 datasets: `laos-monthly`, `vietnam-monthly`, and
-  `thailand-monthly`
-- 1 repetition
-- 30 model–dataset evaluations in total
-
-Each evaluation gets a fresh disposable Docker container with an 8-CPU limit,
-a 64 GB memory limit, a two-hour timeout, and network access for cloning the
-model and preparing its dependencies. The dataset and model configuration are
-mounted read-only; only that evaluation's output is writable.
-
-Within the container, CHAP loads and validates the dataset, clones the model at
-its exact 40-character commit, prepares the model environment, applies the
-selected configuration, and runs `chap eval`. The backtest parameters are:
-
-```yaml
-n_periods: 3
-n_splits: 12
-stride: 1
-n_retrain: 1
-historical_context_years: 6
-```
-
-This creates 12 forecast origins one month apart. Each forecasts the next
-three months, so the forecast windows overlap. The model is fitted at the first
-split only; later splits receive an expanding history without fitting the
-estimator again. Each location can therefore contribute up to 36 forecast
-cells, excluding cells whose target observation is missing. The six years of
-historical context are retained for plots and history-dependent metrics; they
-do not cap the model's training data.
-
-CHAP writes forecasts and observations to NetCDF and calculates overall,
-per-horizon, and per-location metrics. `crps_norm` is the primary ranking
-metric; MAE, RMSE, CRPS, interval coverage, ratio above truth, and the 10–90%
-Winkler score are also recorded. Models are ranked within each dataset, then
-combined by equally weighted mean dataset rank. Models with incomplete dataset
-coverage are placed after models that completed all three datasets.
-
-The portable output in `artifacts/` includes the resolved manifest, structured
-run records, benchmark files, metric slices, pairwise comparisons, NetCDF
-evaluations, and complete logs. It also records commands, hashes, machine
-information, runtime, CPU consumption, and peak memory. Marketplace YAML is
-exported only after the complete suite succeeds and passes its export checks.
 For the underlying evaluation command, see the CHAP documentation for
 [evaluating models](https://chap.dhis2.org/chap-modeling-platform/external_models/running_models_in_chap/).
 
