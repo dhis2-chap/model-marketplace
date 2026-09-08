@@ -122,7 +122,7 @@ export interface BenchmarkRowView {
   modelId: string;
   name: string;
   versionTag: string;
-  /** "mstl_arima@6cdec6f · v1" */
+  /** "chapkit_ewars_model@fa880a1 · 1.0.0" */
   pinLine: string;
   measured: boolean;
   ncrps: number | null;

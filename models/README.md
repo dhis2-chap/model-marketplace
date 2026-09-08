@@ -1,4 +1,4 @@
-# Model registry format (draft, schema_version 1)
+# Model registry format (draft, schema_version 2)
 
 One YAML file per whitelisted model. Everything in this directory has been
 reviewed and verified by the CHAP maintainers — a model, a new version pin, or
@@ -12,117 +12,188 @@ the ordered list of model files.
 This format is a first draft and expected to change. Bump `schema_version`
 when it does.
 
+## What schema_version 2 changed
+
+Version 2 tracks chapkit 2.0.0. Every listed model is now a containerised
+chapkit ML service rather than an MLproject repository run through chapkit's
+MLproject runner, and the file records what the service's own `MLServiceInfo`
+declares.
+
+| v1 | v2 |
+|---|---|
+| `maturity: stable \| experimental` | `kind: model \| template` plus `assessed_status`, the author's own chapkit `AssessedStatus` |
+| — | `service_id`, the id the service registers with chap-core under |
+| `source.repository` (+ optional `mlproject_name`) | `source.repository`, `source.image`, `source.runtime_image` |
+| — | `attribution` — author, organization, contact, citation, from the service metadata |
+| `compatibility.max_prediction_length` | `compatibility.min_prediction_periods` / `max_prediction_periods` / `requires_geo` |
+| `covariates.additional_continuous` | `covariates.defaults` plus `covariates.allow_free_additional` |
+| `versions[].commit` | `versions[].commit`, `image_tag`, `chapkit` |
+| `configurations[].user_option_values` (+ `additional_continuous_covariates`) | `configurations[].config`, the flat object chapkit takes on `POST /api/v1/configs` |
+
+## Verification means the pin, not the forecast
+
+Two separate signals live in every file, and the site keeps them apart:
+
+- **`versions[].status` / `verified_by`** — the marketplace review gate. Three
+  maintainers checked that the pin is the revision it claims to be and that it
+  runs as a chapkit service. This says nothing about forecast quality.
+- **`assessed_status`** — the *model authors'* own judgement, copied verbatim
+  from the service's `MLServiceInfo.model_metadata.author_assessed_status`.
+  The marketplace never assigns or reinterprets it.
+
+`assessed_status` uses chapkit's `AssessedStatus` scale, whose definitions
+come from chapkit itself (`src/chapkit/api/service_builder.py`):
+
+| value | meaning |
+|---|---|
+| `green` | Validated and ready for production use. |
+| `yellow` | Ready for more rigorous testing on diverse data. |
+| `orange` | Shows promise on limited data; needs manual configuration and careful evaluation. |
+| `red` | Highly experimental prototype, not validated; early experimentation only. |
+| `gray` | Not intended for use — deprecated, or kept only for backwards compatibility. |
+
+No listed model is currently self-assessed `green`.
+
+## Models and templates
+
+`kind: template` marks scaffolding — a repository whose whole purpose is to be
+copied when writing a model, with a placeholder regressor where the real model
+goes. Templates are listed because model authors need a reviewed, running
+starting point, but they are counted, filtered and labelled separately from
+forecasting models everywhere on the site, and must never be deployed to
+produce real forecasts.
+
 ## Annotated example
 
-The example below is illustrative (fictional commits) and shows the full
-shape, including a model that has both a verified stable version and a newer
-unreviewed one.
-
 ```yaml
-schema_version: 1                # format version of this file
+schema_version: 2                # format version of this file
 
-id: my_model                     # unique id, used by the site and by chap
-display_name: My Model           # human-readable name for the catalog
-maturity: stable                 # which set the model is browsed under:
-                                 #   stable | experimental
+id: my_model                     # unique id, matches the filename
+service_id: my-model             # MLServiceInfo.id — the kebab-case form of
+                                 # `id`, enforced by the schema
+display_name: My Model           # human-readable name for the catalog,
+                                 # normalised — no "(chapkit)" suffix, no raw
+                                 # repo names
+kind: model                      # model | template
+assessed_status: orange          # the AUTHOR's own AssessedStatus:
+                                 #   green | yellow | orange | red | gray
 
 summary: >-                      # one paragraph for the catalog card and the
   What the model is and when     # top of the model page
   to use it.
 
 source:
-  repository: https://github.com/org/my_model
-  mlproject_name: other_name     # optional: only when the MLproject name in
-                                 # the repo — the name chapkit's MLproject
-                                 # runner serves the model under — differs
-                                 # from `id`
+  repository: https://github.com/chap-models/my_model
+  image: ghcr.io/chap-models/my_model        # published service image, no tag
+  runtime_image: ghcr.io/dhis2-chap/chapkit-py   # the chapkit base it builds on
 
-maintainers:                     # GitHub handles responsible for the listing
+attribution:                     # from MLServiceInfo.model_metadata
+  author: Somebody
+  organization: Some Institute   # optional
+  contact: somebody@example.org  # optional
+  citation: >-                   # optional
+    A paper or a data citation.
+
+maintainers:                     # GitHub handles responsible for the LISTING
   - somebody
 
 compatibility:
   period_types: [monthly]        # monthly | weekly | ...
-  max_prediction_length: 3       # optional: only if the model declares one
+  min_prediction_periods: 1      # MLServiceInfo bounds on the horizon
+  max_prediction_periods: 12
+  requires_geo: false            # MLServiceInfo.requires_geo — the service
+                                 # needs a GeoJSON input
 
 covariates:
-  required:                      # supplied automatically by chap; never
-    - population                 # repeated in configurations
-  additional_continuous:         # covariates the model can take via
-    - rainfall                   # additional_continuous_covariates; empty
-                                 # list = takes none
+  required:                      # required_covariates — supplied
+    - population                 # automatically by chap, never repeated in a
+                                 # configuration
+  defaults:                      # the service's own default
+    - rainfall                   # additional_continuous_covariates
+  allow_free_additional: true    # allow_free_additional_continuous_covariates
 
 channels:                        # named pointers into `versions`
-  stable: v2                     # newest *verified* pin — what production
-                                 # chap instances should use
-  latest: v3                     # newest pin of any status; diverges from
+  stable: 1.1.0                  # newest *verified* pin — what production
+                                 # chap instances should run
+  latest: 1.2.0                  # newest pin of any status; diverges from
                                  # stable while a new version is under review
 
 versions:                        # newest first
-  - version: v3
+  - version: 1.2.0               # the service's own MLServiceInfo.version
     commit: 0000000000000000000000000000000000000000
+    image_tag: sha-0000000       # the tag built from this commit
+    chapkit: ">=2.0.0,<3"        # what the pinned revision requires
     status: unstable             # verified | unstable | deprecated | yanked
     verified_by: []              # empty until three maintainers approve
     changelog: >-
-      What changed since v2.
-  - version: v2
+      What changed since 1.1.0.
+  - version: 1.1.0
     commit: 1111111111111111111111111111111111111111
+    image_tag: sha-1111111
+    chapkit: ">=2.0.0,<3"
     status: verified
     verified_by: [maintainer-a, maintainer-b, maintainer-c]
     changelog: >-
-      What changed since v1.
-  - version: v1
-    commit: 2222222222222222222222222222222222222222
-    status: deprecated
-    verified_by: [maintainer-a, maintainer-b, maintainer-c]
-    changelog: null
+      What changed since 1.0.0.
 
 configurations:                  # verified, copy-pasteable configurations
   monthly:
     description: >-
       When to use this configuration and what its caveats are.
-    user_option_values:
-      some_option: 12
-    additional_continuous_covariates:   # omit if the model takes none
-      - rainfall
+    config:                      # the flat chapkit config object
+      prediction_periods: 3      # required by chapkit's own BaseConfig
+      some_option: 12            # the model's own options
+      additional_continuous_covariates:
+        - rainfall
 ```
 
-## How the fields map to chap
+## How the fields map to chapkit and chap
 
-- A version pin resolves to `<source.repository>@<commit>`. Only models run by
-  [chapkit](https://dhis2-chap.github.io/chapkit/) are supported for now: the
-  pinned commit is served as a chapkit model service — an MLproject repository
-  started with `chapkit mlproject run`, or a scaffolded chapkit service image —
-  and chap is pointed at the service URL with
-  `chap eval --model-name <url> --run-config.is-chapkit-model`
-  (see [the chap docs](https://chap.dhis2.org/chap-modeling-platform/external_models/chapkit/)).
-- A listed model must run under one of chapkit's published runtimes
-  ([dhis2-chap/chapkit-images](https://github.com/dhis2-chap/chapkit-images)):
-  Python MLprojects declare `uv_env` and run in `chapkit-py(-cli)`; R
-  MLprojects run in `chapkit-r(-cli)`, or `chapkit-r-tidyverse` /
-  `chapkit-r-inla` when they need those package stacks. A legacy `docker_env`
-  in the MLproject (as in `ewars_template`) is not used by chapkit — the
-  matching chapkit image provides the runtime instead. Each model file notes
-  its runtime in a comment under `source:`.
-- Every block under `configurations:` is a valid standalone
-  `--model-configuration-yaml` file for `chap eval` and
-  `chap evaluate-ensemble`: copy the inner keys (`user_option_values`,
-  `additional_continuous_covariates`) into their own file.
+- A version pin resolves to two halves of one revision:
+  `<source.repository>@<commit>` for reading the code, and
+  `<source.image>:<image_tag>` for running it. The publish workflow tags every
+  build `sha-<short commit>`, so a `sha-` tag must agree with `commit` —
+  the schema enforces it. `:latest` moves and is never a pin.
+- A listed service runs on one of chapkit's published base images
+  ([dhis2-chap/chapkit-images](https://github.com/dhis2-chap/chapkit-images)),
+  recorded as `source.runtime_image`: `chapkit-py` for Python services,
+  `chapkit-r`, `chapkit-r-tidyverse` or `chapkit-r-inla` for R. The R-INLA
+  base is amd64 only.
+- Deployment is a compose overlay next to chap-core: the service self-registers
+  through `SERVICEKIT_ORCHESTRATOR_URL` on container port 8000, and the DHIS2
+  Modeling App then picks it up automatically. A bare `docker run` registers
+  nothing. See
+  [chapkit's deployment guide](https://dhis2-chap.github.io/chapkit/guides/deploying-to-chap-core/).
+- Every block under `configurations:` is the `data` object of a
+  `POST /api/v1/configs` request — a running service holds no configuration
+  until one is created. `prediction_periods` is required by chapkit's
+  `BaseConfig` and validated here against the service's declared bounds;
+  `additional_continuous_covariates` is the other field CHAP interprets.
 - `covariates.required` are supplied automatically by chap and are therefore
   never repeated under `additional_continuous_covariates` in configurations.
+- When `allow_free_additional` is `false`, a configuration may only name
+  covariates from `covariates.defaults` — the service rejects anything else.
 
 ## Conventions
 
+- `service_id` is `id` with underscores replaced by dashes. The schema
+  enforces it so a listing cannot drift from the identity the service
+  registers with chap-core, and the loader rejects two listings sharing one
+  service id.
+- `display_name` is normalised for the catalog: no `(chapkit)` suffix (every
+  listed model is a chapkit service), and never a raw repository name.
 - `channels.stable` must point at a version with `status: verified`.
-- `maintainers` lists the GitHub handles responsible for the listing. The
+- `maintainers` lists the GitHub handles responsible for the listing — not
+  necessarily the model's authors, who are recorded under `attribution`. The
   current entries were backfilled from each source repository's contributors;
   corrections land like everything else, by PR.
 - `versions[].verified_by` lists the three approving maintainers of the PR
   that added the pin. `[]` on a verified pin means the pin was verified by
   the merge gate itself without named approvals on record — true for the
-  seed import, which predates this repo's PR flow. Pins added by PR going
-  forward record their approvers.
-- Version keys are whatever upstream uses (`v6`, `uv`, `stable`, ...); we do
-  not rename them, the channel pointers provide the uniform interface.
+  chapkit 2.0.0 seed import, which predates this repo's PR flow. Pins added
+  by PR going forward record their approvers.
+- `version` keys are the service's own `MLServiceInfo.version`; we do not
+  rename them, the channel pointers provide the uniform interface.
 - `changelog` is per-version, free text. `null` until we have one.
 
 ## Benchmarks
@@ -130,10 +201,13 @@ configurations:                  # verified, copy-pasteable configurations
 Benchmark results do not live in these files: they live in the sibling
 [`../benchmarks/`](../benchmarks/README.md) directory, one YAML file per
 (model, version, dataset), cross-checked against the pins here at build time.
+None have been run yet, and how they will be run is still being decided.
 
 ## Open questions for this draft
 
-- Are `stable`/`experimental` the right sets, and is per-model maturity the
-  right granularity (vs. per-version)?
+- Is per-model `assessed_status` the right granularity, or should it be
+  per-version like `status`?
 - Do dataset-specific configuration bundles stay a separate concept, or are
   verified per-model configurations enough?
+- Should a `yanked` image tag be recorded distinctly from a yanked commit,
+  given a registry deletion and a git revert are different events?

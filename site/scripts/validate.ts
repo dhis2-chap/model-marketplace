@@ -8,6 +8,7 @@
 import { loadBenchmarks } from "../src/lib/benchmarks";
 import {
   displayPin,
+  imageRef,
   loadRegistry,
   stableVersion,
   verifiedCount,
@@ -15,12 +16,18 @@ import {
 
 try {
   const registry = loadRegistry();
-  console.log(`registry.yaml OK — ${registry.models.length} models\n`);
+  const templates = registry.models.filter((m) => m.kind === "template").length;
+  console.log(
+    `registry.yaml OK — ${registry.models.length - templates} models, ${templates} templates\n`,
+  );
   for (const model of registry.models) {
     const stable = stableVersion(model);
+    console.log(`  ✓ ${model.id}`);
     console.log(
-      `  ✓ ${model.id.padEnd(28)} ${model.maturity.padEnd(13)} stable=${displayPin(model, stable)} (${verifiedCount(model)} verified pin${verifiedCount(model) === 1 ? "" : "s"})`,
+      `      ${model.kind.padEnd(8)} assessed=${model.assessed_status.padEnd(6)} ${verifiedCount(model)} verified pin${verifiedCount(model) === 1 ? "" : "s"}`,
     );
+    console.log(`      commit  ${displayPin(model, stable)}`);
+    console.log(`      image   ${imageRef(model, stable)}`);
   }
 
   const benchmarks = loadBenchmarks(registry, registry.root);

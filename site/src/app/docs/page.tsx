@@ -20,9 +20,15 @@ const ENTRIES = [
     href: "https://github.com/dhis2-chap/model-marketplace/blob/main/benchmarks/README.md",
   },
   {
+    kicker: "chapkit",
+    title: "Deploy a chapkit service to chap-core",
+    body: "The install path every listing follows: publish an image, add a compose overlay beside chap-core, self-register, appear in the DHIS2 Modeling App.",
+    href: "https://dhis2-chap.github.io/chapkit/guides/deploying-to-chap-core/",
+  },
+  {
     kicker: "platform",
     title: "Run chapkit models in CHAP",
-    body: "Start a pinned model service and point chap at it — how CHAP talks to chapkit services over HTTP, including the data format.",
+    body: "How CHAP talks to chapkit services over HTTP, including the data format.",
     href: "https://chap.dhis2.org/chap-modeling-platform/external_models/chapkit/",
   },
   {
@@ -60,7 +66,8 @@ export default function DocsPage() {
             Marketplace formats are documented in this repository. The index
             links directly to the relevant CHAP and chapkit guides for running
             model services, building your own, and working in the DHIS2
-            Modeling App. Only models built with chapkit are supported for now.
+            Modeling App. Every listed model is a chapkit 2.0.0 service —
+            nothing else is supported.
           </p>
         </div>
         <div className="border-t-2 border-ink">

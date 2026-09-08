@@ -47,6 +47,7 @@ export function loadRegistry(root = findRepoRoot()): Registry {
   const index = parsedIndex.data;
 
   const ids = new Set<string>();
+  const serviceIds = new Set<string>();
   const models = index.models.map((relPath) => {
     const file = path.join(root, relPath);
     const parsed = modelSchema.safeParse(loadYaml(file));
@@ -63,7 +64,15 @@ export function loadRegistry(root = findRepoRoot()): Registry {
     if (ids.has(model.id)) {
       throw new Error(`${relPath}: duplicate model id "${model.id}"`);
     }
+    // Two listings registering under the same service id would collide in
+    // chap-core, which keys its catalogue on MLServiceInfo.id.
+    if (serviceIds.has(model.service_id)) {
+      throw new Error(
+        `${relPath}: duplicate service id "${model.service_id}"`,
+      );
+    }
     ids.add(model.id);
+    serviceIds.add(model.service_id);
     return model;
   });
 
@@ -91,6 +100,16 @@ export function repoOrg(model: Model): string {
   return repoSlug(model).split("/")[1] ?? "";
 }
 
+/** "chap-models/chapkit_ewars_model" — the slug without the host. */
+export function repoPath(model: Model): string {
+  return repoSlug(model).split("/").slice(1).join("/");
+}
+
+/** Just the repository name, for places too narrow for org and host. */
+export function repoName(model: Model): string {
+  return repoSlug(model).split("/")[2] ?? repoSlug(model);
+}
+
 export function shortCommit(commit: string): string {
   return commit.slice(0, 7);
 }
@@ -114,18 +133,39 @@ export function latestVersion(model: Model): ModelVersion {
   return v;
 }
 
-/** The pin as chap consumes it: repository URL + full commit hash. */
+/** The source pin: repository URL + full commit hash. */
 export function fullPin(model: Model, version: ModelVersion): string {
   return `${model.source.repository}@${version.commit}`;
 }
 
-/** The pin as the UI displays it: repo slug + short commit. */
+/** The source pin as the UI displays it: repo slug + short commit. */
 export function displayPin(model: Model, version: ModelVersion): string {
   return `${repoSlug(model)}@${shortCommit(version.commit)}`;
 }
 
+/**
+ * The pin for a catalog card, where the full slug truncates away the commit
+ * — which is the half worth reading. Repository name + short commit.
+ */
+export function compactPin(model: Model, version: ModelVersion): string {
+  return `${repoName(model)}@${shortCommit(version.commit)}`;
+}
+
+/**
+ * The deployable pin: the published image at the tag built from this
+ * commit. This is what goes in a compose overlay — the `sha-` tag is
+ * immutable, unlike `:latest`.
+ */
+export function imageRef(model: Model, version: ModelVersion): string {
+  return `${model.source.image}:${version.image_tag}`;
+}
+
 export function verifiedCount(model: Model): number {
   return model.versions.filter((v) => v.status === "verified").length;
+}
+
+export function isTemplate(model: Model): boolean {
+  return model.kind === "template";
 }
 
 export function marketplaceStats(registry: Registry) {
@@ -133,8 +173,11 @@ export function marketplaceStats(registry: Registry) {
     (n, m) => n + verifiedCount(m),
     0,
   );
+  const templates = registry.models.filter(isTemplate).length;
   return {
-    models: registry.models.length,
+    /** Forecasting models only — templates are counted separately. */
+    models: registry.models.length - templates,
+    templates,
     verifiedPins,
     reviews: verifiedPins * registry.index.review_policy.required_approvals,
   };

@@ -12,10 +12,10 @@ import { loadRegistry, shortCommit, stableVersion } from "./registry";
 import type { Benchmark } from "./schema";
 
 const registry = loadRegistry();
-const ewars = registry.models.find((m) => m.id === "ewars_template")!;
+const ewars = registry.models.find((m) => m.id === "chapkit_ewars_model")!;
 const ewarsStable = stableVersion(ewars);
-const mstl = registry.models.find((m) => m.id === "mstl_arima")!;
-const mstlStable = stableVersion(mstl);
+const multistep = registry.models.find((m) => m.id === "chapkit_simple_multistep_model")!;
+const multistepStable = stableVersion(multistep);
 
 function benchmark(overrides: Partial<Benchmark> = {}): Benchmark {
   return {
@@ -34,13 +34,13 @@ function benchmark(overrides: Partial<Benchmark> = {}): Benchmark {
 /** The shape of the repo's first real record: a full chap eval run. */
 function smokeRun(overrides: Partial<Benchmark> = {}): Benchmark {
   return benchmark({
-    model: mstl.id,
-    version: mstlStable.version,
-    commit: mstlStable.commit,
+    model: multistep.id,
+    version: multistepStable.version,
+    commit: multistepStable.commit,
     dataset: "laos-admin1-monthly",
     harness: { tool: "chap eval" },
     run: {
-      configuration: "monthly_fast",
+      configuration: "monthly_climate",
       observations: 2808,
       horizon: 3,
       splits: 1,
@@ -85,7 +85,7 @@ describe("loadBenchmarks", () => {
   it("round-trips the run, extra metric and resource fields", () => {
     write(smokeRun());
     const [loaded] = loadBenchmarks(registry, root);
-    expect(loaded.run?.configuration).toBe("monthly_fast");
+    expect(loaded.run?.configuration).toBe("monthly_climate");
     expect(loaded.run?.samples).toBe(200);
     expect(loaded.metrics.rmse).toBeCloseTo(108.3282);
     expect(loaded.metrics.norm_crps).toBeCloseTo(0.045345);
@@ -116,7 +116,7 @@ describe("loadBenchmarks", () => {
   it("rejects a run configuration the model file does not declare", () => {
     write(smokeRun({ run: { configuration: "nightly" } }));
     expect(() => loadBenchmarks(registry, root)).toThrow(
-      /configuration "nightly" is not in models\/mstl_arima\.yaml/,
+      /configuration "nightly" is not in models\/chapkit_simple_multistep_model\.yaml/,
     );
   });
 });
@@ -139,22 +139,22 @@ describe("buildBenchmarkSuites", () => {
     const suite = suites[0];
 
     expect(suite.heading).toBe("Laos admin-1 monthly · horizon 3");
-    expect(suite.countLine).toBe("1 of 6 listed models evaluated");
+    expect(suite.countLine).toBe("1 of 7 listed models evaluated");
     expect(suite.runContext).toContainEqual({
       k: "Suite",
-      v: "mstl_arima.monthly_fast",
+      v: "chapkit_simple_multistep_model.monthly_climate",
     });
     expect(suite.runContext).toContainEqual({ k: "Observations", v: "2,808 rows" });
-    expect(suite.pendingNote).toMatch(/^Five listed models/);
+    expect(suite.pendingNote).toMatch(/^Six listed models/);
 
     expect(suite.rows).toHaveLength(registry.models.length);
     const [first, ...rest] = suite.rows;
     expect(first.measured).toBe(true);
     expect(first.pinLine).toBe(
-      `mstl_arima@${shortCommit(mstlStable.commit)} · ${mstlStable.version}`,
+      `chapkit_simple_multistep_model@${shortCommit(multistepStable.commit)} · ${multistepStable.version}`,
     );
     expect(first.suiteLine).toBe(
-      `mstl_arima.monthly_fast · ${mstlStable.commit.slice(0, 12)}…`,
+      `chapkit_simple_multistep_model.monthly_climate · ${multistepStable.commit.slice(0, 12)}…`,
     );
     for (const row of rest) {
       expect(row.measured).toBe(false);
@@ -167,29 +167,29 @@ describe("buildBenchmarkSuites", () => {
     const suite = buildBenchmarkSuites(registry, [smokeRun()])[0];
     const pendingEwars = suite.rows.find((r) => r.modelId === ewars.id)!;
     expect(pendingEwars.cmd).toBe(
-      `chap eval --model ewars_template \\\n  --commit ${shortCommit(ewarsStable.commit)} --dataset laos-admin1-monthly \\\n  --horizon 3 --splits 1 --samples 200`,
+      `chap eval --model chapkit_ewars_model \\\n  --commit ${shortCommit(ewarsStable.commit)} --dataset laos-admin1-monthly \\\n  --horizon 3 --splits 1 --samples 200`,
     );
   });
 
   it("ranks measured rows by normalised CRPS ascending", () => {
-    const pymc = registry.models.find((m) => m.id === "chap_pymc")!;
-    const pymcStable = stableVersion(pymc);
+    const ghr = registry.models.find((m) => m.id === "chapkit_ghr_model")!;
+    const ghrStable = stableVersion(ghr);
     const suite = buildBenchmarkSuites(registry, [
       smokeRun(),
       smokeRun({
-        model: pymc.id,
-        version: pymcStable.version,
-        commit: pymcStable.commit,
+        model: ghr.id,
+        version: ghrStable.version,
+        commit: ghrStable.commit,
         run: undefined,
         metrics: { crps: 39.2, norm_crps: 0.041 },
         resources: undefined,
       }),
     ])[0];
     expect(suite.rows.slice(0, 2).map((r) => r.modelId)).toEqual([
-      "chap_pymc",
-      "mstl_arima",
+      "chapkit_ghr_model",
+      "chapkit_simple_multistep_model",
     ]);
-    expect(suite.countLine).toBe("2 of 6 listed models evaluated");
-    expect(suite.pendingNote).toMatch(/^Four listed models/);
+    expect(suite.countLine).toBe("2 of 7 listed models evaluated");
+    expect(suite.pendingNote).toMatch(/^Five listed models/);
   });
 });

@@ -1,0 +1,128 @@
+schema_version: 2
+
+id: chapkit_ghr_model
+service_id: chapkit-ghr-model
+display_name: GHRmodel
+kind: model
+
+# The author's own chapkit AssessedStatus, copied from the service — not a
+# marketplace verdict. red = highly experimental prototype, not validated.
+assessed_status: red
+
+summary: >-
+  Bayesian spatio-temporal model for climate-sensitive disease, built on
+  R-INLA. Wraps the Global Health Resilience group's GHRmodel package and
+  runs one user-specified configuration: BYM2 spatial, cyclic random-walk
+  seasonal and interannual random effects, with lagged and rolling climate
+  covariates as fixed effects.
+
+source:
+  repository: https://github.com/chap-models/chapkit_ghr_model
+  image: ghcr.io/chap-models/chapkit_ghr_model
+  # R + INLA, driving BSC's GHRmodel (dhis2-workflow branch) through its
+  # exported API — no GHRmodel source is modified. amd64 only.
+  runtime_image: ghcr.io/dhis2-chap/chapkit-r-inla
+
+attribution:
+  author: Global Health Resilience group, BSC (wrapped for CHAP by HISP Centre)
+  organization: Barcelona Supercomputing Center
+  # The wrapper maintainer, not BSC: they authored the model but do not
+  # support this service.
+  contact: morten@dhis2.org
+  citation: >-
+    Lowe R, Lee SA, O'Reilly KM et al. (2021) Combined effects of
+    hydrometeorological hazards and urbanisation on dengue risk in Brazil: a
+    spatiotemporal modelling study. The Lancet Planetary Health.
+    https://doi.org/10.1016/S2542-5196(20)30292-8
+
+# GitHub handles responsible for this listing — backfilled from the source
+# repository's contributors; corrections welcome by PR.
+maintainers:
+  - mortenoh
+  - edvinstava
+
+compatibility:
+  period_types: [monthly]
+  min_prediction_periods: 1
+  max_prediction_periods: 12
+  # The service accepts geometry and uses it for the BYM2 spatial effect, but
+  # does not require it — re_spatial is forced to "none" when none is given.
+  requires_geo: false
+
+covariates:
+  required:
+    - population
+  defaults:
+    - rainfall
+    - mean_temperature
+  allow_free_additional: true
+
+channels:
+  stable: 0.1.0
+  latest: 0.1.0
+
+versions:
+  - version: 0.1.0
+    commit: 1eb8cf1c7a4db3ac69975d1c31a223bd9601d297
+    image_tag: sha-1eb8cf1
+    chapkit: ">=2.0.0,<3"
+    status: verified
+    # Verified by the merge gate. Part of the chapkit 2.0.0 seed import.
+    verified_by: []
+    changelog: >-
+      First listed pin: GHRmodel wrapped as a chapkit 2.0.0 service, with
+      GIT_REVISION passed through to the published image.
+
+configurations:
+  monthly_bym2_seasonal:
+    description: >-
+      The service defaults: BYM2 spatial effect, cyclic RW1 seasonality and
+      IID interannual variation, with a 3-period rolling mean on temperature,
+      a 3-period rolling sum on rainfall and a 1-period lag on both. The
+      nested R parameters are encoded as "name:v1,v2;name2:v3" strings —
+      see scripts/lib.R:parse_spec upstream.
+    config:
+      prediction_periods: 3
+      re_spatial: bym2
+      re_seasonal: rw1
+      re_interannual: iid
+      priors: "0.5:0.01"
+      roll_mean: "mean_temperature:3"
+      roll_sum: "rainfall:3"
+      lag: "mean_temperature:1;rainfall:1"
+      nl: ""
+      standardize: true
+      family: nbinomial
+      offset: population
+      offset_scale: 10000.0
+      n_samples: 1000
+      nthreads: 4
+      emit_re_selection_report: false
+      additional_continuous_covariates:
+        - rainfall
+        - mean_temperature
+  monthly_no_geometry:
+    description: >-
+      For datasets without an adjacency graph. re_spatial is set to "none"
+      explicitly rather than relying on the service's fallback, so the
+      configuration reads the same way it runs.
+    config:
+      prediction_periods: 3
+      re_spatial: none
+      re_seasonal: rw1
+      re_interannual: iid
+      priors: "0.5:0.01"
+      roll_mean: "mean_temperature:3"
+      roll_sum: "rainfall:3"
+      lag: "mean_temperature:1;rainfall:1"
+      nl: ""
+      standardize: true
+      family: nbinomial
+      offset: population
+      offset_scale: 10000.0
+      n_samples: 1000
+      nthreads: 4
+      emit_re_selection_report: false
+      additional_continuous_covariates:
+        - rainfall
+        - mean_temperature

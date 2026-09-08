@@ -13,34 +13,48 @@ export const metadata: Metadata = {
 };
 
 /** Compact version of the real schema documented in models/README.md. */
-const EXAMPLE_YAML = `schema_version: 1
+const EXAMPLE_YAML = `schema_version: 2
 
 id: my_model
+service_id: my-model          # MLServiceInfo.id — kebab-case of id
 display_name: My Model
-maturity: experimental        # new models always enter here
+kind: model                   # model | template
+assessed_status: red          # YOUR OWN chapkit AssessedStatus
 
 summary: >-
   What the model is and when to use it.
 
 source:
   repository: https://github.com/org/my_model
+  image: ghcr.io/org/my_model                  # published, no tag
+  runtime_image: ghcr.io/dhis2-chap/chapkit-py # the chapkit base
+
+attribution:
+  author: Your Name
+  contact: you@example.org
 
 maintainers: [your-github-handle]
 
 compatibility:
   period_types: [monthly]
+  min_prediction_periods: 1
+  max_prediction_periods: 12
+  requires_geo: false
 
 covariates:
   required: [population]      # supplied automatically by chap
-  additional_continuous: [rainfall]
+  defaults: [rainfall]        # your service's own defaults
+  allow_free_additional: true
 
 channels:
-  stable: v1                  # must point at a verified version
-  latest: v1
+  stable: 1.0.0               # must point at a verified version
+  latest: 1.0.0
 
 versions:
-  - version: v1
+  - version: 1.0.0            # your MLServiceInfo.version
     commit: 1111111111111111111111111111111111111111
+    image_tag: sha-1111111    # the tag built from that commit
+    chapkit: ">=2.0.0,<3"
     status: verified          # set by maintainers on approval
     verified_by: []           # the three approving maintainers
     changelog: First submission.
@@ -48,27 +62,36 @@ versions:
 configurations:
   monthly:
     description: When to use this configuration.
-    user_option_values:
+    config:
+      prediction_periods: 3
       some_option: 12
-    additional_continuous_covariates: [rainfall]
+      additional_continuous_covariates: [rainfall]
 `;
 
 const SUBMISSION_CHECKS = [
   {
+    title: "Build it on chapkit 2.0.0",
+    body: "Only chapkit services are listed. Your model must be a chapkit ML service — an MLServiceBuilder app on one of the published chapkit base images.",
+  },
+  {
+    title: "Publish the image",
+    body: "Push to a registry with a sha-<short commit> tag alongside :latest, so a pin names one immutable revision. The scaffolded publish-docker workflow already does this.",
+  },
+  {
     title: "Pin the exact revision",
-    body: "Use the full 40-character commit SHA, already pushed to the model repository.",
+    body: "Use the full 40-character commit SHA, already pushed, and the image tag built from that same commit. The schema rejects the two if they disagree.",
   },
   {
-    title: "Run it with chapkit",
-    body: "Only chapkit-run models are listed — the pinned commit must serve as a chapkit model service: an MLproject repository started with chapkit mlproject run, or a scaffolded chapkit service.",
+    title: "Declare the contract honestly",
+    body: "MLServiceInfo is what CHAP and the Modeling App show operators: required_covariates, the prediction-period bounds, requires_geo, and whether you accept free additional covariates.",
   },
   {
-    title: "Describe the inputs",
-    body: "List the required and optional covariates the model actually reads.",
+    title: "Assess your own model",
+    body: "Set author_assessed_status to the colour that most honestly describes how far you have validated it, and pick conservatively — deployers make real decisions on this field. The marketplace copies it verbatim and never upgrades it for you.",
   },
   {
-    title: "Show one complete run",
-    body: "Serve the pinned revision with chapkit and run chap eval against it with at least one CHAP reference dataset.",
+    title: "Show it registering",
+    body: "Start the service from a compose overlay next to chap-core and confirm it appears in GET /v2/services, then run a train and a predict through it.",
   },
   {
     title: "Check the forecast output",
@@ -76,7 +99,7 @@ const SUBMISSION_CHECKS = [
   },
   {
     title: "Name a maintainer",
-    body: "Add a GitHub handle for someone who can answer questions and review future updates.",
+    body: "Add a GitHub handle for someone who can answer questions and review future updates — separate from the author credit in attribution.",
   },
 ];
 
@@ -96,9 +119,10 @@ export default function ContributePage() {
           </h1>
           <p className="max-w-[62ch] font-serif text-[17px] leading-[1.7] text-ink-2">
             The marketplace is a git repository. You add one YAML file
-            describing your model and pinning a commit; {approvals} CHAP
-            maintainers review it; the merge is the listing. Nothing else
-            grants access — there is no upload form and no account to create.
+            describing your chapkit service and pinning a commit and its
+            image; {approvals} CHAP maintainers review it; the merge is the
+            listing. Nothing else grants access — there is no upload form and
+            no account to create.
           </p>
         </div>
       </section>
@@ -120,7 +144,11 @@ export default function ContributePage() {
           <p className="mb-5 max-w-[76ch] font-serif text-[14px] leading-[1.65] text-ink-2">
             One file per model in{" "}
             <code className="font-mono text-[12.5px] text-ink">models/</code>.
-            Adding a version is a second, smaller PR appending to{" "}
+            Most of it is transcribed from your service&apos;s own{" "}
+            <code className="font-mono text-[12.5px] text-ink">
+              MLServiceInfo
+            </code>
+            . Adding a version is a second, smaller PR appending to{" "}
             <code className="font-mono text-[12.5px] text-ink">versions:</code>{" "}
             — reviewed the same way. The full format is documented in{" "}
             <code className="font-mono text-[12.5px] text-ink">
@@ -177,17 +205,20 @@ export default function ContributePage() {
           <div className="mt-8 rounded-[3px] border border-line bg-surface px-5 py-[18px]">
             <Kicker className="mb-2.5">After you submit</Kicker>
             <p className="font-serif text-[13.5px] leading-[1.65] text-ink-2">
-              {approvals} CHAP maintainers review the pinned code and the model
-              YAML. Once they approve and the PR merges, the model is listed as{" "}
-              <strong className="font-bold text-exp">Experimental</strong> with
-              its first verified version.
+              {approvals} CHAP maintainers review the pinned code, the image
+              and the model YAML. Once they approve and the PR merges, the pin
+              is{" "}
+              <strong className="font-bold text-verified">verified</strong> —
+              meaning it is the revision it claims to be and runs as a chapkit
+              service.
             </p>
             <div className="my-4 border-t border-line" />
             <p className="font-serif text-[13.5px] leading-[1.65] text-ink-2">
-              A model can move to{" "}
-              <strong className="font-bold text-verified">Stable</strong> after
-              benchmark results have been recorded on the reference datasets
-              and an active maintainer is committed to keeping it current.
+              The gate does not grade your forecasts. Your own{" "}
+              <strong className="font-bold text-ink">assessed status</strong>{" "}
+              stays exactly as you set it and is shown as your claim; raising
+              it is a PR against your own service, not something maintainers
+              do for you.
             </p>
           </div>
 

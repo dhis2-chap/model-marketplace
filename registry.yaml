@@ -7,8 +7,13 @@
 #
 # The site renders this repo — the repo stays the source of truth and the
 # review gate. See models/README.md for the per-model file format.
+#
+# Verification is about the pin, not the forecast: the gate checks that a
+# pinned revision is what it claims to be and runs as a chapkit service. What
+# the model's own authors will vouch for is a separate axis, carried per
+# model as `assessed_status` and surfaced as such by the site.
 
-schema_version: 1
+schema_version: 2
 
 marketplace:
   name: CHAP Model Marketplace
@@ -22,11 +27,14 @@ marketplace:
   repository: https://github.com/dhis2-chap/model-marketplace
   documentation:
     chap: https://chap.dhis2.org
-    # Only chapkit model services are supported for now; the install guide
-    # points at the chapkit integration page in the chap docs.
-    install: https://chap.dhis2.org/chap-modeling-platform/external_models/chapkit/
-    # The container runtimes chapkit models run in (chapkit-py, chapkit-r,
-    # chapkit-r-tidyverse, chapkit-r-inla, each with a -cli variant).
+    # Only chapkit model services are supported. Every listed model is a
+    # chapkit 2.0.0 service published as a container image; the install guide
+    # is chapkit's own deployment walkthrough.
+    install: https://dhis2-chap.github.io/chapkit/guides/deploying-to-chap-core/
+    # How CHAP talks to a running chapkit service over HTTP.
+    chap_chapkit: https://chap.dhis2.org/chap-modeling-platform/external_models/chapkit/
+    chapkit: https://dhis2-chap.github.io/chapkit/
+    # The chapkit base images the listed services are built on.
     runtimes: https://github.com/dhis2-chap/chapkit-images
 
 review_policy:
@@ -36,11 +44,15 @@ review_policy:
     repository and must be approved by three maintainers before merge.
 
 # Ordered list of whitelisted models. Each entry is a standalone YAML file;
-# the model's maturity set (stable | experimental) is declared inside the file.
+# whether it is a forecasting model or a template to copy is declared inside
+# the file as `kind`.
 models:
-  - models/ewars_template.yaml
-  - models/chap_pymc.yaml
-  - models/auto_regressive_monthly_v2.yaml
-  - models/mstl_arima.yaml
-  - models/mstl_multistep_model.yaml
-  - models/sarimax_xgboost_comoros.yaml
+  # Forecasting models.
+  - models/chapkit_ewars_model.yaml
+  - models/chapkit_ghr_model.yaml
+  - models/chapkit_rwanda_malaria_bym_model.yaml
+  - models/chapkit_simple_multistep_model.yaml
+  - models/auto_arima_chapkit.yaml
+  # Templates — scaffolding for model authors, not models.
+  - models/chapkit_minimalist_example_py.yaml
+  - models/chapkit_minimalist_example_r.yaml

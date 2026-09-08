@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { MaturityBadge, VerifiedChip } from "@/components/badges";
+import {
+  AssessedStatusBadge,
+  KindBadge,
+  VerifiedChip,
+} from "@/components/badges";
 import { CopyButton } from "@/components/copy";
 import { GitHubMark } from "@/components/icons";
 import { ModelDetailTabs } from "@/components/ModelDetailTabs";
@@ -68,12 +72,23 @@ function PinPanel({
           {channel.tag}
         </span>
       </div>
-      <div className="flex items-center gap-2 bg-surface px-3 py-2.5">
-        <span className="min-w-0 flex-1 truncate font-mono text-[12.5px] text-ink">
+      <div className="flex items-start gap-2 bg-surface px-3 py-2.5">
+        <span className="min-w-0 flex-1 font-mono text-[12.5px] leading-[1.5] text-ink [overflow-wrap:anywhere]">
           {channel.pinDisplay}
         </span>
         <CopyButton
           text={channel.pinFull}
+          accent={verifiedTone ? "verified" : "brand"}
+        />
+      </div>
+      {/* The deployable half of the pin. The sha- tag is built from the same
+          commit, so the two lines always describe one revision. */}
+      <div className="flex items-start gap-2 border-t border-line bg-surface-2 px-3 py-2.5">
+        <span className="min-w-0 flex-1 font-mono text-[12.5px] leading-[1.5] text-ink-2 [overflow-wrap:anywhere]">
+          {channel.image}
+        </span>
+        <CopyButton
+          text={channel.image}
           accent={verifiedTone ? "verified" : "brand"}
         />
       </div>
@@ -103,10 +118,10 @@ export default async function ModelPage({
     <>
       <div className="mb-6 flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-[11px] uppercase tracking-[0.1em] text-ink-3">
         <Link href="/" className="text-brand hover:text-brand-dark hover:underline">
-          Models
+          Catalog
         </Link>
         <span>/</span>
-        <span>{view.maturity === "stable" ? "Stable set" : "Experimental set"}</span>
+        <span>{view.kind === "model" ? "Models" : "Templates"}</span>
         <span>/</span>
         <span className="text-ink-2">{view.name}</span>
       </div>
@@ -116,8 +131,9 @@ export default async function ModelPage({
             <h1 className="font-brand text-[clamp(26px,5vw,40px)] font-extrabold leading-[1.02] tracking-[-0.025em] text-ink">
               {view.name}
             </h1>
-            <MaturityBadge maturity={view.maturity} size="md" suffix=" set" />
+            <KindBadge kind={view.kind} size="md" />
             <VerifiedChip approvals="3/3" />
+            <AssessedStatusBadge status={view.assessedStatus} size="md" />
           </div>
           <p className="mb-3.5 max-w-[64ch] font-serif text-[16px] leading-[1.65] text-ink-2">
             {view.summary}
@@ -147,7 +163,7 @@ export default async function ModelPage({
         <div className="flex w-full min-w-0 flex-col gap-2.5 lg:min-w-[400px] lg:max-w-[440px]">
           <PinPanel
             channel={view.stable}
-            note="newest verified pin — run this in production"
+            note="newest verified pin — commit and image"
             verifiedTone
           />
           <PinPanel channel={view.latest} note={latestNote} verifiedTone={false} />

@@ -56,49 +56,49 @@ describe("approvingReviewers", () => {
 
 describe("proposedPinsInFile", () => {
   const registry = loadRegistry();
-  const ewars = registry.models.find((m) => m.id === "ewars_template")!;
-  const v6 = ewars.versions.find((v) => v.version === "v6")!;
+  const ewars = registry.models.find((m) => m.id === "chapkit_ewars_model")!;
+  const v1 = ewars.versions.find((v) => v.version === "1.0.0")!;
 
-  const headWithV7 = [
-    "id: ewars_template",
-    "display_name: EWARS",
+  const headWithNewPin = [
+    "id: chapkit_ewars_model",
+    "display_name: CHAP-EWARS",
     "versions:",
-    "  - version: v7",
+    "  - version: 1.1.0",
     `    commit: ${"a".repeat(40)}`,
     "    status: unstable",
-    "  - version: v6",
-    `    commit: ${v6.commit}`,
+    "  - version: 1.0.0",
+    `    commit: ${v1.commit}`,
     "    status: verified",
   ].join("\n");
 
   it("reports only version tags main does not already pin", () => {
-    const pins = proposedPinsInFile("models/ewars_template.yaml", headWithV7, ewars);
+    const pins = proposedPinsInFile("models/chapkit_ewars_model.yaml", headWithNewPin, ewars);
     expect(pins).toEqual([
       {
-        modelId: "ewars_template",
-        displayName: "EWARS",
+        modelId: "chapkit_ewars_model",
+        displayName: "CHAP-EWARS",
         isNewModel: false,
-        versionTag: "v7",
+        versionTag: "1.1.0",
         commit: "a".repeat(40),
       },
     ]);
   });
 
   it("treats a re-pinned existing tag as a proposal", () => {
-    const repinned = headWithV7.replace(v6.commit, "b".repeat(40));
-    const pins = proposedPinsInFile("models/ewars_template.yaml", repinned, ewars);
-    expect(pins.map((p) => p.versionTag).sort()).toEqual(["v6", "v7"]);
+    const repinned = headWithNewPin.replace(v1.commit, "b".repeat(40));
+    const pins = proposedPinsInFile("models/chapkit_ewars_model.yaml", repinned, ewars);
+    expect(pins.map((p) => p.versionTag).sort()).toEqual(["1.0.0", "1.1.0"]);
   });
 
   it("reports nothing when the file matches what main lists", () => {
     const unchanged = [
-      "id: ewars_template",
+      "id: chapkit_ewars_model",
       "versions:",
-      "  - version: v6",
-      `    commit: ${v6.commit}`,
+      "  - version: 1.0.0",
+      `    commit: ${v1.commit}`,
     ].join("\n");
     expect(
-      proposedPinsInFile("models/ewars_template.yaml", unchanged, ewars),
+      proposedPinsInFile("models/chapkit_ewars_model.yaml", unchanged, ewars),
     ).toEqual([]);
   });
 

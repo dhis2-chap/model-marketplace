@@ -5,20 +5,16 @@ import { useState, type ReactNode } from "react";
 import { BENCHMARKS_LIVE } from "@/lib/flags";
 import type { ModelDetailView } from "@/lib/views";
 import {
+  AssessedStatusBadge,
   ChannelChip,
   Kicker,
-  MockDataChip,
   SoonPill,
   StatusBadge,
 } from "./badges";
 import { CodePanel } from "./CodePanel";
 import { CopyButton, PinChip, useCopy } from "./copy";
 import { CopyGlyph, SealIcon } from "./icons";
-import {
-  ComparisonChart,
-  CountrySkillBars,
-  CrpsByHorizonChart,
-} from "./charts";
+import { ComparisonChart, CrpsByHorizonChart } from "./charts";
 
 type Tab = "overview" | "versions" | "configs" | "benchmarks" | "install";
 
@@ -69,26 +65,52 @@ function Approvals({ v }: { v: ModelDetailView["versions"][number] }) {
 function OverviewTab({ view, goInstall }: { view: ModelDetailView; goInstall: () => void }) {
   const required = view.requiredCovariates.length
     ? view.requiredCovariates.map((c) => [c, "supplied automatically"] as const)
-    : ([["none", "this model takes no covariates"]] as const);
-  const additional = view.additionalCovariates.length
-    ? view.additionalCovariates.map((c) => [c, "declare in your configuration"] as const)
-    : ([["none", "nothing to supply"]] as const);
+    : ([["none", "the service declares no required covariates"]] as const);
+  const additional: readonly (readonly [string, string])[] = view
+    .defaultCovariates.length
+    ? view.defaultCovariates.map(
+        (c) => [c, "on by default — keep or clear it"] as const,
+      )
+    : view.allowFreeAdditional
+      ? ([["any", "the service accepts free-form extras"]] as const)
+      : ([["none", "the service accepts none"]] as const);
   return (
     <div className="grid items-start gap-10 lg:grid-cols-[1.5fr_1fr]">
       <div>
         <h2 className="mb-3 font-brand text-[22px] font-bold tracking-[-0.01em] text-ink">
-          About this model
+          About this {view.kind}
         </h2>
         <p className="mb-3.5 max-w-[74ch] text-[15px] leading-[1.7] text-ink-2 [text-wrap:pretty]">
           {view.summary}
         </p>
-        {view.mlprojectName ? (
-          <p className="mb-3.5 max-w-[74ch] text-[13px] leading-relaxed text-ink-3">
-            The MLproject name in the repository is{" "}
-            <code className="font-mono text-ink-2">{view.mlprojectName}</code>,
-            so chapkit serves it under that name.
+        {view.kind === "template" ? (
+          <p className="mb-3.5 max-w-[74ch] rounded-md border border-dashed border-exp bg-exp-tint px-3.5 py-2.5 text-[12.5px] leading-relaxed text-exp">
+            This is a template, not a forecasting model. It is listed so model
+            authors have a reviewed, running starting point to copy — do not
+            deploy it to make real forecasts.
           </p>
         ) : null}
+
+        {/* The author's own verdict, stated in their words, next to — and
+            visibly distinct from — the marketplace's verification. */}
+        <div className="mb-6 mt-6 rounded-md border border-line bg-surface p-4">
+          <div className="mb-2.5 flex flex-wrap items-center gap-2.5">
+            <AssessedStatusBadge status={view.assessedStatus} size="md" />
+            <span className="font-brand text-[10.5px] font-medium uppercase tracking-[0.1em] text-ink-3">
+              declared by the model authors
+            </span>
+          </div>
+          <p className="max-w-[74ch] text-[13px] leading-[1.6] text-ink-2">
+            {view.assessedBlurb} This is{" "}
+            <strong className="font-bold text-ink">{view.attribution.author}</strong>
+            &apos;s own assessment, read from the service&apos;s chapkit
+            metadata — not a marketplace judgement. The three maintainer
+            approvals on the pin say it is the revision it claims to be and
+            runs as a chapkit service; they say nothing about forecast
+            quality.
+          </p>
+        </div>
+
         <h3 className="mb-3 mt-7 font-brand text-[15px] font-medium text-ink">
           Covariates
         </h3>
@@ -108,7 +130,7 @@ function OverviewTab({ view, goInstall }: { view: ModelDetailView; goInstall: ()
           </div>
           <div className="rounded-md border border-line bg-surface p-4">
             <div className="mb-2.5 font-brand text-[10.5px] font-medium uppercase tracking-[0.1em] text-ink-3">
-              Additional · you supply
+              Additional continuous · you choose
             </div>
             <div className="flex flex-col gap-2">
               {additional.map(([name, note]) => (
@@ -118,32 +140,72 @@ function OverviewTab({ view, goInstall }: { view: ModelDetailView; goInstall: ()
                 </div>
               ))}
             </div>
+            <p className="mt-3 border-t border-line pt-2.5 text-[12px] leading-[1.5] text-ink-3">
+              {view.allowFreeAdditional
+                ? "The service allows free additional continuous covariates, so a configuration may name columns beyond the defaults."
+                : "The service refuses free additional continuous covariates — anything not listed here is rejected when the configuration is created."}
+            </p>
           </div>
         </div>
+
+        {view.attribution.citation ? (
+          <>
+            <h3 className="mb-2.5 mt-7 font-brand text-[15px] font-medium text-ink">
+              Citation
+            </h3>
+            <p className="max-w-[74ch] font-serif text-[13.5px] leading-[1.65] text-ink-2">
+              {view.attribution.citation}
+            </p>
+          </>
+        ) : null}
       </div>
       <div className="rounded-lg border border-line bg-surface-2 p-5">
-        <Kicker className="mb-3.5">Compatibility</Kicker>
+        <Kicker className="mb-3.5">Service contract</Kicker>
         {(
           [
+            ["Service id", view.serviceId],
             ["Period type", view.periodType],
-            [
-              "Max forecast horizon",
-              view.horizon ? `${view.horizon} periods` : "not declared",
-            ],
+            ["Forecast horizon", view.horizon],
+            ["Needs geometry", view.requiresGeo ? "yes" : "no"],
             ["Framework", view.framework],
             ["Covariate mode", view.covLabel],
-            ["Set", view.maturity],
+            ["chapkit", view.chapkitRequirement],
             ["Verified pins", String(view.verifiedPins)],
           ] as const
         ).map(([k, v]) => (
           <div
             key={k}
-            className="flex items-center justify-between border-b border-line py-2.5"
+            className="flex items-center justify-between gap-4 border-b border-line py-2.5"
           >
-            <span className="text-[13px] text-ink-2">{k}</span>
-            <span className="font-mono text-[12.5px] text-ink">{v}</span>
+            <span className="shrink-0 text-[13px] text-ink-2">{k}</span>
+            <span className="min-w-0 truncate text-right font-mono text-[12.5px] text-ink">
+              {v}
+            </span>
           </div>
         ))}
+        <div className="mt-3.5">
+          <Kicker className="mb-2">Runtime base image</Kicker>
+          <div className="font-mono text-[11.5px] leading-relaxed text-ink-2 [overflow-wrap:anywhere]">
+            {view.runtimeImage}
+          </div>
+        </div>
+        <div className="mt-3.5">
+          <Kicker className="mb-2">Contact</Kicker>
+          <div className="text-[12.5px] leading-relaxed text-ink-2">
+            {view.attribution.organization ?? view.org}
+            {view.attribution.contact ? (
+              <>
+                {" · "}
+                <a
+                  href={`mailto:${view.attribution.contact}`}
+                  className="text-brand hover:underline [overflow-wrap:anywhere]"
+                >
+                  {view.attribution.contact}
+                </a>
+              </>
+            ) : null}
+          </div>
+        </div>
         <button
           type="button"
           onClick={goInstall}
@@ -156,7 +218,7 @@ function OverviewTab({ view, goInstall }: { view: ModelDetailView; goInstall: ()
   );
 }
 
-/** Open-PR pins for this model: experimental until merged, shown with n/3. */
+/** Open-PR pins for this model: unverified until merged, shown with n/3. */
 function InReviewSection({ view }: { view: ModelDetailView }) {
   return (
     <div className="mb-6 overflow-hidden rounded-lg border border-dashed border-exp bg-surface">
@@ -209,6 +271,9 @@ function InReviewSection({ view }: { view: ModelDetailView }) {
   );
 }
 
+const VERSION_GRID =
+  "grid-cols-[110px_minmax(200px,1fr)_minmax(190px,0.8fr)_106px_170px_90px_80px]";
+
 function VersionsTab({
   view,
   onInstall,
@@ -226,9 +291,14 @@ function VersionsTab({
             Version pins
           </h2>
           <p className="max-w-[80ch] text-[13.5px] text-ink-2">
-            Each row is a git commit reviewed on its own. Three maintainer
-            approvals are required before a pin can be verified, and only
-            verified pins may be pointed at by the{" "}
+            Each row is one revision, reviewed on its own: a git commit and the
+            container image built from it. The image is tagged{" "}
+            <code className="font-mono text-[12.5px] text-ink">
+              sha-&lt;short commit&gt;
+            </code>
+            , so the two halves can never drift apart — and neither is{" "}
+            <code className="font-mono text-[12.5px] text-ink">:latest</code>.
+            Only verified pins may be pointed at by the{" "}
             <code className="font-mono text-[12.5px] text-ink">stable</code>{" "}
             channel.
           </p>
@@ -250,10 +320,13 @@ function VersionsTab({
         </div>
       </div>
       <div className="overflow-x-auto rounded-lg border border-line bg-surface">
-        <div className="min-w-[860px]">
-          <div className="grid grid-cols-[130px_minmax(220px,1fr)_116px_190px_100px_80px] gap-4 border-b border-line bg-surface-2 px-[18px] py-2.5 font-brand text-[10px] font-medium uppercase tracking-[0.1em] text-ink-3">
+        <div className="min-w-[1020px]">
+          <div
+            className={`grid ${VERSION_GRID} gap-4 border-b border-line bg-surface-2 px-[18px] py-2.5 font-brand text-[10px] font-medium uppercase tracking-[0.1em] text-ink-3`}
+          >
             <span>Version</span>
             <span>Commit pin</span>
+            <span>Image</span>
             <span>Status</span>
             <span>Approved by</span>
             <span className="text-right">Changelog</span>
@@ -271,7 +344,9 @@ function VersionsTab({
                     : "bg-surface"
                 }`}
               >
-                <div className="grid grid-cols-[130px_minmax(220px,1fr)_116px_190px_100px_80px] items-center gap-4 px-[18px] py-4">
+                <div
+                  className={`grid ${VERSION_GRID} items-center gap-4 px-[18px] py-4`}
+                >
                   <span className="flex flex-wrap items-center gap-1.5">
                     <span className="font-mono text-[13.5px] font-bold text-ink">
                       {v.tag}
@@ -283,6 +358,13 @@ function VersionsTab({
                   </span>
                   <span>
                     <PinChip display={v.pinDisplay} copyText={v.pinFull} variant="table" />
+                  </span>
+                  <span>
+                    <PinChip
+                      display={`:${v.imageTag}`}
+                      copyText={v.image}
+                      variant="table"
+                    />
                   </span>
                   <span>
                     <StatusBadge status={v.status} />
@@ -355,17 +437,19 @@ function ConfigsTab({ view }: { view: ModelDetailView }) {
         Verified configurations
       </h2>
       <p className="mb-6 max-w-[80ch] text-[13.5px] text-ink-2">
-        Configuration blocks shipped and reviewed alongside the pin. Each is a
-        valid standalone{" "}
+        Configuration blocks shipped and reviewed alongside the pin. Each one
+        is the flat object a chapkit service takes as{" "}
+        <code className="font-mono text-[12.5px] text-ink">data</code> on{" "}
         <code className="font-mono text-[12.5px] text-ink">
-          --model-configuration-yaml
+          POST /api/v1/configs
         </code>{" "}
-        file for <code className="font-mono text-[12.5px] text-ink">chap eval</code>{" "}
-        and{" "}
+        —{" "}
         <code className="font-mono text-[12.5px] text-ink">
-          chap evaluate-ensemble
-        </code>
-        .
+          prediction_periods
+        </code>{" "}
+        is required by chapkit itself, everything else is this model&apos;s own
+        option set. CHAP and the DHIS2 Modeling App create configurations the
+        same way.
       </p>
       <div className="flex flex-col gap-5">
         {view.configurations.map((config) => (
@@ -387,7 +471,10 @@ function ConfigsTab({ view }: { view: ModelDetailView }) {
                   {config.description}
                 </p>
               </div>
-              <CopyButton text={config.yaml} label="Copy YAML" size="md" />
+              <div className="flex shrink-0 flex-wrap gap-2">
+                <CopyButton text={config.yaml} label="Copy YAML" size="md" />
+                <CopyButton text={config.curl} label="Copy request" size="md" />
+              </div>
             </div>
             <CodePanel code={config.yaml} />
           </div>
@@ -412,7 +499,8 @@ function BenchmarksTab({ view }: { view: ModelDetailView }) {
           run, and exactly how they will be run is still being decided. Once
           that is settled, every score here will come from a controlled CHAP
           evaluation of this model&apos;s pinned commits — nothing
-          self-reported.
+          self-reported. Until then the only quality signal on this page is
+          the author&apos;s own assessed status, on the Overview tab.
         </p>
         <div className="rounded-lg border border-dashed border-line-strong bg-surface px-[26px] py-6">
           <div className="font-brand text-[15px] font-medium text-ink">
@@ -439,7 +527,6 @@ function BenchmarksTab({ view }: { view: ModelDetailView }) {
       </p>
     );
   }
-  const real = b.source === "real";
   const p = b.provenance;
   const benchmarkSummary = view.benchmarkSummary;
   return (
@@ -455,33 +542,27 @@ function BenchmarksTab({ view }: { view: ModelDetailView }) {
             backtests at the pinned commit.
           </p>
         </div>
-        {real && p ? (
-          <span className="inline-block rounded-[3px] border border-verified bg-verified-tint px-[9px] py-[5px] font-mono text-[11px] text-verified">
-            measured · {p.dataset} @ {p.versionTag}
-          </span>
-        ) : (
-          <MockDataChip />
-        )}
+        <span className="inline-block rounded-[3px] border border-verified bg-verified-tint px-[9px] py-[5px] font-mono text-[11px] text-verified">
+          measured · {p.dataset} @ {p.versionTag}
+        </span>
       </div>
-      {real && p ? (
-        <p className="mb-[18px] font-mono text-[12px] text-ink-3">
-          evaluated {p.evaluatedAt} · {p.harnessTool}
-          {p.runUrl ? (
-            <>
-              {" · "}
-              <a
-                href={p.runUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="text-brand hover:underline"
-              >
-                raw output
-              </a>
-            </>
-          ) : null}
-          {" · "}source: benchmarks/{view.id}/{p.versionTag}/{p.dataset}.yaml
-        </p>
-      ) : null}
+      <p className="mb-[18px] font-mono text-[12px] text-ink-3">
+        evaluated {p.evaluatedAt} · {p.harnessTool}
+        {p.runUrl ? (
+          <>
+            {" · "}
+            <a
+              href={p.runUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="text-brand hover:underline"
+            >
+              raw output
+            </a>
+          </>
+        ) : null}
+        {" · "}source: benchmarks/{view.id}/{p.versionTag}/{p.dataset}.yaml
+      </p>
       {b.headline.length > 0 ? (
         <div className="mb-5 grid grid-cols-2 gap-4 rounded-lg border border-line bg-surface-2 px-5 py-4 sm:grid-cols-4">
           {b.headline.map((h) => (
@@ -496,7 +577,7 @@ function BenchmarksTab({ view }: { view: ModelDetailView }) {
           ))}
         </div>
       ) : null}
-      <div className="grid gap-5 lg:grid-cols-3">
+      <div className="grid gap-5 lg:grid-cols-2">
         {b.crpsByHorizon.length > 0 ? (
           <div className="rounded-lg border border-line bg-surface p-[18px]">
             <div className="font-brand text-[13.5px] font-medium text-ink">
@@ -511,7 +592,6 @@ function BenchmarksTab({ view }: { view: ModelDetailView }) {
               crps={b.crpsByHorizon}
               baseline={b.baseline}
               shortName={view.shortName}
-              withSpreadBand={!real}
             />
           </div>
         ) : null}
@@ -521,20 +601,9 @@ function BenchmarksTab({ view }: { view: ModelDetailView }) {
               Model comparison
             </div>
             <div className="mb-3.5 text-[11.5px] text-ink-3">
-              Mean CRPS · {real && p ? p.dataset : "dengue-brazil-monthly"}
+              Mean CRPS · {p.dataset}
             </div>
             <ComparisonChart items={b.comparison} />
-          </div>
-        ) : null}
-        {b.countrySkill.length > 0 ? (
-          <div className="rounded-lg border border-line bg-surface p-[18px]">
-            <div className="font-brand text-[13.5px] font-medium text-ink">
-              Per-country performance
-            </div>
-            <div className="mb-3.5 text-[11.5px] text-ink-3">
-              Skill vs. baseline · positive is better
-            </div>
-            <CountrySkillBars rows={b.countrySkill} />
           </div>
         ) : null}
       </div>
@@ -588,32 +657,33 @@ function InstallTab({
 }) {
   const { copied, copy } = useCopy();
   const selected = view.versions.find((v) => v.tag === selectedTag) ?? null;
-  const pin = selected?.pinFull ?? view.stable.pinFull;
+  const image = selected?.image ?? view.stable.image;
   const pinDisplay = selected?.pinDisplay ?? view.stable.pinDisplay;
   const shortPin = pinDisplay.split("@")[1];
   const tag = selected?.tag ?? view.stable.tag;
-  const fullCommit = pin.split("@")[1] ?? "";
   const verified = selected ? selected.status === "verified" : true;
+  const overlay = `compose.${view.serviceId}.yml`;
+  const configExample = view.configurations[0];
   const steps = [
     {
-      title: verified ? "Copy the verified pin" : "Copy the version pin",
-      cmd: pin,
-      note: "Repo URL plus commit hash — the pin identifies the exact revision of the model you are about to run.",
+      title: verified ? "Pull the verified image" : "Pull the image",
+      cmd: `docker pull ${image}`,
+      note: "The sha- tag is built from the pinned commit, so it names one immutable revision. :latest moves; do not deploy it.",
     },
     {
-      title: "Check out the pinned revision",
-      cmd: `git clone ${view.repoUrl} ${view.id} && git -C ${view.id} checkout ${fullCommit}`,
-      note: "The pin is the contract — the same commit produces the same model everywhere.",
+      title: "Add a compose overlay next to chap-core",
+      cmd: `$EDITOR ${overlay}`,
+      note: `One service block: image ${image}, container port 8000 on a free host port, and SERVICEKIT_ORCHESTRATOR_URL pointing at chap. The service name must be unique across overlays — use ${view.serviceId}.`,
     },
     {
-      title: "Serve it with chapkit",
-      cmd: `chapkit mlproject run ./${view.id} --port 5001`,
-      note: "Run this from the model's own runtime environment (uv, conda or renv). Chapkit's MLproject runner turns the checked-out repository into a REST model service, no changes to the repo needed. A model that ships a prebuilt chapkit service image can be started with docker run -p 5001:8000 <image> instead.",
+      title: "Start the stack",
+      cmd: `docker compose -f compose.yml -f ${overlay} up -d`,
+      note: "The model self-registers with chap-core on startup and keeps the registration alive with a periodic ping. Registration only happens when SERVICEKIT_ORCHESTRATOR_URL is set — a bare docker run registers nothing.",
     },
     {
-      title: "Point chap at the running service",
-      cmd: "chap eval --model-name http://localhost:5001 --run-config.is-chapkit-model",
-      note: "chap talks to the service over HTTP from here on. To make it appear in the DHIS2 Modeling App, register the service with your CHAP instance — the chap docs cover registration.",
+      title: "Confirm chap-core sees it",
+      cmd: `curl -s http://localhost:8000/v2/services | grep ${view.serviceId}`,
+      note: `Look for the service id ${view.serviceId}. Once it is listed, the DHIS2 Modeling App picks the model up automatically — nothing to configure inside DHIS2.`,
     },
   ];
   return (
@@ -623,10 +693,11 @@ function InstallTab({
           Add to your CHAP instance
         </h2>
         <p className="mb-[18px] max-w-[76ch] text-[13.5px] text-ink-2">
-          The marketplace lists chapkit-run models only — each one runs as a
-          chapkit REST service that CHAP talks to over HTTP. Run the pinned
-          revision next to your CHAP instance. The pin is the contract — the
-          same commit produces the same service everywhere.
+          The marketplace lists chapkit services only. Every listing is a
+          published container image that talks to CHAP over HTTP and registers
+          itself with chap-core on startup. Run it beside your CHAP
+          deployment; the pin is the contract — the same commit, and the image
+          tagged from it, produce the same service everywhere.
         </p>
         <div className="mb-3.5 flex flex-wrap items-center gap-2">
           <Kicker>Version pin</Kicker>
@@ -664,13 +735,25 @@ function InstallTab({
             evaluation and development only, never on a production instance.
           </p>
         ) : null}
+        {view.kind === "template" ? (
+          <p className="mb-3.5 max-w-[76ch] rounded-md border border-dashed border-exp bg-exp-tint px-3.5 py-2.5 text-[12.5px] leading-relaxed text-exp">
+            This is a template. Running it is useful to see the round trip
+            work end to end; the forecasts it produces are placeholders.
+          </p>
+        ) : null}
+        {view.requiresGeo ? (
+          <p className="mb-3.5 max-w-[76ch] rounded-md border border-line-strong bg-surface-2 px-3.5 py-2.5 text-[12.5px] leading-relaxed text-ink-2">
+            This service requires geometry: chap has to send a GeoJSON
+            alongside the data, so the dataset must carry org-unit boundaries.
+          </p>
+        ) : null}
         <div className="overflow-hidden rounded-lg border border-line bg-code-bg">
           <div className="flex items-center gap-2 border-b border-white/10 px-4 py-[11px]">
             <span className="h-[9px] w-[9px] rounded-full bg-[#FF5F57]" />
             <span className="h-[9px] w-[9px] rounded-full bg-[#FEBC2E]" />
             <span className="h-[9px] w-[9px] rounded-full bg-[#28C840]" />
             <span className="ml-2 font-mono text-[11.5px] text-[#8A93A6]">
-              {view.id} · {tag} @ {shortPin}
+              {view.serviceId} · {tag} @ {shortPin}
             </span>
           </div>
           <div className="px-5 pb-[22px] pt-[18px]">
@@ -695,11 +778,11 @@ function InstallTab({
             ))}
             <button
               type="button"
-              onClick={() => copy(pin)}
+              onClick={() => copy(image)}
               className="flex h-9 w-full cursor-pointer items-center justify-center gap-2 rounded-[4px] border border-white/15 bg-white/5 font-brand text-[12.5px] font-medium text-[#D8DEE9] transition-colors hover:bg-white/10"
             >
               <CopyGlyph className="h-3 w-3" />
-              {copied === pin ? "Copied" : `Copy ${tag} pin`}
+              {copied === image ? "Copied" : `Copy ${tag} image ref`}
             </button>
           </div>
         </div>
@@ -725,10 +808,25 @@ function InstallTab({
             </span>
           </div>
         </div>
+        {configExample ? (
+          <div className="rounded-lg border border-line bg-surface-2 p-5">
+            <Kicker className="mb-2.5">Then create a configuration</Kicker>
+            <p className="text-[13px] leading-relaxed text-ink-2">
+              A running service holds no configuration until one is created.
+              The{" "}
+              <code className="font-mono text-[12.5px] text-ink">
+                {configExample.key}
+              </code>{" "}
+              block on the Configurations tab is a reviewed starting point, and
+              copies as the request that creates it.
+            </p>
+          </div>
+        ) : null}
         <div className="rounded-lg border border-line p-5">
           <Kicker className="mb-3.5">Full instructions</Kicker>
           <p className="text-[13px] leading-relaxed text-ink-2">
-            Only models run by{" "}
+            The compose overlay, the registration environment variables, host
+            port conventions and the troubleshooting list live in{" "}
             <a
               href="https://dhis2-chap.github.io/chapkit/"
               target="_blank"
@@ -736,10 +834,8 @@ function InstallTab({
               className="font-bold text-brand hover:text-brand-dark hover:underline"
             >
               chapkit
-            </a>{" "}
-            are supported for now. Running a chapkit service with CHAP —
-            images, ports, the data format and how a service registers with
-            your instance — is documented on the CHAP platform site.
+            </a>
+            &apos;s own deployment guide. Only chapkit services are supported.
           </p>
           <a
             href={view.installUrl}
@@ -747,7 +843,7 @@ function InstallTab({
             rel="noreferrer"
             className="mt-3 inline-block text-[13px] font-bold text-brand hover:text-brand-dark hover:underline"
           >
-            chap.dhis2.org → chapkit models
+            chapkit → deploying to chap-core
           </a>
         </div>
       </div>
@@ -762,7 +858,7 @@ export function ModelDetailTabs({
   view: ModelDetailView;
   header: ReactNode;
 }) {
-  const [tab, setTab] = useState<Tab>("versions");
+  const [tab, setTab] = useState<Tab>("overview");
   const [installTag, setInstallTag] = useState<string>(view.stable.tag);
   const openInstall = (tag: string) => {
     setInstallTag(tag);

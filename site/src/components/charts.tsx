@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  Area,
   Bar,
   BarChart,
   CartesianGrid,
@@ -21,8 +20,9 @@ import type {
 } from "recharts/types/component/DefaultTooltipContent";
 
 /**
- * Benchmark charts. All series rendered here come from mock fixtures
- * (lib/mock-benchmarks.ts) and sit under a "mock data · illustrative" chip.
+ * Benchmark charts. Every series rendered here comes from a real record in
+ * the repo's benchmarks/ store — there are no illustrative fixtures behind
+ * these components, and nothing here derives a value it was not given.
  */
 
 const AXIS_TICK = {
@@ -61,20 +61,16 @@ export function CrpsByHorizonChart({
   crps,
   baseline,
   shortName,
-  withSpreadBand = true,
 }: {
   crps: number[];
   baseline: number[];
   shortName: string;
-  /** The illustrative spread band belongs to the mock fixtures only. */
-  withSpreadBand?: boolean;
 }) {
   const hasBaseline = baseline.length > 0;
   const data = crps.map((v, i) => ({
     h: `h${i + 1}`,
     model: v,
     baseline: baseline[i],
-    band: withSpreadBand ? ([v * 0.8, v * 1.22] as [number, number]) : undefined,
   }));
   return (
     <div>
@@ -85,17 +81,6 @@ export function CrpsByHorizonChart({
             <XAxis dataKey="h" tick={AXIS_TICK} tickLine={false} axisLine={false} />
             <YAxis domain={[0, 1.4]} ticks={[0, 0.5, 0.9, 1.4]} tick={AXIS_TICK} tickLine={false} axisLine={false} />
             <Tooltip content={ChartTooltip} cursor={{ stroke: "var(--mp-border-strong)" }} />
-            {withSpreadBand ? (
-              <Area
-                dataKey="band"
-                name="spread"
-                stroke="none"
-                fill="var(--mp-brand)"
-                fillOpacity={0.12}
-                isAnimationActive={false}
-                tooltipType="none"
-              />
-            ) : null}
             {hasBaseline ? (
               <Line
                 dataKey="baseline"
@@ -178,33 +163,6 @@ export function ComparisonChart({
           <span className="h-2.5 w-2.5 rounded-[2px] border border-line-strong bg-surface-3" /> others in set
         </span>
       </div>
-    </div>
-  );
-}
-
-export function CountrySkillBars({
-  rows,
-}: {
-  rows: [country: string, skill: number][];
-}) {
-  return (
-    <div className="flex flex-col gap-[11px]">
-      {rows.map(([country, v]) => (
-        <div key={country}>
-          <div className="mb-1 flex items-baseline justify-between">
-            <span className="text-[12px] text-ink">{country}</span>
-            <span className="font-mono text-[11px] text-ink-2">
-              +{Math.round(v * 100)}%
-            </span>
-          </div>
-          <div className="h-2 overflow-hidden rounded-[2px] bg-surface-3">
-            <div
-              className="h-2 rounded-[2px] bg-brand"
-              style={{ width: `${Math.min(100, Math.round(v * 100))}%` }}
-            />
-          </div>
-        </div>
-      ))}
     </div>
   );
 }

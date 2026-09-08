@@ -4,23 +4,33 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useMemo, useState, type ReactNode } from "react";
 import type { InReviewPinView, ModelCardView } from "@/lib/views";
-import { MaturityBadge, VerifiedInline } from "./badges";
+import {
+  ASSESSED_STATUS_COPY,
+  ASSESSED_STATUS_ORDER,
+} from "@/lib/presentation";
+import type { AssessedStatus } from "@/lib/schema";
+import { AssessedStatusBadge, KindBadge, VerifiedInline } from "./badges";
 import { PinChip } from "./copy";
 import { MagnifierIcon, SealIcon } from "./icons";
-import { Sparkline } from "./Sparkline";
 
-type SetFilter = "all" | "stable" | "experimental";
-type Filters = Partial<Record<"period" | "cov" | "fw", string>>;
+type SetFilter = "all" | "model" | "template";
+type Filters = Partial<Record<"period" | "cov" | "lang" | "geo", string>>;
 
 const CHIPS: { label: string; key: keyof Filters; val: string }[] = [
   { label: "monthly", key: "period", val: "monthly" },
   { label: "climate-driven", key: "cov", val: "climate" },
   { label: "no covariates", key: "cov", val: "none" },
-  { label: "python", key: "fw", val: "python" },
-  { label: "R / INLA", key: "fw", val: "inla" },
+  { label: "needs geometry", key: "geo", val: "yes" },
+  { label: "Python", key: "lang", val: "Python" },
+  { label: "R", key: "lang", val: "R" },
 ];
 
-function matches(m: ModelCardView, q: string, filters: Filters): boolean {
+function matches(
+  m: ModelCardView,
+  q: string,
+  filters: Filters,
+  statuses: Set<AssessedStatus>,
+): boolean {
   if (q) {
     const hay =
       `${m.name} ${m.summary} ${m.framework} ${m.repo} ${m.covLabel}`.toLowerCase();
@@ -31,12 +41,17 @@ function matches(m: ModelCardView, q: string, filters: Filters): boolean {
     return false;
   if (filters.cov === "none" && !["none", "both"].includes(m.covMode))
     return false;
-  if (filters.fw && !m.framework.toLowerCase().includes(filters.fw))
-    return false;
+  if (filters.geo === "yes" && !m.requiresGeo) return false;
+  if (filters.lang && m.language !== filters.lang) return false;
+  if (statuses.size > 0 && !statuses.has(m.assessedStatus)) return false;
   return true;
 }
 
-/** A restrained catalog entry; maturity is communicated by its badge. */
+/**
+ * A restrained catalog entry. Two independent signals ride the header: what
+ * the marketplace verified (the pin) and what the author will vouch for (the
+ * assessed status). They are deliberately not merged into one badge.
+ */
 function ModelCard({ m }: { m: ModelCardView }) {
   return (
     <Link
@@ -50,16 +65,24 @@ function ModelCard({ m }: { m: ModelCardView }) {
           </h3>
           <div className="truncate font-mono text-[11px] text-ink-3">{m.repo}</div>
         </div>
-        <MaturityBadge maturity={m.maturity} />
+        <KindBadge kind={m.kind} />
       </div>
-      <div className="px-[18px] pt-3.5">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2 px-[18px] pt-3.5">
         <VerifiedInline approvals={m.approvals} detail={m.framework} />
+      </div>
+      <div className="px-[18px] pt-2.5">
+        <AssessedStatusBadge status={m.assessedStatus} />
       </div>
       <p className="flex-1 px-[18px] pt-3 text-[13.5px] leading-[1.6] text-ink-2 [text-wrap:pretty]">
         {m.summary}
       </p>
       <div className="flex flex-wrap gap-1.5 px-[18px] pt-4">
-        {[m.periodType, m.covLabel, m.horizon ? `horizon ${m.horizon}` : null]
+        {[
+          m.periodType,
+          m.covLabel,
+          m.horizon,
+          m.requiresGeo ? "needs geometry" : null,
+        ]
           .filter(Boolean)
           .map((tag) => (
             <span
@@ -70,19 +93,6 @@ function ModelCard({ m }: { m: ModelCardView }) {
             </span>
           ))}
       </div>
-      {m.spark.length > 0 ? (
-        <div className="px-[18px] pt-4">
-          <div className="mb-1.5 flex items-baseline justify-between">
-            <span className="font-mono text-[9.5px] uppercase tracking-[0.14em] text-ink-3">
-              {m.sparkLabel}
-            </span>
-            <span className="font-mono text-[11px] text-ink-2">
-              {m.spark[m.spark.length - 1].toFixed(2)}
-            </span>
-          </div>
-          <Sparkline values={m.spark} />
-        </div>
-      ) : null}
       <div className="mt-4 flex items-center justify-between gap-3 border-t border-line px-[18px] py-3">
         <span className="flex min-w-0 flex-1 items-center gap-2">
           <span className="shrink-0 font-mono text-[9.5px] font-bold uppercase tracking-[0.08em] text-verified">
@@ -100,8 +110,60 @@ function ModelCard({ m }: { m: ModelCardView }) {
 
 export interface MarketplaceStatsView {
   models: number;
+  templates: number;
   verifiedPins: number;
   reviews: number;
+}
+
+/**
+ * The AssessedStatus scale, spelled out. Without it the coloured badges read
+ * as a marketplace grade, which is exactly what they are not.
+ */
+function AssessedStatusLegend({
+  present,
+}: {
+  present: AssessedStatus[];
+}) {
+  return (
+    <div className="mt-10 overflow-hidden rounded-md border border-line bg-surface">
+      <div className="border-b border-line bg-surface-2 px-5 py-3">
+        <span className="font-brand text-[13px] font-bold text-ink">
+          Author-assessed status
+        </span>
+        <p className="mt-1 max-w-[92ch] text-[12.5px] leading-[1.6] text-ink-2">
+          Each model service declares how far its own authors have validated
+          it — chapkit&apos;s <code className="font-mono text-[12px] text-ink">AssessedStatus</code>,
+          shown here verbatim. It is separate from the marketplace review
+          gate: three maintainer approvals mean a pin is what it claims to be
+          and runs as a chapkit service, never that its forecasts are good. No
+          model in the catalog is self-assessed{" "}
+          <strong className="font-bold text-ink">green</strong> yet.
+        </p>
+      </div>
+      <dl className="divide-y divide-line">
+        {ASSESSED_STATUS_ORDER.map((status) => (
+          <div
+            key={status}
+            className={`grid items-baseline gap-x-4 gap-y-1 px-5 py-2.5 sm:grid-cols-[168px_1fr] ${
+              present.includes(status) ? "" : "opacity-55"
+            }`}
+          >
+            <dt>
+              <AssessedStatusBadge status={status} />
+            </dt>
+            <dd className="text-[12.5px] leading-[1.55] text-ink-2">
+              {ASSESSED_STATUS_COPY[status].blurb}
+              {present.includes(status) ? null : (
+                <span className="ml-1.5 font-mono text-[11px] text-ink-3">
+                  — none listed
+                </span>
+              )}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  );
 }
 
 /** Open proposals from PR ingestion — in-review pins with their n/3 count. */
@@ -178,6 +240,7 @@ export function CatalogClient({
   const [set, setSet] = useState<SetFilter>("all");
   const [q, setQ] = useState(urlQuery);
   const [filters, setFilters] = useState<Filters>({});
+  const [statuses, setStatuses] = useState<Set<AssessedStatus>>(new Set());
   // Adopt a new header-search query mid-session (state adjusted during render).
   const [prevUrlQuery, setPrevUrlQuery] = useState(urlQuery);
   if (prevUrlQuery !== urlQuery) {
@@ -188,32 +251,50 @@ export function CatalogClient({
   const counts = useMemo(
     () => ({
       all: models.length,
-      stable: models.filter((m) => m.maturity === "stable").length,
-      experimental: models.filter((m) => m.maturity === "experimental").length,
+      model: models.filter((m) => m.kind === "model").length,
+      template: models.filter((m) => m.kind === "template").length,
     }),
     [models],
   );
 
-  const visible = models.filter(
-    (m) => (set === "all" || m.maturity === set) && matches(m, q, filters),
+  const presentStatuses = useMemo(
+    () =>
+      ASSESSED_STATUS_ORDER.filter((s) =>
+        models.some((m) => m.assessedStatus === s),
+      ),
+    [models],
   );
-  const anyFilter = q !== "" || Object.values(filters).some(Boolean);
+
+  const visible = models.filter(
+    (m) => (set === "all" || m.kind === set) && matches(m, q, filters, statuses),
+  );
+  const anyFilter =
+    q !== "" || Object.values(filters).some(Boolean) || statuses.size > 0;
 
   const toggleChip = (key: keyof Filters, val: string) =>
     setFilters((f) => ({ ...f, [key]: f[key] === val ? undefined : val }));
+  const toggleStatus = (status: AssessedStatus) =>
+    setStatuses((prev) => {
+      const next = new Set(prev);
+      if (next.has(status)) next.delete(status);
+      else next.add(status);
+      return next;
+    });
   const clearAll = () => {
     setFilters({});
+    setStatuses(new Set());
     setQ("");
   };
 
   const TABS: { id: SetFilter; label: string; bar: string }[] = [
-    { id: "all", label: "All sets", bar: "bg-ink" },
-    { id: "stable", label: "Stable", bar: "bg-verified" },
-    { id: "experimental", label: "Experimental", bar: "bg-exp" },
+    { id: "all", label: "Everything", bar: "bg-ink" },
+    { id: "model", label: "Models", bar: "bg-verified" },
+    { id: "template", label: "Templates", bar: "bg-exp" },
   ];
 
   const STATS = [
-    [stats.models, "Models listed", "text-ink"],
+    [stats.models, "Forecasting models", "text-ink"],
+    [stats.templates, "Author templates", "text-ink"],
     [stats.verifiedPins, "Verified version pins", "text-ink"],
     [stats.reviews, "Maintainer reviews", "text-ink"],
   ] as const;
@@ -227,16 +308,16 @@ export function CatalogClient({
             <div className="pb-9 sm:pb-10">
               <div className="mb-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-[12px]">
                 <span className="text-brand">Review-gated registry</span>
-                <span className="text-ink-2">git-backed · chapkit-run</span>
+                <span className="text-ink-2">git-backed · chapkit services</span>
               </div>
               <h1 className="mb-6 max-w-[15ch] font-brand text-[clamp(34px,4vw,50px)] font-semibold leading-[1.1] tracking-[-0.03em] [text-wrap:balance]">
                 Verified forecasting models for climate &amp; health
               </h1>
               <p className="mb-9 max-w-[46ch] text-[15px] leading-[1.7] text-ink-2">
-                Every model and every version pin in the CHAP marketplace is
-                reviewed and approved by three maintainers before it is listed.
-                Pin a commit, run it in your CHAP instance, reproduce the
-                result.
+                Every model here is a chapkit service, pinned to a commit and
+                a published image, and approved by three maintainers before it
+                is listed. What each model&apos;s own authors will vouch for is
+                shown separately, in their words.
               </p>
               <div className="relative max-w-[520px]">
                 <MagnifierIcon className="pointer-events-none absolute left-4 top-4 h-[18px] w-[18px] text-ink-3" />
@@ -245,7 +326,7 @@ export function CatalogClient({
                 <input
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
-                  placeholder={`Search ${stats.models} verified models — try “INLA” or “no covariates”`}
+                  placeholder={`Search ${counts.all} listings — try “INLA” or “no covariates”`}
                   aria-label="Search models"
                   className="h-13 w-full rounded-md border border-line-strong bg-paper pl-11 pr-4 text-[16px] text-ink placeholder:text-ink-3 focus:border-brand sm:text-[14px]"
                 />
@@ -256,7 +337,7 @@ export function CatalogClient({
         </div>
         {/* Registry totals. */}
         <div className="relative border-t border-line">
-          <div className="mx-auto grid max-w-[1240px] grid-cols-3 gap-x-4 px-5 sm:flex sm:items-stretch sm:gap-x-0 sm:px-8">
+          <div className="mx-auto grid max-w-[1240px] grid-cols-2 gap-x-4 px-5 sm:flex sm:items-stretch sm:gap-x-0 sm:px-8">
             {STATS.map(([n, label, tone], i) => (
               <div
                 key={label}
@@ -337,9 +418,46 @@ export function CatalogClient({
           </div>
         </div>
 
+        {/* Author-assessed status filter — its own row, because it means
+            something different from the filters above. */}
+        <div className="mb-[18px] flex flex-wrap items-center gap-2">
+          <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-3">
+            Author-assessed
+          </span>
+          {presentStatuses.map((status) => {
+            const active = statuses.has(status);
+            const copy = ASSESSED_STATUS_COPY[status];
+            return (
+              <button
+                key={status}
+                type="button"
+                onClick={() => toggleStatus(status)}
+                title={copy.blurb}
+                aria-pressed={active}
+                className={`h-7 cursor-pointer rounded-[2px] border px-[11px] font-mono text-[11.5px] transition-colors ${
+                  active
+                    ? "border-brand bg-brand-tint text-brand"
+                    : "border-line bg-surface text-ink-2 hover:border-line-strong"
+                }`}
+              >
+                {copy.label}
+                <span className="ml-1.5 text-ink-3">
+                  {models.filter((m) => m.assessedStatus === status).length}
+                </span>
+              </button>
+            );
+          })}
+          <a
+            href="#assessed-status"
+            className="font-brand text-[12px] font-bold text-brand hover:underline"
+          >
+            What do these mean?
+          </a>
+        </div>
+
         <p className="mb-[18px] font-mono text-[11.5px] text-ink-3">
-          {visible.length} {visible.length === 1 ? "model" : "models"} · every
-          pin below carries three maintainer approvals
+          {visible.length} {visible.length === 1 ? "listing" : "listings"} ·
+          every pin below carries three maintainer approvals
         </p>
 
         {visible.length > 0 ? (
@@ -370,6 +488,10 @@ export function CatalogClient({
         {inReview.length > 0 ? (
           <InReviewStrip pins={inReview} asOf={inReviewAsOf} />
         ) : null}
+
+        <div id="assessed-status" className="scroll-mt-24">
+          <AssessedStatusLegend present={presentStatuses} />
+        </div>
 
         {/* Review policy. */}
         <div className="mt-10 overflow-hidden rounded-md border border-line bg-surface text-ink">

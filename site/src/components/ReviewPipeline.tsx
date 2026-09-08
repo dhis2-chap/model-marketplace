@@ -28,33 +28,33 @@ const STEPS: {
 }[] = [
   {
     title: "Open a pull request",
-    body: "Add one model YAML file pinning a repo URL and commit hash. No account, no upload form.",
+    body: "Add one model YAML file pinning a commit and the image tag built from it. No account, no upload form.",
     tag: "you",
     tone: "brand",
   },
   {
     title: "Automated checks",
-    body: "CI validates the YAML against the registry schema and checks that the channel pointers resolve.",
+    body: "CI validates the YAML against the registry schema: the channel pointers resolve, the commit and image tag agree, and every configuration fits the declared bounds.",
     tag: "ci",
     tone: "neutral",
   },
   {
     title: "Three maintainer reviews",
-    body: "Maintainers verify the commit, the declared covariates, and an end-to-end run. Three approvals required.",
+    body: "Maintainers check the pinned revision, the declared service contract, and that the service registers and completes a run. Three approvals required.",
     tag: "review gate",
     tone: "verified",
   },
   {
     title: "Merged = listed",
-    body: "The merge commit is the listing. Your model appears in the Experimental set with its first verified pin.",
-    tag: "experimental",
-    tone: "exp",
+    body: "The merge commit is the listing. Your model appears with its first verified pin, at the assessed status you declared.",
+    tag: "verified pin",
+    tone: "verified",
   },
   {
-    title: "Promoted to Stable",
-    body: "Verified pins, benchmarks on the reference datasets, and a maintenance commitment earn promotion.",
-    tag: "stable",
-    tone: "verified",
+    title: "Your own status, your own call",
+    body: "Raising your assessed status as validation work lands is a PR against your service. The gate verifies pins; it never grades forecasts.",
+    tag: "authors",
+    tone: "exp",
   },
 ];
 

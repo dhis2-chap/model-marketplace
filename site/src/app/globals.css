@@ -22,6 +22,21 @@
   --mp-danger: #c84141;
   --mp-danger-tint: #fbecec;
 
+  /* chapkit's AssessedStatus scale — the model author's own judgement of how
+     far their model has been validated. Five fixed steps, so they get their
+     own tokens rather than borrowing the verified/exp pair, which means
+     something else entirely (the marketplace review gate). */
+  --mp-as-green: #157a44;
+  --mp-as-green-tint: #e3f4ea;
+  --mp-as-yellow: #8a6a08;
+  --mp-as-yellow-tint: #fbf1d6;
+  --mp-as-orange: #c14e0d;
+  --mp-as-orange-tint: #fcefe4;
+  --mp-as-red: #c84141;
+  --mp-as-red-tint: #fbecec;
+  --mp-as-gray: #687681;
+  --mp-as-gray-tint: #eceff1;
+
   /* The plotting board — near-constant across themes. */
   --mp-board: #293741;
   --mp-board-2: #34434e;
@@ -62,6 +77,17 @@
   --mp-danger: #e58484;
   --mp-danger-tint: #2e1717;
 
+  --mp-as-green: #80c39c;
+  --mp-as-green-tint: #263b30;
+  --mp-as-yellow: #dcc07a;
+  --mp-as-yellow-tint: #3a331f;
+  --mp-as-orange: #dfa574;
+  --mp-as-orange-tint: #3e3127;
+  --mp-as-red: #e58484;
+  --mp-as-red-tint: #2e1717;
+  --mp-as-gray: #929fa9;
+  --mp-as-gray-tint: #2d343b;
+
   --mp-board: #1b2228;
   --mp-board-2: #2b353e;
   --mp-board-line: rgba(158, 203, 238, 0.11);
@@ -91,6 +117,16 @@
   --color-exp-tint: var(--mp-exp-tint);
   --color-danger: var(--mp-danger);
   --color-danger-tint: var(--mp-danger-tint);
+  --color-as-green: var(--mp-as-green);
+  --color-as-green-tint: var(--mp-as-green-tint);
+  --color-as-yellow: var(--mp-as-yellow);
+  --color-as-yellow-tint: var(--mp-as-yellow-tint);
+  --color-as-orange: var(--mp-as-orange);
+  --color-as-orange-tint: var(--mp-as-orange-tint);
+  --color-as-red: var(--mp-as-red);
+  --color-as-red-tint: var(--mp-as-red-tint);
+  --color-as-gray: var(--mp-as-gray);
+  --color-as-gray-tint: var(--mp-as-gray-tint);
   --color-board: var(--mp-board);
   --color-board-2: var(--mp-board-2);
   --color-board-line: var(--mp-board-line);

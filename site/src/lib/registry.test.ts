@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   displayPin,
   fullPin,
+  imageRef,
   loadRegistry,
   marketplaceStats,
   stableVersion,
@@ -28,14 +29,41 @@ describe("the real registry", () => {
     }
   });
 
-  it("derives pins in both display and chap-consumable form", () => {
-    const ewars = registry.models.find((m) => m.id === "ewars_template");
+  it("lists chapkit services only — every model has a published image", () => {
+    for (const model of registry.models) {
+      expect(model.source.image).toMatch(/^ghcr\.io\//);
+      expect(model.source.runtime_image).toMatch(
+        /^ghcr\.io\/dhis2-chap\/chapkit-/,
+      );
+      for (const version of model.versions) {
+        expect(version.chapkit).toContain("2.0.0");
+      }
+    }
+  });
+
+  it("derives the source pin in both display and chap-consumable form", () => {
+    const ewars = registry.models.find((m) => m.id === "chapkit_ewars_model");
     expect(ewars).toBeDefined();
     const stable = stableVersion(ewars!);
-    expect(displayPin(ewars!, stable)).toBe("github.com/dhis2-chap/ewars_template@cdd06ed");
-    expect(fullPin(ewars!, stable)).toBe(
-      "https://github.com/dhis2-chap/ewars_template@cdd06ed61ee0f6eccab1fc9b9d74eb52cb122539",
+    expect(displayPin(ewars!, stable)).toBe(
+      "github.com/chap-models/chapkit_ewars_model@fa880a1",
     );
+    expect(fullPin(ewars!, stable)).toBe(
+      "https://github.com/chap-models/chapkit_ewars_model@fa880a1d8621c6c5bf60c472c299c40b5568ecd0",
+    );
+  });
+
+  it("derives the deployable image pin from the same commit", () => {
+    const ewars = registry.models.find((m) => m.id === "chapkit_ewars_model")!;
+    expect(imageRef(ewars, stableVersion(ewars))).toBe(
+      "ghcr.io/chap-models/chapkit_ewars_model:sha-fa880a1",
+    );
+  });
+
+  it("counts forecasting models and templates separately", () => {
+    const stats = marketplaceStats(registry);
+    expect(stats.models + stats.templates).toBe(registry.models.length);
+    expect(stats.templates).toBeGreaterThan(0);
   });
 
   it("counts reviews as verified pins × required approvals", () => {
@@ -46,20 +74,38 @@ describe("the real registry", () => {
 
 describe("schema refinements", () => {
   const base = {
-    schema_version: 1,
+    schema_version: 2,
     id: "my_model",
+    service_id: "my-model",
     display_name: "My Model",
-    maturity: "experimental",
+    kind: "model",
+    assessed_status: "red",
     summary: "A test model.",
-    source: { repository: "https://github.com/org/my_model" },
+    source: {
+      repository: "https://github.com/org/my_model",
+      image: "ghcr.io/org/my_model",
+      runtime_image: "ghcr.io/dhis2-chap/chapkit-py",
+    },
+    attribution: { author: "Someone" },
     maintainers: [],
-    compatibility: { period_types: ["monthly"] },
-    covariates: { required: ["population"], additional_continuous: ["rainfall"] },
-    channels: { stable: "v1", latest: "v1" },
+    compatibility: {
+      period_types: ["monthly"],
+      min_prediction_periods: 1,
+      max_prediction_periods: 12,
+      requires_geo: false,
+    },
+    covariates: {
+      required: ["population"],
+      defaults: ["rainfall"],
+      allow_free_additional: false,
+    },
+    channels: { stable: "1.0.0", latest: "1.0.0" },
     versions: [
       {
-        version: "v1",
+        version: "1.0.0",
         commit: "1111111111111111111111111111111111111111",
+        image_tag: "sha-1111111",
+        chapkit: ">=2.0.0,<3",
         status: "verified",
         verified_by: [],
         changelog: null,
@@ -72,8 +118,13 @@ describe("schema refinements", () => {
     expect(modelSchema.safeParse(base).success).toBe(true);
   });
 
+  it("rejects a service id that is not the kebab-case model id", () => {
+    const bad = { ...base, service_id: "something-else" };
+    expect(modelSchema.safeParse(bad).success).toBe(false);
+  });
+
   it("rejects a channel pointing at a missing version", () => {
-    const bad = { ...base, channels: { stable: "v1", latest: "v9" } };
+    const bad = { ...base, channels: { stable: "1.0.0", latest: "9.9.9" } };
     expect(modelSchema.safeParse(bad).success).toBe(false);
   });
 
@@ -93,31 +144,81 @@ describe("schema refinements", () => {
     expect(modelSchema.safeParse(bad).success).toBe(false);
   });
 
-  it("rejects configurations repeating a required covariate", () => {
+  it("rejects a sha- image tag that disagrees with the commit", () => {
+    const bad = {
+      ...base,
+      versions: [{ ...base.versions[0], image_tag: "sha-2222222" }],
+    };
+    expect(modelSchema.safeParse(bad).success).toBe(false);
+  });
+
+  it("accepts a non-sha image tag without cross-checking it", () => {
+    const ok = {
+      ...base,
+      versions: [{ ...base.versions[0], image_tag: "1.0.0" }],
+    };
+    expect(modelSchema.safeParse(ok).success).toBe(true);
+  });
+
+  it("rejects prediction_periods outside the declared range", () => {
     const bad = {
       ...base,
       configurations: {
         monthly: {
           description: "test",
-          user_option_values: {},
-          additional_continuous_covariates: ["population"],
+          config: { prediction_periods: 24 },
         },
       },
     };
     expect(modelSchema.safeParse(bad).success).toBe(false);
   });
 
-  it("rejects configurations using undeclared covariates", () => {
+  it("rejects configurations repeating a required covariate", () => {
     const bad = {
       ...base,
       configurations: {
         monthly: {
           description: "test",
-          user_option_values: {},
-          additional_continuous_covariates: ["mean_temperature"],
+          config: {
+            prediction_periods: 3,
+            additional_continuous_covariates: ["population"],
+          },
         },
       },
     };
     expect(modelSchema.safeParse(bad).success).toBe(false);
+  });
+
+  it("rejects undeclared covariates when the service refuses free extras", () => {
+    const bad = {
+      ...base,
+      configurations: {
+        monthly: {
+          description: "test",
+          config: {
+            prediction_periods: 3,
+            additional_continuous_covariates: ["mean_temperature"],
+          },
+        },
+      },
+    };
+    expect(modelSchema.safeParse(bad).success).toBe(false);
+  });
+
+  it("allows any covariate when the service accepts free extras", () => {
+    const ok = {
+      ...base,
+      covariates: { ...base.covariates, allow_free_additional: true },
+      configurations: {
+        monthly: {
+          description: "test",
+          config: {
+            prediction_periods: 3,
+            additional_continuous_covariates: ["mean_temperature"],
+          },
+        },
+      },
+    };
+    expect(modelSchema.safeParse(ok).success).toBe(true);
   });
 });

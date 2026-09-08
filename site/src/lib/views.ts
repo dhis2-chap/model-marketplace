@@ -1,7 +1,10 @@
 import { stringify } from "yaml";
 import {
+  compactPin,
   displayPin,
   fullPin,
+  imageRef,
+  repoPath,
   latestVersion,
   repoOrg,
   repoSlug,
@@ -10,16 +13,22 @@ import {
   verifiedCount,
   type Registry,
 } from "./registry";
-import type { Benchmark, Model, ModelVersion } from "./schema";
+import type {
+  AssessedStatus,
+  Benchmark,
+  Model,
+  ModelKind,
+  ModelVersion,
+} from "./schema";
 import { benchmarksFor, skillOf } from "./benchmarks";
 import type { Proposals } from "./proposals";
 import {
+  ASSESSED_STATUS_COPY,
   COV_LABEL,
   datasetNameFor,
   presentationFor,
   type CovariateMode,
 } from "./presentation";
-import { BASELINE_CRPS, mockBenchmarksFor } from "./mock-benchmarks";
 
 /**
  * Serializable card view of a model, built on the server and handed to the
@@ -31,20 +40,26 @@ export interface ModelCardView {
   name: string;
   shortName: string;
   repo: string;
-  maturity: "stable" | "experimental";
+  kind: ModelKind;
+  /** The author's own AssessedStatus — never a marketplace verdict. */
+  assessedStatus: AssessedStatus;
+  assessedLabel: string;
   summary: string;
   framework: string;
+  language: string;
   covMode: CovariateMode;
   covLabel: string;
   periodType: string;
-  horizon: number | null;
+  /** e.g. "1–24 periods" — the service's declared forecast bounds. */
+  horizon: string;
+  requiresGeo: boolean;
   stableTag: string;
+  /** Card-sized pin: repository name + short commit. */
   stablePinDisplay: string;
   stablePinFull: string;
+  /** Immutable image pin for the stable channel. */
+  image: string;
   approvals: string;
-  /** Real CRPS-by-horizon when the store has it; labeled mock otherwise. */
-  spark: number[];
-  sparkLabel: string;
 }
 
 /** The model's stored results, stable-channel pin first, then by dataset. */
@@ -57,32 +72,37 @@ function recordsFor(model: Model, benchmarks: Benchmark[]): Benchmark[] {
   );
 }
 
-export function toCardView(model: Model, benchmarks: Benchmark[]): ModelCardView {
+/** "0–100 periods", or "3 periods" when the bounds coincide. */
+export function horizonLabel(model: Model): string {
+  const { min_prediction_periods: min, max_prediction_periods: max } =
+    model.compatibility;
+  return min === max ? `${max} periods` : `${min}–${max} periods`;
+}
+
+export function toCardView(model: Model): ModelCardView {
   const pres = presentationFor(model.id);
   const stable = stableVersion(model);
-  const real = recordsFor(model, benchmarks).find(
-    (b) => b.metrics.crps_by_horizon,
-  );
   return {
     id: model.id,
     name: model.display_name,
     shortName: pres.shortName,
-    repo: repoSlug(model),
-    maturity: model.maturity,
+    repo: repoPath(model),
+    kind: model.kind,
+    assessedStatus: model.assessed_status,
+    assessedLabel: ASSESSED_STATUS_COPY[model.assessed_status].label,
     summary: model.summary,
     framework: pres.framework,
+    language: pres.language,
     covMode: pres.covMode,
     covLabel: COV_LABEL[pres.covMode],
     periodType: model.compatibility.period_types.join(" · "),
-    horizon: model.compatibility.max_prediction_length ?? null,
+    horizon: horizonLabel(model),
+    requiresGeo: model.compatibility.requires_geo,
     stableTag: model.channels.stable,
-    stablePinDisplay: displayPin(model, stable),
+    stablePinDisplay: compactPin(model, stable),
     stablePinFull: fullPin(model, stable),
+    image: imageRef(model, stable),
     approvals: `${verifiedCount(model) > 0 ? "3/3" : "0/3"}`,
-    spark: real
-      ? real.metrics.crps_by_horizon!
-      : (mockBenchmarksFor(model.id)?.spark ?? []),
-    sparkLabel: real ? `CRPS by horizon · ${real.dataset}` : "CRPS · illustrative",
   };
 }
 
@@ -148,12 +168,16 @@ export interface ChannelView {
   status: string;
   pinDisplay: string;
   pinFull: string;
+  image: string;
 }
 
 export interface VersionRowView {
   tag: string;
   pinDisplay: string;
   pinFull: string;
+  image: string;
+  imageTag: string;
+  chapkit: string;
   status: string;
   verifiedBy: string[];
   changelog: string | null;
@@ -165,44 +189,60 @@ export interface VersionRowView {
 export interface ConfigurationView {
   key: string;
   description: string;
+  /** The flat chapkit config, as YAML for reading and keeping in a file. */
   yaml: string;
+  /** The same config as the request that creates it on a running service. */
+  curl: string;
 }
 
 export interface BenchmarksView {
-  /** "real" renders from the benchmarks/ store; "mock" from labeled fixtures. */
-  source: "real" | "mock";
   crpsByHorizon: number[];
   baseline: number[];
   comparison: { name: string; mean: number; self: boolean }[];
-  countrySkill: [string, number][];
-  /** Real only: provenance + headline metrics of the primary record. */
+  /** Provenance + headline metrics of the primary record. */
   provenance: {
     dataset: string;
     versionTag: string;
     evaluatedAt: string;
     harnessTool: string;
     runUrl: string | null;
-  } | null;
+  };
   headline: { label: string; value: string }[];
 }
 
 export interface ModelDetailView {
   id: string;
+  serviceId: string;
   name: string;
   shortName: string;
-  maturity: "stable" | "experimental";
+  kind: ModelKind;
+  assessedStatus: AssessedStatus;
+  assessedLabel: string;
+  assessedBlurb: string;
   summary: string;
   repo: string;
   repoUrl: string;
   org: string;
   maintainers: string[];
-  mlprojectName: string | null;
+  attribution: {
+    author: string;
+    organization: string | null;
+    contact: string | null;
+    citation: string | null;
+  };
   framework: string;
   covLabel: string;
   periodType: string;
-  horizon: number | null;
+  horizon: string;
+  minPeriods: number;
+  maxPeriods: number;
+  requiresGeo: boolean;
+  allowFreeAdditional: boolean;
   requiredCovariates: string[];
-  additionalCovariates: string[];
+  defaultCovariates: string[];
+  imageBase: string;
+  runtimeImage: string;
+  chapkitRequirement: string;
   stable: ChannelView;
   latest: ChannelView;
   latestSameAsStable: boolean;
@@ -233,26 +273,30 @@ function toChannelView(
     status: version.status,
     pinDisplay: displayPin(model, version),
     pinFull: fullPin(model, version),
+    image: imageRef(model, version),
   };
 }
 
-/** Serialize a configuration block back to the standalone
- * --model-configuration-yaml file a user copies into chap. */
-function configYaml(config: {
-  user_option_values: Record<string, unknown>;
-  additional_continuous_covariates?: string[];
-}): string {
-  const doc: Record<string, unknown> = {
-    user_option_values: config.user_option_values,
-  };
-  if (config.additional_continuous_covariates?.length) {
-    doc.additional_continuous_covariates =
-      config.additional_continuous_covariates;
-  }
-  return stringify(doc, { lineWidth: 0 });
+/** The flat chapkit config, as a YAML document. */
+function configYaml(config: Record<string, unknown>): string {
+  return stringify(config, { lineWidth: 0 });
 }
 
-function realBenchmarksView(
+/**
+ * The request that creates this configuration on a running service. chapkit
+ * takes `{name, data}` on POST /api/v1/configs, where `data` is the flat
+ * config object validated against the model's own config schema.
+ */
+function configCurl(key: string, config: Record<string, unknown>): string {
+  const body = JSON.stringify({ name: key, data: config });
+  return [
+    "curl -X POST http://localhost:8000/api/v1/configs \\",
+    "  -H 'Content-Type: application/json' \\",
+    `  -d '${body}'`,
+  ].join("\n");
+}
+
+function benchmarksView(
   model: Model,
   registry: Registry,
   benchmarks: Benchmark[],
@@ -302,11 +346,9 @@ function realBenchmarksView(
   ];
 
   return {
-    source: "real",
     crpsByHorizon: primary.metrics.crps_by_horizon ?? [],
     baseline: primary.metrics.baseline_crps_by_horizon ?? [],
     comparison: comparison.length > 1 ? comparison : [],
-    countrySkill: [],
     provenance: {
       dataset: primary.dataset,
       versionTag: primary.version,
@@ -315,32 +357,6 @@ function realBenchmarksView(
       runUrl: primary.harness.run ?? null,
     },
     headline,
-  };
-}
-
-function mockBenchmarksView(
-  model: Model,
-  registry: Registry,
-): BenchmarksView | null {
-  const mocks = mockBenchmarksFor(model.id);
-  if (!mocks) return null;
-  const comparison = registry.models
-    .map((m) => ({
-      name: presentationFor(m.id).abbrev,
-      mean: mockBenchmarksFor(m.id)?.comparisonMean,
-      self: m.id === model.id,
-    }))
-    .filter((c): c is { name: string; mean: number; self: boolean } =>
-      typeof c.mean === "number",
-    );
-  return {
-    source: "mock",
-    crpsByHorizon: mocks.crpsByHorizon,
-    baseline: BASELINE_CRPS,
-    comparison,
-    countrySkill: mocks.countrySkill,
-    provenance: null,
-    headline: [],
   };
 }
 
@@ -355,24 +371,41 @@ export function toDetailView(
   const latest = latestVersion(model);
   const required = registry.index.review_policy.required_approvals;
   const verifiedPins = verifiedCount(model);
+  const assessed = ASSESSED_STATUS_COPY[model.assessed_status];
 
   return {
     id: model.id,
+    serviceId: model.service_id,
     name: model.display_name,
     shortName: pres.shortName,
-    maturity: model.maturity,
+    kind: model.kind,
+    assessedStatus: model.assessed_status,
+    assessedLabel: assessed.label,
+    assessedBlurb: assessed.blurb,
     summary: model.summary,
     repo: repoSlug(model),
     repoUrl: model.source.repository,
     org: repoOrg(model),
     maintainers: model.maintainers,
-    mlprojectName: model.source.mlproject_name ?? null,
+    attribution: {
+      author: model.attribution.author,
+      organization: model.attribution.organization ?? null,
+      contact: model.attribution.contact ?? null,
+      citation: model.attribution.citation ?? null,
+    },
     framework: pres.framework,
     covLabel: COV_LABEL[pres.covMode],
     periodType: model.compatibility.period_types.join(" · "),
-    horizon: model.compatibility.max_prediction_length ?? null,
+    horizon: horizonLabel(model),
+    minPeriods: model.compatibility.min_prediction_periods,
+    maxPeriods: model.compatibility.max_prediction_periods,
+    requiresGeo: model.compatibility.requires_geo,
+    allowFreeAdditional: model.covariates.allow_free_additional,
     requiredCovariates: model.covariates.required,
-    additionalCovariates: model.covariates.additional_continuous,
+    defaultCovariates: model.covariates.defaults,
+    imageBase: model.source.image,
+    runtimeImage: model.source.runtime_image,
+    chapkitRequirement: stable.chapkit,
     stable: toChannelView(model, "stable", stable),
     latest: toChannelView(model, "latest", latest),
     latestSameAsStable: model.channels.stable === model.channels.latest,
@@ -380,6 +413,9 @@ export function toDetailView(
       tag: v.version,
       pinDisplay: displayPin(model, v),
       pinFull: fullPin(model, v),
+      image: imageRef(model, v),
+      imageTag: v.image_tag,
+      chapkit: v.chapkit,
       status: v.status,
       verifiedBy: v.verified_by,
       changelog: v.changelog,
@@ -392,15 +428,14 @@ export function toDetailView(
     ),
     inReviewAsOf: fetchedAtLabel(proposals.fetchedAt),
     configurations: Object.entries(model.configurations).map(
-      ([key, config]) => ({
+      ([key, configuration]) => ({
         key,
-        description: config.description,
-        yaml: configYaml(config),
+        description: configuration.description,
+        yaml: configYaml(configuration.config),
+        curl: configCurl(key, configuration.config),
       }),
     ),
-    benchmarks:
-      realBenchmarksView(model, registry, benchmarks) ??
-      mockBenchmarksView(model, registry),
+    benchmarks: benchmarksView(model, registry, benchmarks),
     benchmarkSummary:
       benchmarks.length > 0
         ? {

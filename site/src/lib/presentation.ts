@@ -1,9 +1,10 @@
+import type { AssessedStatus } from "./schema";
+
 /**
  * Editorial, site-side metadata the registry YAML does not carry (yet).
  * Facts about the model repositories — framework, how the model uses
  * covariates — that may migrate into the YAML in a schema_version bump.
- * Nothing here is fabricated data; benchmark mocks live in
- * mock-benchmarks.ts and are labeled as such in the UI.
+ * Nothing here is fabricated data.
  */
 
 export type CovariateMode = "climate" | "none" | "both";
@@ -11,6 +12,8 @@ export type CovariateMode = "climate" | "none" | "both";
 export interface Presentation {
   /** e.g. "R · INLA" — what the model is implemented with. */
   framework: string;
+  /** The implementation language, for the catalog's language filter. */
+  language: "Python" | "R";
   /** How the model relates to climate covariates. */
   covMode: CovariateMode;
   /** Short name for tight chart labels. */
@@ -26,35 +29,54 @@ export const COV_LABEL: Record<CovariateMode, string> = {
 };
 
 export const PRESENTATION: Record<string, Presentation> = {
-  ewars_template: {
+  chapkit_ewars_model: {
     framework: "R · INLA",
-    covMode: "climate",
-    shortName: "EWARS",
+    language: "R",
+    covMode: "both",
+    shortName: "CHAP-EWARS",
     abbrev: "EWARS",
   },
-  chap_pymc: {
-    framework: "Python · PyMC",
+  chapkit_ghr_model: {
+    framework: "R · INLA · GHRmodel",
+    language: "R",
     covMode: "climate",
-    shortName: "CHAP PyMC",
-    abbrev: "PyMC",
+    shortName: "GHRmodel",
+    abbrev: "GHR",
   },
-  auto_regressive_monthly_v2: {
-    framework: "PyTorch · GRU",
+  chapkit_rwanda_malaria_bym_model: {
+    framework: "R · INLA",
+    language: "R",
     covMode: "climate",
-    shortName: "AR Monthly v2",
-    abbrev: "AR v2",
+    shortName: "Rwanda BYM",
+    abbrev: "BYM",
   },
-  mstl_arima: {
-    framework: "Python · statsforecast",
-    covMode: "none",
-    shortName: "MSTL + ARIMA",
-    abbrev: "MSTL+A",
-  },
-  mstl_multistep_model: {
-    framework: "Python · statsforecast + sklearn",
+  chapkit_simple_multistep_model: {
+    framework: "Python · scikit-learn + skpro",
+    language: "Python",
     covMode: "both",
-    shortName: "MSTL Multistep",
-    abbrev: "MSTL-M",
+    shortName: "Simple Multistep",
+    abbrev: "Multi",
+  },
+  auto_arima_chapkit: {
+    framework: "R · fable",
+    language: "R",
+    covMode: "none",
+    shortName: "Auto-ARIMA",
+    abbrev: "ARIMA",
+  },
+  chapkit_minimalist_example_py: {
+    framework: "Python · scikit-learn",
+    language: "Python",
+    covMode: "none",
+    shortName: "Minimalist (Py)",
+    abbrev: "Min-py",
+  },
+  chapkit_minimalist_example_r: {
+    framework: "R · lm()",
+    language: "R",
+    covMode: "none",
+    shortName: "Minimalist (R)",
+    abbrev: "Min-R",
   },
 };
 
@@ -62,12 +84,59 @@ export function presentationFor(id: string): Presentation {
   return (
     PRESENTATION[id] ?? {
       framework: "—",
+      language: "Python",
       covMode: "both",
       shortName: id,
       abbrev: id.slice(0, 6),
     }
   );
 }
+
+/* ---------- assessed status ---------- */
+
+/**
+ * chapkit's AssessedStatus scale, worded for the site. These are the
+ * *author's* own definitions, transcribed from chapkit
+ * (`src/chapkit/api/service_builder.py`) — the marketplace does not
+ * reinterpret them and does not assign them.
+ */
+export const ASSESSED_STATUS_COPY: Record<
+  AssessedStatus,
+  { label: string; blurb: string }
+> = {
+  green: {
+    label: "Validated",
+    blurb: "Validated by its authors and ready for production use.",
+  },
+  yellow: {
+    label: "Ready for testing",
+    blurb: "Ready for more rigorous testing on diverse data.",
+  },
+  orange: {
+    label: "Promising",
+    blurb:
+      "Shows promise on limited data. Needs manual configuration and careful evaluation.",
+  },
+  red: {
+    label: "Prototype",
+    blurb:
+      "Highly experimental prototype, not validated — for early experimentation only.",
+  },
+  gray: {
+    label: "Not for general use",
+    blurb:
+      "Not intended for use: deprecated, or kept only for reference and backwards compatibility.",
+  },
+};
+
+/** Best-to-worst, for sorting and for rendering the scale in order. */
+export const ASSESSED_STATUS_ORDER: AssessedStatus[] = [
+  "green",
+  "yellow",
+  "orange",
+  "red",
+  "gray",
+];
 
 /** Display names for the dataset ids used in benchmarks/. */
 export const DATASET_NAME: Record<string, string> = {
