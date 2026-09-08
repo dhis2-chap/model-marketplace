@@ -139,3 +139,5 @@ export const DATASET_NAME: Record<string, string> = {
 export function datasetNameFor(id: string): string {
   return DATASET_NAME[id] ?? id.replace(/-/g, " ");
 }
+
+/* gate fast-path probe — this branch is not for merging */
