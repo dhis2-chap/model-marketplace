@@ -138,8 +138,13 @@ function MobileNav({
 }) {
   const [open, setOpen] = useState(false);
 
-  // The sheet is a route-level control: any navigation closes it.
-  useEffect(() => setOpen(false), [pathname]);
+  // Any navigation closes the sheet — including back/forward, which the
+  // link handlers below never see (state adjusted during render).
+  const [prevPathname, setPrevPathname] = useState(pathname);
+  if (prevPathname !== pathname) {
+    setPrevPathname(pathname);
+    setOpen(false);
+  }
 
   useEffect(() => {
     if (!open) return;

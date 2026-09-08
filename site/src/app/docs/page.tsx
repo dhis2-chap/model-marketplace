@@ -47,8 +47,8 @@ const ENTRIES = [
 
 export default function DocsPage() {
   return (
-    <main className="mx-auto max-w-[1240px] px-5 sm:px-8 pb-24 pt-16">
-      <div className="grid gap-x-16 gap-y-10 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.45fr)]">
+    <main className="mx-auto max-w-[1240px] px-5 pb-20 pt-11 sm:px-8 sm:pb-24 sm:pt-16">
+      <div className="grid gap-x-10 gap-y-9 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.45fr)] xl:gap-x-16">
         <div>
           <div className="mb-4 font-mono text-[10.5px] uppercase tracking-[0.18em] text-brand">
             Reference

@@ -13,7 +13,7 @@ const LinkClass =
 export function Footer() {
   return (
     <footer className="board-panel border-t border-line text-board-ink">
-      <div className="mx-auto grid max-w-[1240px] gap-x-10 gap-y-10 px-5 sm:px-8 pb-10 pt-12 md:grid-cols-[1.5fr_1fr_1fr]">
+      <div className="mx-auto grid max-w-[1240px] gap-x-10 gap-y-9 px-5 pb-10 pt-11 sm:grid-cols-2 sm:px-8 sm:pt-12 md:grid-cols-[1.5fr_1fr_1fr]">
         <div>
           <div className="flex items-center gap-3">
             <Dhis2Mark className="h-6 w-auto text-fan" />

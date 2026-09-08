@@ -483,7 +483,7 @@ function BenchmarksTab({ view }: { view: ModelDetailView }) {
         </p>
       ) : null}
       {b.headline.length > 0 ? (
-        <div className="mb-5 grid gap-4 rounded-lg border border-line bg-surface-2 px-5 py-4 sm:grid-cols-4">
+        <div className="mb-5 grid grid-cols-2 gap-4 rounded-lg border border-line bg-surface-2 px-5 py-4 sm:grid-cols-4">
           {b.headline.map((h) => (
             <div key={h.label}>
               <div className="font-brand text-[22px] font-medium leading-none text-ink">
@@ -773,13 +773,13 @@ export function ModelDetailTabs({
       <div className="border-b border-line bg-surface-2">
         <div className="mx-auto max-w-[1240px] px-5 sm:px-8 pt-[22px]">
           {header}
-          <div className="flex gap-0.5 overflow-x-auto">
+          <div className="no-scrollbar -mx-5 flex gap-0.5 overflow-x-auto px-5 sm:mx-0 sm:px-0">
             {TABS.map((t) => (
               <button
                 key={t.id}
                 type="button"
                 onClick={() => setTab(t.id)}
-                className={`flex shrink-0 cursor-pointer items-center gap-1.5 border-b-[3px] bg-transparent px-4 pb-3 pt-[11px] font-brand text-[12px] font-bold uppercase tracking-[0.07em] ${
+                className={`flex shrink-0 cursor-pointer items-center gap-1.5 border-b-[3px] bg-transparent px-3 pb-3 pt-[11px] font-brand text-[12px] font-bold uppercase tracking-[0.07em] sm:px-4 ${
                   tab === t.id
                     ? "border-brand text-ink"
                     : "border-transparent text-ink-2 hover:text-ink"

@@ -16,7 +16,7 @@ function BenchmarksComingSoon() {
   return (
     <main>
       <section className="border-b border-line bg-surface">
-        <div className="mx-auto max-w-[1240px] px-5 sm:px-8 pb-12 pt-16">
+        <div className="mx-auto max-w-[1240px] px-5 pb-10 pt-11 sm:px-8 sm:pb-12 sm:pt-16">
           <span className="font-mono text-[10.5px] uppercase tracking-[0.18em] text-exp">
             Coming soon
           </span>
@@ -77,7 +77,7 @@ export default function BenchmarksPage() {
   return (
     <main>
       <section className="border-b border-line bg-surface">
-        <div className="mx-auto grid max-w-[1240px] items-end gap-x-14 gap-y-10 px-5 sm:px-8 pb-10 pt-16 lg:grid-cols-[minmax(0,1fr)_400px]">
+        <div className="mx-auto grid max-w-[1240px] items-end gap-x-14 gap-y-10 px-5 pb-10 pt-11 sm:px-8 sm:pt-16 lg:grid-cols-[minmax(0,1fr)_400px]">
           <div>
             <span className="font-mono text-[10.5px] uppercase tracking-[0.18em] text-exp">
               {records.length === 0

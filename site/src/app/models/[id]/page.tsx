@@ -101,7 +101,7 @@ export default async function ModelPage({
 
   const header = (
     <>
-      <div className="mb-6 flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.1em] text-ink-3">
+      <div className="mb-6 flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-[11px] uppercase tracking-[0.1em] text-ink-3">
         <Link href="/" className="text-brand hover:text-brand-dark hover:underline">
           Models
         </Link>
@@ -110,10 +110,10 @@ export default async function ModelPage({
         <span>/</span>
         <span className="text-ink-2">{view.name}</span>
       </div>
-      <div className="grid items-start gap-10 pb-[22px] lg:grid-cols-[1fr_auto]">
-        <div>
+      <div className="grid items-start gap-7 pb-[22px] lg:grid-cols-[1fr_auto] lg:gap-10">
+        <div className="min-w-0">
           <div className="mb-3 flex flex-wrap items-center gap-3">
-            <h1 className="font-brand text-[clamp(30px,3.4vw,40px)] font-extrabold leading-[1.02] tracking-[-0.025em] text-ink">
+            <h1 className="font-brand text-[clamp(26px,5vw,40px)] font-extrabold leading-[1.02] tracking-[-0.025em] text-ink">
               {view.name}
             </h1>
             <MaturityBadge maturity={view.maturity} size="md" suffix=" set" />
@@ -135,14 +135,16 @@ export default async function ModelPage({
               href={view.repoUrl}
               target="_blank"
               rel="noreferrer"
-              className="flex items-center gap-1.5 text-brand hover:text-brand-dark hover:underline"
+              className="flex min-w-0 items-center gap-1.5 text-brand hover:text-brand-dark hover:underline"
             >
-              <GitHubMark className="h-[13px] w-[13px]" />
-              <span className="font-mono text-[12px]">{view.repo}</span>
+              <GitHubMark className="h-[13px] w-[13px] shrink-0" />
+              <span className="font-mono text-[12px] [overflow-wrap:anywhere]">
+                {view.repo}
+              </span>
             </a>
           </div>
         </div>
-        <div className="flex w-full flex-col gap-2.5 lg:min-w-[400px] lg:max-w-[440px]">
+        <div className="flex w-full min-w-0 flex-col gap-2.5 lg:min-w-[400px] lg:max-w-[440px]">
           <PinPanel
             channel={view.stable}
             note="newest verified pin — run this in production"

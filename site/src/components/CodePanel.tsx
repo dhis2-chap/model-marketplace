@@ -65,7 +65,7 @@ export function CodePanel({
       {lines.map((line, i) => (
         <div
           key={i}
-          className="flex gap-4 font-mono text-[12.5px] leading-[1.75]"
+          className="flex w-max min-w-full gap-4 font-mono text-[12.5px] leading-[1.75]"
         >
           <span
             className="select-none text-right"

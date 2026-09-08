@@ -223,8 +223,8 @@ export function CatalogClient({
       {/* Introduction and a compact forecast illustration. */}
       <section className="relative overflow-hidden border-b border-line bg-surface text-ink">
         <div className="mx-auto max-w-[1240px] px-5 sm:px-8">
-          <div className="grid items-end gap-x-14 gap-y-4 pt-12 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]">
-            <div className="pb-10">
+          <div className="grid items-end gap-x-14 gap-y-4 pt-10 sm:pt-12 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]">
+            <div className="pb-9 sm:pb-10">
               <div className="mb-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-[12px]">
                 <span className="text-brand">Review-gated registry</span>
                 <span className="text-ink-2">git-backed · chapkit-run</span>
@@ -240,12 +240,14 @@ export function CatalogClient({
               </p>
               <div className="relative max-w-[520px]">
                 <MagnifierIcon className="pointer-events-none absolute left-4 top-4 h-[18px] w-[18px] text-ink-3" />
+                {/* 16px on phones — anything smaller and iOS Safari zooms
+                    the page in when the field takes focus. */}
                 <input
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
                   placeholder={`Search ${stats.models} verified models — try “INLA” or “no covariates”`}
                   aria-label="Search models"
-                  className="h-13 w-full rounded-md border border-line-strong bg-paper pl-11 pr-4 text-[14px] text-ink placeholder:text-ink-3 focus:border-brand"
+                  className="h-13 w-full rounded-md border border-line-strong bg-paper pl-11 pr-4 text-[16px] text-ink placeholder:text-ink-3 focus:border-brand sm:text-[14px]"
                 />
               </div>
             </div>
@@ -254,7 +256,7 @@ export function CatalogClient({
         </div>
         {/* Registry totals. */}
         <div className="relative border-t border-line">
-          <div className="mx-auto grid max-w-[1240px] grid-cols-3 gap-x-5 px-5 sm:px-8 sm:flex sm:items-stretch sm:gap-x-0">
+          <div className="mx-auto grid max-w-[1240px] grid-cols-3 gap-x-4 px-5 sm:flex sm:items-stretch sm:gap-x-0 sm:px-8">
             {STATS.map(([n, label, tone], i) => (
               <div
                 key={label}
@@ -263,11 +265,11 @@ export function CatalogClient({
                 }`}
               >
                 <div
-                  className={`font-brand text-[24px] font-semibold leading-none tracking-[-0.02em] ${tone}`}
+                  className={`font-brand text-[21px] font-semibold leading-none tracking-[-0.02em] sm:text-[24px] ${tone}`}
                 >
                   {n}
                 </div>
-                <div className="mt-2 text-[12px] text-ink-2">
+                <div className="mt-2 text-[11px] leading-[1.35] text-ink-2 sm:text-[12px]">
                   {label}
                 </div>
               </div>
@@ -281,14 +283,14 @@ export function CatalogClient({
 
       {/* Toolbar + grid */}
       <section className="mx-auto max-w-[1240px] px-5 pb-20 pt-8 sm:px-8">
-        <div className="mb-5 flex flex-wrap items-end justify-between gap-6 border-b border-line-strong">
-          <div className="flex gap-0.5">
+        <div className="mb-5 flex flex-wrap items-end justify-between gap-x-6 gap-y-2 border-b border-line-strong">
+          <div className="no-scrollbar flex max-w-full gap-0.5 overflow-x-auto">
             {TABS.map((tab) => (
               <button
                 key={tab.id}
                 type="button"
                 onClick={() => setSet(tab.id)}
-                className={`relative flex cursor-pointer items-center gap-2 whitespace-nowrap bg-transparent px-4 pb-3.5 pt-2.5 font-brand text-[13px] font-medium ${
+                className={`relative flex shrink-0 cursor-pointer items-center gap-2 whitespace-nowrap bg-transparent px-3 pb-3.5 pt-2.5 font-brand text-[13px] font-medium sm:px-4 ${
                   set === tab.id ? "text-ink" : "text-ink-2"
                 }`}
               >

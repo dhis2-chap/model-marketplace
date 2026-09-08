@@ -199,8 +199,8 @@ export function CountrySkillBars({
           </div>
           <div className="h-2 overflow-hidden rounded-[2px] bg-surface-3">
             <div
-              className="h-2 max-w-full rounded-[2px] bg-brand"
-              style={{ width: Math.round(v * 240) }}
+              className="h-2 rounded-[2px] bg-brand"
+              style={{ width: `${Math.min(100, Math.round(v * 100))}%` }}
             />
           </div>
         </div>

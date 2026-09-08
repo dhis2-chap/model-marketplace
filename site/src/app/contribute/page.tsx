@@ -87,7 +87,7 @@ export default function ContributePage() {
   return (
     <>
       <section className="border-b border-line bg-surface">
-        <div className="mx-auto max-w-[1240px] px-5 sm:px-8 py-16">
+        <div className="mx-auto max-w-[1240px] px-5 py-11 sm:px-8 sm:py-16">
           <div className="mb-5 font-mono text-[10.5px] uppercase tracking-[0.18em] text-brand">
             Contribute a model
           </div>
@@ -110,8 +110,10 @@ export default function ContributePage() {
         <ReviewPipeline />
       </section>
 
-      <section className="mx-auto grid max-w-[1240px] items-start gap-10 px-5 sm:px-8 py-12 lg:grid-cols-[1.25fr_1fr]">
-        <div>
+      <section className="mx-auto grid max-w-[1240px] items-start gap-10 px-5 py-10 sm:px-8 sm:py-12 lg:grid-cols-[1.25fr_1fr]">
+        {/* min-w-0: without it the grid track sizes to the widest YAML line
+            instead of letting the code panel scroll. */}
+        <div className="min-w-0">
           <h2 className="mb-1.5 font-brand text-[22px] font-bold tracking-[-0.01em] text-ink">
             The model YAML file
           </h2>
@@ -136,7 +138,7 @@ export default function ContributePage() {
             <CodePanel code={EXAMPLE_YAML} gutterWidth={18} />
           </div>
         </div>
-        <aside>
+        <aside className="min-w-0">
           <div className="border-t-2 border-ink pt-5">
             <div className="mb-2 flex items-baseline justify-between gap-4">
               <h2 className="font-brand text-[22px] font-bold tracking-[-0.01em] text-ink">
