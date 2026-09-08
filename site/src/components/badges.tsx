@@ -4,8 +4,10 @@ import { ASSESSED_STATUS_COPY } from "@/lib/presentation";
 import type { AssessedStatus, ModelKind } from "@/lib/schema";
 
 /**
- * Model / Template badge. A template is scaffolding to copy when writing a
- * model, not something to forecast with — dashed border, everywhere.
+ * Template marker. A template is scaffolding to copy when writing a model,
+ * not something to forecast with — dashed border, everywhere. Models get no
+ * badge at all: the catalog tabs already carry that axis, and a word printed
+ * on five of seven listings only crowds out the signals that vary.
  */
 export function KindBadge({
   kind,
@@ -14,18 +16,14 @@ export function KindBadge({
   kind: ModelKind;
   size?: "sm" | "md";
 }) {
-  const isModel = kind === "model";
+  if (kind === "model") return null;
   return (
     <span
-      className={`inline-block shrink-0 rounded-[2px] font-brand font-bold uppercase tracking-[0.09em] ${
+      className={`inline-block shrink-0 rounded-[2px] border border-dashed border-exp bg-exp-tint font-brand font-bold uppercase tracking-[0.09em] text-exp ${
         size === "md" ? "px-2 py-1 text-[10px]" : "px-[7px] py-[3px] text-[9.5px]"
-      } ${
-        isModel
-          ? "border border-solid border-line-strong bg-surface-3 text-ink-2"
-          : "border border-dashed border-exp bg-exp-tint text-exp"
       }`}
     >
-      {isModel ? "Model" : "Template"}
+      Template
     </span>
   );
 }
@@ -77,26 +75,20 @@ export function AssessedStatusBadge({
   );
 }
 
-/** Inline "Verified 3/3" row used on cards. */
-export function VerifiedInline({
-  approvals,
-  detail,
-}: {
-  approvals: string;
-  detail?: ReactNode;
-}) {
+/**
+ * The review gate, on a catalog card: a seal sitting on the pin it certifies.
+ * Every listed pin carries the same three approvals, so spelling it out per
+ * card said nothing — the line above the grid states it once. The seal marks
+ * *what* was verified without competing with the author-assessed status.
+ */
+export function VerifiedPinSeal({ approvals }: { approvals: string }) {
   return (
-    <span className="flex items-center gap-2">
-      <SealIcon className="h-3.5 w-3.5 shrink-0 text-verified" />
-      <span className="font-brand text-[12px] font-bold text-verified">
-        Verified {approvals}
-      </span>
-      {detail ? (
-        <>
-          <span className="text-ink-3">·</span>
-          <span className="text-[12px] text-ink-2">{detail}</span>
-        </>
-      ) : null}
+    <span
+      title={`Pin verified ${approvals} — three maintainers confirmed this is the revision it claims to be and runs as a chapkit service. It says nothing about forecast quality.`}
+      className="inline-flex shrink-0 items-center"
+    >
+      <SealIcon className="h-3.5 w-3.5 text-verified" />
+      <span className="sr-only">Pin verified {approvals}</span>
     </span>
   );
 }

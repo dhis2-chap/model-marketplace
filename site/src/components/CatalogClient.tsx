@@ -9,7 +9,7 @@ import {
   ASSESSED_STATUS_ORDER,
 } from "@/lib/presentation";
 import type { AssessedStatus } from "@/lib/schema";
-import { AssessedStatusBadge, KindBadge, VerifiedInline } from "./badges";
+import { AssessedStatusBadge, KindBadge, VerifiedPinSeal } from "./badges";
 import { PinChip } from "./copy";
 import { MagnifierIcon, SealIcon } from "./icons";
 
@@ -48,35 +48,45 @@ function matches(
 }
 
 /**
- * A restrained catalog entry. Two independent signals ride the header: what
- * the marketplace verified (the pin) and what the author will vouch for (the
- * assessed status). They are deliberately not merged into one badge.
+ * A restrained catalog entry. Two independent signals ride the card, and they
+ * are deliberately not merged: what the author will vouch for (the assessed
+ * status) takes the corner, because it is the only one that differs between
+ * listings; what the marketplace verified (the pin) is a seal in the footer,
+ * on the pin it certifies. Templates are told apart by a dashed frame and a
+ * marker beside the name — models carry no kind badge at all.
  */
 function ModelCard({ m }: { m: ModelCardView }) {
+  const isTemplate = m.kind === "template";
   return (
     <Link
       href={`/models/${m.id}`}
-      className="group relative flex min-w-0 flex-col overflow-hidden rounded-md border border-line bg-surface transition-colors duration-150 hover:border-line-strong"
+      className={`group relative flex min-w-0 flex-col overflow-hidden rounded-md bg-surface transition-colors duration-150 ${
+        isTemplate
+          ? "border border-dashed border-line-strong hover:border-exp"
+          : "border border-line hover:border-line-strong"
+      }`}
     >
       <div className="flex items-start justify-between gap-3 px-[18px] pt-5">
         <div className="min-w-0">
           <h3 className="mb-[6px] font-brand text-[19px] font-bold leading-[1.15] tracking-[-0.015em] text-ink">
             {m.name}
           </h3>
-          <div className="truncate font-mono text-[11px] text-ink-3">{m.repo}</div>
+          <div className="flex min-w-0 items-center gap-2">
+            <KindBadge kind={m.kind} />
+            <span className="truncate font-mono text-[11px] text-ink-3">
+              {m.repo}
+            </span>
+          </div>
         </div>
-        <KindBadge kind={m.kind} />
-      </div>
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-2 px-[18px] pt-3.5">
-        <VerifiedInline approvals={m.approvals} detail={m.framework} />
-      </div>
-      <div className="px-[18px] pt-2.5">
         <AssessedStatusBadge status={m.assessedStatus} />
       </div>
-      <p className="flex-1 px-[18px] pt-3 text-[13.5px] leading-[1.6] text-ink-2 [text-wrap:pretty]">
+      <p className="flex-1 px-[18px] pt-3.5 text-[13.5px] leading-[1.6] text-ink-2 [text-wrap:pretty]">
         {m.summary}
       </p>
       <div className="flex flex-wrap gap-1.5 px-[18px] pt-4">
+        <span className="rounded-[2px] bg-surface-3 px-[7px] py-[3px] font-mono text-[10.5px] text-ink">
+          {m.framework}
+        </span>
         {[
           m.periodType,
           m.covLabel,
@@ -95,7 +105,8 @@ function ModelCard({ m }: { m: ModelCardView }) {
       </div>
       <div className="mt-4 flex items-center justify-between gap-3 border-t border-line px-[18px] py-3">
         <span className="flex min-w-0 flex-1 items-center gap-2">
-          <span className="shrink-0 font-mono text-[9.5px] font-bold uppercase tracking-[0.08em] text-verified">
+          <VerifiedPinSeal approvals={m.approvals} />
+          <span className="shrink-0 font-mono text-[9.5px] font-bold uppercase tracking-[0.08em] text-ink-3">
             {m.stableTag}
           </span>
           <PinChip display={m.stablePinDisplay} copyText={m.stablePinFull} />

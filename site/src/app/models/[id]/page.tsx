@@ -132,8 +132,10 @@ export default async function ModelPage({
               {view.name}
             </h1>
             <KindBadge kind={view.kind} size="md" />
-            <VerifiedChip approvals="3/3" />
+            {/* Author's own assessment leads, as it does on the catalog card;
+                the review gate follows it, never merged into it. */}
             <AssessedStatusBadge status={view.assessedStatus} size="md" />
+            <VerifiedChip approvals="3/3" />
           </div>
           <p className="mb-3.5 max-w-[64ch] font-serif text-[16px] leading-[1.65] text-ink-2">
             {view.summary}
