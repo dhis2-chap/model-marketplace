@@ -77,6 +77,12 @@ reports a required `model-review-gate` status. `review_policy.required_approvals
 in `registry.yaml` is the number it enforces; the author's own approval never
 counts, and approvals are dismissed when new commits are pushed.
 
+The applied configuration is recorded at
+[`.github/rulesets/main.json`](.github/rulesets/main.json) so it is
+reviewable like everything else. GitHub is the live source of truth; that
+file is the record of what was applied, replayable with
+`gh api -X POST repos/dhis2-chap/model-marketplace/rulesets --input .github/rulesets/main.json`.
+
 **Currently pending:** the maintainers named in `CODEOWNERS` are not yet
 collaborators on this repository, and GitHub ignores code owners without write
 access. Until they are added, `main` carries pull-request enforcement, signed
