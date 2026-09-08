@@ -16,7 +16,7 @@ function BenchmarksComingSoon() {
   return (
     <main>
       <section className="border-b border-line bg-surface">
-        <div className="mx-auto max-w-[1240px] px-8 pb-12 pt-16">
+        <div className="mx-auto max-w-[1240px] px-5 sm:px-8 pb-12 pt-16">
           <span className="font-mono text-[10.5px] uppercase tracking-[0.18em] text-exp">
             Coming soon
           </span>
@@ -32,7 +32,7 @@ function BenchmarksComingSoon() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-[1240px] px-8 pt-9">
+      <section className="mx-auto max-w-[1240px] px-5 sm:px-8 pt-9">
         <div className="rounded-lg border border-dashed border-line-strong bg-surface px-[26px] py-6">
           <div className="font-brand text-[15px] font-medium text-ink">
             What will appear here
@@ -48,7 +48,7 @@ function BenchmarksComingSoon() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-[1240px] px-8 pb-24 pt-9">
+      <section className="mx-auto max-w-[1240px] px-5 sm:px-8 pb-24 pt-9">
         <div className="flex flex-wrap items-center justify-between gap-5 border-t border-line pt-5">
           <span className="text-[13px] text-ink-2">
             Per-model benchmark charts get the same treatment — they appear on
@@ -77,7 +77,7 @@ export default function BenchmarksPage() {
   return (
     <main>
       <section className="border-b border-line bg-surface">
-        <div className="mx-auto grid max-w-[1240px] items-end gap-x-14 gap-y-10 px-8 pb-10 pt-16 lg:grid-cols-[minmax(0,1fr)_400px]">
+        <div className="mx-auto grid max-w-[1240px] items-end gap-x-14 gap-y-10 px-5 sm:px-8 pb-10 pt-16 lg:grid-cols-[minmax(0,1fr)_400px]">
           <div>
             <span className="font-mono text-[10.5px] uppercase tracking-[0.18em] text-exp">
               {records.length === 0
@@ -127,7 +127,7 @@ export default function BenchmarksPage() {
       ))}
 
       {suites.length === 0 ? (
-        <section className="mx-auto max-w-[1240px] px-8 pt-9">
+        <section className="mx-auto max-w-[1240px] px-5 sm:px-8 pt-9">
           <div className="rounded-lg border border-line bg-surface px-[26px] py-6">
             <div className="font-brand text-[15px] font-medium text-ink">
               Waiting for the first results
@@ -145,7 +145,7 @@ export default function BenchmarksPage() {
         </section>
       ) : null}
 
-      <section className="mx-auto max-w-[1240px] px-8 pb-24 pt-9">
+      <section className="mx-auto max-w-[1240px] px-5 sm:px-8 pb-24 pt-9">
         <div className="flex flex-wrap items-center justify-between gap-5 border-t border-line pt-5">
           <span className="text-[13px] text-ink-2">
             Per-model benchmark charts — horizon curves, baseline comparison,

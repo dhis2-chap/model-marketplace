@@ -1,16 +1,9 @@
-/**
- * The hero's visual anchor: an ensemble forecast fan drawn straight onto
- * the plotting board (no card chrome). Pure SVG on purpose — this is
- * illustration, not a data chart, so it never takes real data and stays
- * out of the charting library. The board palette is constant across
- * themes, so the plot colors are literals.
- */
-
-const HISTORY = "#ECF4FA";
-const MEDIAN = "#45D68C";
-const FAN = "#6FC3F2";
-const RULE = "rgba(158, 203, 238, 0.22)";
-const LABEL = "#9FBED8";
+/** Decorative forecast illustration, using the active theme's palette. */
+const HISTORY = "var(--mp-text-2)";
+const MEDIAN = "var(--mp-verified)";
+const FAN = "var(--mp-brand)";
+const RULE = "var(--mp-border)";
+const LABEL = "var(--mp-text-3)";
 
 function pts(
   vals: number[],
@@ -58,7 +51,7 @@ const draw = (duration: number, delay: number) => ({
 export function HeroChart() {
   return (
     <div>
-      <div className="mb-1 flex items-baseline justify-between gap-4 px-1 font-mono text-[10px] uppercase tracking-[0.14em] text-board-ink-2">
+      <div className="mb-1 flex items-baseline justify-between gap-4 px-1 font-mono text-[10px] uppercase tracking-[0.14em] text-ink-3">
         <span>Ensemble forecast · dengue incidence</span>
         <span className="hidden sm:block">5 members · 3-month horizon</span>
       </div>
@@ -120,7 +113,7 @@ export function HeroChart() {
           2026-08
         </text>
       </svg>
-      <div className="flex items-center gap-5 px-1 pt-1 font-mono text-[10.5px] text-board-ink-2">
+      <div className="flex items-center gap-5 px-1 pt-1 font-mono text-[10.5px] text-ink-3">
         <span className="flex items-center gap-2">
           <span className="h-0.5 w-3.5" style={{ background: HISTORY }} /> observed
         </span>

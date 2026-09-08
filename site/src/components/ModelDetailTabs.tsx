@@ -771,7 +771,7 @@ export function ModelDetailTabs({
   return (
     <>
       <div className="border-b border-line bg-surface-2">
-        <div className="mx-auto max-w-[1240px] px-8 pt-[22px]">
+        <div className="mx-auto max-w-[1240px] px-5 sm:px-8 pt-[22px]">
           {header}
           <div className="flex gap-0.5 overflow-x-auto">
             {TABS.map((t) => (
@@ -792,7 +792,7 @@ export function ModelDetailTabs({
           </div>
         </div>
       </div>
-      <main className="mx-auto max-w-[1240px] px-8 pb-20 pt-9">
+      <main className="mx-auto max-w-[1240px] px-5 sm:px-8 pb-20 pt-9">
         {tab === "overview" ? (
           <OverviewTab
             view={view}

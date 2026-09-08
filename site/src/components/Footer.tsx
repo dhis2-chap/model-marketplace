@@ -12,8 +12,8 @@ const LinkClass =
 
 export function Footer() {
   return (
-    <footer className="board-grid border-t-[3px] border-brand text-board-ink">
-      <div className="mx-auto grid max-w-[1240px] gap-x-10 gap-y-10 px-8 pb-10 pt-12 md:grid-cols-[1.5fr_1fr_1fr]">
+    <footer className="board-panel border-t border-line text-board-ink">
+      <div className="mx-auto grid max-w-[1240px] gap-x-10 gap-y-10 px-5 sm:px-8 pb-10 pt-12 md:grid-cols-[1.5fr_1fr_1fr]">
         <div>
           <div className="flex items-center gap-3">
             <Dhis2Mark className="h-6 w-auto text-fan" />
@@ -78,7 +78,7 @@ export function Footer() {
         </div>
       </div>
       <div className="border-t border-white/10">
-        <div className="mx-auto flex max-w-[1240px] flex-wrap items-center justify-between gap-3 px-8 py-4 font-mono text-[10px] uppercase tracking-[0.14em] text-board-ink-2">
+        <div className="mx-auto flex max-w-[1240px] flex-wrap items-center justify-between gap-3 px-5 sm:px-8 py-4 font-mono text-[10px] uppercase tracking-[0.14em] text-board-ink-2">
           <span>HISP Centre · University of Oslo</span>
           <span>catalog build {buildStamp()}</span>
         </div>

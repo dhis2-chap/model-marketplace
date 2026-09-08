@@ -36,19 +36,13 @@ function matches(m: ModelCardView, q: string, filters: Filters): boolean {
   return true;
 }
 
-/** Catalog plate. The top rule is the set code: green stable, orange experimental. */
+/** A restrained catalog entry; maturity is communicated by its badge. */
 function ModelCard({ m }: { m: ModelCardView }) {
   return (
     <Link
       href={`/models/${m.id}`}
-      className="group relative flex flex-col overflow-hidden rounded-[3px] border border-line bg-surface transition-[box-shadow,border-color,transform] duration-[180ms] hover:-translate-y-[2px] hover:border-line-strong hover:shadow-card"
+      className="group relative flex min-w-0 flex-col overflow-hidden rounded-md border border-line bg-surface transition-colors duration-150 hover:border-line-strong"
     >
-      <span
-        aria-hidden
-        className={`absolute inset-x-0 top-0 h-[3px] ${
-          m.maturity === "stable" ? "bg-verified" : "bg-exp"
-        }`}
-      />
       <div className="flex items-start justify-between gap-3 px-[18px] pt-5">
         <div className="min-w-0">
           <h3 className="mb-[6px] font-brand text-[19px] font-bold leading-[1.15] tracking-[-0.015em] text-ink">
@@ -61,7 +55,7 @@ function ModelCard({ m }: { m: ModelCardView }) {
       <div className="px-[18px] pt-3.5">
         <VerifiedInline approvals={m.approvals} detail={m.framework} />
       </div>
-      <p className="flex-1 px-[18px] pt-3 font-serif text-[13.5px] leading-[1.6] text-ink-2 [text-wrap:pretty]">
+      <p className="flex-1 px-[18px] pt-3 text-[13.5px] leading-[1.6] text-ink-2 [text-wrap:pretty]">
         {m.summary}
       </p>
       <div className="flex flex-wrap gap-1.5 px-[18px] pt-4">
@@ -89,7 +83,7 @@ function ModelCard({ m }: { m: ModelCardView }) {
           <Sparkline values={m.spark} />
         </div>
       ) : null}
-      <div className="mt-4 flex items-center justify-between gap-3 border-t border-line bg-surface-2 px-[18px] py-3">
+      <div className="mt-4 flex items-center justify-between gap-3 border-t border-line px-[18px] py-3">
         <span className="flex min-w-0 flex-1 items-center gap-2">
           <span className="shrink-0 font-mono text-[9.5px] font-bold uppercase tracking-[0.08em] text-verified">
             {m.stableTag}
@@ -219,27 +213,26 @@ export function CatalogClient({
   ];
 
   const STATS = [
-    [stats.models, "Models listed", "text-board-ink"],
-    [stats.verifiedPins, "Verified version pins", "text-board-ink"],
-    [stats.reviews, "Maintainer reviews", "text-[#45D68C]"],
+    [stats.models, "Models listed", "text-ink"],
+    [stats.verifiedPins, "Verified version pins", "text-ink"],
+    [stats.reviews, "Maintainer reviews", "text-ink"],
   ] as const;
 
   return (
     <>
-      {/* The plotting board — text left, forecast fan bleeding right,
-          stats as the board's legend strip. */}
-      <section className="board-grid relative overflow-hidden text-board-ink">
-        <div className="mx-auto max-w-[1240px] px-8">
-          <div className="grid items-end gap-x-14 gap-y-4 pt-16 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]">
-            <div className="pb-12">
-              <div className="mb-6 flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-[10.5px] uppercase tracking-[0.18em]">
-                <span className="text-fan">Review-gated registry</span>
-                <span className="text-board-ink-2">git-backed · chapkit-run</span>
+      {/* Introduction and a compact forecast illustration. */}
+      <section className="relative overflow-hidden border-b border-line bg-surface text-ink">
+        <div className="mx-auto max-w-[1240px] px-5 sm:px-8">
+          <div className="grid items-end gap-x-14 gap-y-4 pt-12 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]">
+            <div className="pb-10">
+              <div className="mb-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-[12px]">
+                <span className="text-brand">Review-gated registry</span>
+                <span className="text-ink-2">git-backed · chapkit-run</span>
               </div>
-              <h1 className="mb-6 max-w-[15ch] font-brand text-[clamp(40px,5.2vw,66px)] font-extrabold leading-[0.98] tracking-[-0.03em] [text-wrap:balance]">
+              <h1 className="mb-6 max-w-[15ch] font-brand text-[clamp(34px,4vw,50px)] font-semibold leading-[1.1] tracking-[-0.03em] [text-wrap:balance]">
                 Verified forecasting models for climate &amp; health
               </h1>
-              <p className="mb-9 max-w-[46ch] font-serif text-[17px] leading-[1.7] text-board-ink-2">
+              <p className="mb-9 max-w-[46ch] text-[15px] leading-[1.7] text-ink-2">
                 Every model and every version pin in the CHAP marketplace is
                 reviewed and approved by three maintainers before it is listed.
                 Pin a commit, run it in your CHAP instance, reproduce the
@@ -251,34 +244,35 @@ export function CatalogClient({
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
                   placeholder={`Search ${stats.models} verified models — try “INLA” or “no covariates”`}
-                  className="h-13 w-full rounded-[3px] border-0 bg-white pl-11 pr-4 text-[15px] text-[#14293C] shadow-[0_10px_30px_-8px_rgba(3,16,29,0.55)] outline-none placeholder:text-[#78909F] focus:[box-shadow:0_0_0_3px_rgba(111,195,242,0.55),0_10px_30px_-8px_rgba(3,16,29,0.55)]"
+                  aria-label="Search models"
+                  className="h-13 w-full rounded-md border border-line-strong bg-paper pl-11 pr-4 text-[14px] text-ink placeholder:text-ink-3 focus:border-brand"
                 />
               </div>
             </div>
             <div className="hidden self-end pb-9 lg:block">{heroChart}</div>
           </div>
         </div>
-        {/* Legend strip — the board reads out its own numbers. */}
-        <div className="relative border-t border-white/10 bg-white/[0.03]">
-          <div className="mx-auto grid max-w-[1240px] grid-cols-3 gap-x-5 px-8 sm:flex sm:items-stretch sm:gap-x-0">
+        {/* Registry totals. */}
+        <div className="relative border-t border-line">
+          <div className="mx-auto grid max-w-[1240px] grid-cols-3 gap-x-5 px-5 sm:px-8 sm:flex sm:items-stretch sm:gap-x-0">
             {STATS.map(([n, label, tone], i) => (
               <div
                 key={label}
                 className={`flex flex-col justify-start py-5 sm:justify-center sm:pr-10 ${
-                  i > 0 ? "sm:border-l sm:border-white/10 sm:pl-10" : ""
+                  i > 0 ? "sm:border-l sm:border-line sm:pl-10" : ""
                 }`}
               >
                 <div
-                  className={`font-brand text-[30px] font-extrabold leading-none tracking-[-0.02em] ${tone}`}
+                  className={`font-brand text-[24px] font-semibold leading-none tracking-[-0.02em] ${tone}`}
                 >
                   {n}
                 </div>
-                <div className="mt-2 font-mono text-[9.5px] uppercase tracking-[0.16em] text-board-ink-2">
+                <div className="mt-2 text-[12px] text-ink-2">
                   {label}
                 </div>
               </div>
             ))}
-            <div className="ml-auto hidden items-center font-mono text-[11px] text-board-ink-2 lg:flex">
+            <div className="ml-auto hidden items-center font-mono text-[11px] text-ink-2 lg:flex">
               source of truth: registry.yaml @ main
             </div>
           </div>
@@ -286,7 +280,7 @@ export function CatalogClient({
       </section>
 
       {/* Toolbar + grid */}
-      <section className="mx-auto max-w-[1240px] px-8 pb-20 pt-10">
+      <section className="mx-auto max-w-[1240px] px-5 pb-20 pt-8 sm:px-8">
         <div className="mb-5 flex flex-wrap items-end justify-between gap-6 border-b border-line-strong">
           <div className="flex gap-0.5">
             {TABS.map((tab) => (
@@ -294,7 +288,7 @@ export function CatalogClient({
                 key={tab.id}
                 type="button"
                 onClick={() => setSet(tab.id)}
-                className={`relative flex cursor-pointer items-center gap-2 whitespace-nowrap bg-transparent px-4 pb-3.5 pt-2.5 font-brand text-[12.5px] font-bold uppercase tracking-[0.07em] ${
+                className={`relative flex cursor-pointer items-center gap-2 whitespace-nowrap bg-transparent px-4 pb-3.5 pt-2.5 font-brand text-[13px] font-medium ${
                   set === tab.id ? "text-ink" : "text-ink-2"
                 }`}
               >
@@ -347,7 +341,7 @@ export function CatalogClient({
         </p>
 
         {visible.length > 0 ? (
-          <div className="grid gap-5 [grid-template-columns:repeat(auto-fill,minmax(300px,1fr))]">
+          <div className="grid gap-4 [grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr))]">
             {visible.map((m) => (
               <ModelCard key={m.id} m={m} />
             ))}
@@ -357,7 +351,7 @@ export function CatalogClient({
             <div className="font-brand text-[16px] font-bold text-ink">
               No models match those filters
             </div>
-            <p className="mt-2 font-serif text-[13.5px] text-ink-2">
+            <p className="mt-2 text-[13.5px] text-ink-2">
               The catalog is small and deliberately curated — try clearing a
               filter.
             </p>
@@ -375,18 +369,18 @@ export function CatalogClient({
           <InReviewStrip pins={inReview} asOf={inReviewAsOf} />
         ) : null}
 
-        {/* Review gate — back on the board, sealed three times. */}
-        <div className="board-grid mt-12 overflow-hidden rounded-[4px] text-board-ink">
-          <div className="grid items-center gap-x-10 gap-y-7 px-8 py-9 md:grid-cols-[auto_1fr_auto]">
+        {/* Review policy. */}
+        <div className="mt-10 overflow-hidden rounded-md border border-line bg-surface text-ink">
+          <div className="grid items-center gap-x-10 gap-y-7 px-5 sm:px-8 py-9 md:grid-cols-[auto_1fr_auto]">
             <div className="flex -space-x-3" aria-hidden>
               {[0, 1, 2].map((i) => (
                 <span
                   key={i}
-                  className="grid h-12 w-12 place-items-center rounded-full border border-white/20 bg-board-2"
+                  className="grid h-12 w-12 place-items-center rounded-full border border-line bg-surface-2"
                 >
                   <SealIcon
-                    className="h-5 w-5 text-[#45D68C]"
-                    knockout="var(--mp-board-2)"
+                    className="h-5 w-5 text-verified"
+                    knockout="var(--mp-surface-2)"
                   />
                 </span>
               ))}
@@ -395,17 +389,17 @@ export function CatalogClient({
               <h3 className="mb-1.5 font-brand text-[20px] font-bold tracking-[-0.01em]">
                 The review gate
               </h3>
-              <p className="max-w-[70ch] font-serif text-[14px] leading-[1.65] text-board-ink-2">
+              <p className="max-w-[70ch] text-[14px] leading-[1.65] text-ink-2">
                 The marketplace is a git repository of model YAML files. Nothing
                 appears here without a pull request and three maintainer
                 approvals — the same gate applies to every new version pin, so a{" "}
-                <code className="font-mono text-[13px] text-board-ink">stable</code>{" "}
+                <code className="font-mono text-[13px] text-ink">stable</code>{" "}
                 channel pointer is always a reviewed commit.
               </p>
             </div>
             <Link
               href="/contribute"
-              className="inline-flex h-11 items-center rounded-[3px] bg-board-ink px-6 font-brand text-[13.5px] font-bold text-board transition-colors hover:bg-fan"
+              className="inline-flex h-11 items-center rounded-[3px] border border-line-strong bg-surface px-6 font-brand text-[13.5px] font-bold text-ink transition-colors hover:bg-surface-2"
             >
               List your model
             </Link>

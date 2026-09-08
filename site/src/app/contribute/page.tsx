@@ -87,7 +87,7 @@ export default function ContributePage() {
   return (
     <>
       <section className="border-b border-line bg-surface">
-        <div className="mx-auto max-w-[1240px] px-8 py-16">
+        <div className="mx-auto max-w-[1240px] px-5 sm:px-8 py-16">
           <div className="mb-5 font-mono text-[10.5px] uppercase tracking-[0.18em] text-brand">
             Contribute a model
           </div>
@@ -103,14 +103,14 @@ export default function ContributePage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-[1240px] px-8 pt-12">
+      <section className="mx-auto max-w-[1240px] px-5 sm:px-8 pt-12">
         <h2 className="mb-[22px] font-brand text-[22px] font-bold tracking-[-0.01em] text-ink">
           The review pipeline
         </h2>
         <ReviewPipeline />
       </section>
 
-      <section className="mx-auto grid max-w-[1240px] items-start gap-10 px-8 py-12 lg:grid-cols-[1.25fr_1fr]">
+      <section className="mx-auto grid max-w-[1240px] items-start gap-10 px-5 sm:px-8 py-12 lg:grid-cols-[1.25fr_1fr]">
         <div>
           <h2 className="mb-1.5 font-brand text-[22px] font-bold tracking-[-0.01em] text-ink">
             The model YAML file

@@ -165,7 +165,7 @@ export function BenchmarkSuite({ suite }: { suite: BenchmarkSuiteView }) {
 
   return (
     <>
-      <section className="mx-auto max-w-[1240px] px-8 pt-9">
+      <section className="mx-auto max-w-[1240px] px-5 sm:px-8 pt-9">
         <div className="mb-3.5 flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
           <div>
             <h2 className="mb-1.5 font-brand text-[22px] font-bold tracking-[-0.01em] text-ink">
@@ -270,7 +270,7 @@ export function BenchmarkSuite({ suite }: { suite: BenchmarkSuiteView }) {
         </div>
       </section>
 
-      <section className="mx-auto max-w-[1240px] px-8 pt-8">
+      <section className="mx-auto max-w-[1240px] px-5 sm:px-8 pt-8">
         <div className="grid items-start gap-6 lg:grid-cols-2">
           <RunRecord row={selected} />
           <div className="flex flex-col gap-6">

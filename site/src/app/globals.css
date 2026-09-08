@@ -1,29 +1,17 @@
 @import "tailwindcss";
 
-/* ————————————————————————————————————————————————————————————————
-   CHAP Model Marketplace — "the chart room"
-
-   The identity is drawn from the subject: meteorological and
-   epidemiological plotting boards. Deep-marine "board" panels carry
-   fine plotted gridlines and the ensemble forecast fan; the page
-   ground is cool chart paper; catalog entries sit on white plates.
-   DHIS2 blue is the interactive color, one hot signal orange marks
-   the unverified/experimental lane, and verified green is the gate.
-
-   Light is the default; an explicit [data-theme="dark"] turns the
-   chart room into the night shift. The board itself barely changes
-   between themes — it is the constant.
-   ———————————————————————————————————————————————————————————————— */
+/* Quiet surfaces, with blue reserved for links and controls. */
 :root {
-  --mp-paper: #eef2f6;
+  color-scheme: light;
+  --mp-paper: #f7f8f9;
   --mp-surface: #ffffff;
-  --mp-surface-2: #f5f8fa;
-  --mp-surface-3: #e6edf3;
-  --mp-border: #d9e1e9;
-  --mp-border-strong: #b9c7d4;
-  --mp-text: #14293c;
-  --mp-text-2: #4c6377;
-  --mp-text-3: #78909f;
+  --mp-surface-2: #f5f6f7;
+  --mp-surface-3: #eceff1;
+  --mp-border: #dfe3e6;
+  --mp-border-strong: #bbc3ca;
+  --mp-text: #242c33;
+  --mp-text-2: #56616b;
+  --mp-text-3: #687681;
   --mp-brand: #0e72c4;
   --mp-brand-dark: #0a5697;
   --mp-brand-tint: #e2f0fb;
@@ -35,11 +23,11 @@
   --mp-danger-tint: #fbecec;
 
   /* The plotting board — near-constant across themes. */
-  --mp-board: #0b2e4e;
-  --mp-board-2: #113e68;
+  --mp-board: #293741;
+  --mp-board-2: #34434e;
   --mp-board-line: rgba(158, 203, 238, 0.14);
   --mp-board-ink: #ecf4fa;
-  --mp-board-ink-2: #9fbed8;
+  --mp-board-ink-2: #b4c0ca;
   --mp-fan: #6fc3f2;
 
   --mp-code-bg: #071a2c;
@@ -54,27 +42,28 @@
 }
 
 [data-theme="dark"] {
-  --mp-paper: #07131e;
-  --mp-surface: #0c1e2e;
-  --mp-surface-2: #102636;
-  --mp-surface-3: #17303f;
-  --mp-border: #1e3648;
-  --mp-border-strong: #2c4a61;
-  --mp-text: #e7eff6;
-  --mp-text-2: #a7bbcb;
-  --mp-text-3: #71889b;
-  --mp-brand: #54abe8;
+  color-scheme: dark;
+  --mp-paper: #171b1f;
+  --mp-surface: #1e2328;
+  --mp-surface-2: #242a30;
+  --mp-surface-3: #2d343b;
+  --mp-border: #343c44;
+  --mp-border-strong: #505b65;
+  --mp-text: #e5e9ed;
+  --mp-text-2: #b3bdc6;
+  --mp-text-3: #929fa9;
+  --mp-brand: #80b8e1;
   --mp-brand-dark: #8ac7f3;
-  --mp-brand-tint: #10304a;
-  --mp-verified: #4cbe7e;
-  --mp-verified-tint: #0e2c1d;
-  --mp-exp: #f0813d;
-  --mp-exp-tint: #33200f;
+  --mp-brand-tint: #253b4c;
+  --mp-verified: #80c39c;
+  --mp-verified-tint: #263b30;
+  --mp-exp: #dfa574;
+  --mp-exp-tint: #3e3127;
   --mp-danger: #e58484;
   --mp-danger-tint: #2e1717;
 
-  --mp-board: #0b2c49;
-  --mp-board-2: #12395e;
+  --mp-board: #1b2228;
+  --mp-board-2: #2b353e;
   --mp-board-line: rgba(158, 203, 238, 0.11);
 
   --mp-code-bg: #05121f;
@@ -134,6 +123,10 @@ body {
 
 body {
   font-family: var(--font-body);
+  /* Nothing may push the page sideways on a phone. `clip` rather than
+     `hidden` so it never becomes a scroll container — the sticky header
+     depends on the viewport staying the scrollport. */
+  overflow-x: clip;
 }
 
 ::selection {
@@ -146,21 +139,9 @@ body {
   outline-offset: 2px;
 }
 
-/* Plotted gridlines + one soft cyan light source — the board texture. */
-.board-grid {
+/* Shared solid panels; chart gridlines belong inside the chart. */
+.board-panel {
   background-color: var(--mp-board);
-  background-image:
-    radial-gradient(
-      90rem 42rem at 14% -16%,
-      rgba(111, 195, 242, 0.17),
-      transparent 58%
-    ),
-    linear-gradient(var(--mp-board-line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--mp-board-line) 1px, transparent 1px);
-  background-size:
-    100% 100%,
-    44px 44px,
-    44px 44px;
 }
 
 @keyframes mp-draw {
@@ -203,4 +184,14 @@ body {
     animation: none;
     transform: scaleX(1);
   }
+}
+
+/* Edge-to-edge scroll rows (tab bars, filter rails) keep their scrollbar
+   hidden — the fade and the overflowing content already say "swipe". */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
