@@ -50,6 +50,7 @@
   --mp-code-com: #5e7a93;
   --mp-shadow: 0 1px 2px rgba(11, 46, 78, 0.07);
   --mp-shadow-lift: 0 14px 32px -12px rgba(11, 46, 78, 0.35);
+  --mp-shadow-card: 0 6px 16px -10px rgba(11, 46, 78, 0.22);
 }
 
 [data-theme="dark"] {
@@ -79,6 +80,7 @@
   --mp-code-bg: #05121f;
   --mp-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
   --mp-shadow-lift: 0 14px 32px -10px rgba(0, 0, 0, 0.55);
+  --mp-shadow-card: 0 6px 16px -10px rgba(0, 0, 0, 0.4);
 }
 
 @theme inline {
@@ -118,6 +120,7 @@
   --font-mono: var(--font-spline-mono);
   --shadow-mp: var(--mp-shadow);
   --shadow-lift: var(--mp-shadow-lift);
+  --shadow-card: var(--mp-shadow-card);
 }
 
 html,

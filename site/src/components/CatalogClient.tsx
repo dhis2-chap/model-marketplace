@@ -41,7 +41,7 @@ function ModelCard({ m }: { m: ModelCardView }) {
   return (
     <Link
       href={`/models/${m.id}`}
-      className="group relative flex flex-col overflow-hidden rounded-[3px] border border-line bg-surface transition-[box-shadow,border-color,transform] duration-[180ms] hover:-translate-y-[3px] hover:border-line-strong hover:shadow-lift"
+      className="group relative flex flex-col overflow-hidden rounded-[3px] border border-line bg-surface transition-[box-shadow,border-color,transform] duration-[180ms] hover:-translate-y-[2px] hover:border-line-strong hover:shadow-card"
     >
       <span
         aria-hidden

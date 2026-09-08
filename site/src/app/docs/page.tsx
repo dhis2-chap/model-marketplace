@@ -70,7 +70,7 @@ export default function DocsPage() {
               href={entry.href}
               target={entry.href.startsWith("mailto:") ? undefined : "_blank"}
               rel="noreferrer"
-              className="group grid grid-cols-[92px_minmax(0,1fr)_auto] items-start gap-x-6 border-b border-line py-[22px] transition-colors hover:bg-surface max-sm:grid-cols-[minmax(0,1fr)_auto]"
+              className="group grid grid-cols-[92px_minmax(0,1fr)_auto] items-start gap-x-6 border-b border-line px-4 py-[22px] transition-colors duration-150 hover:bg-surface hover:[box-shadow:inset_2px_0_0_var(--mp-brand)] max-sm:grid-cols-[minmax(0,1fr)_auto]"
             >
               <span className="pt-[3px] font-mono text-[10px] uppercase tracking-[0.14em] text-ink-3 max-sm:col-span-2 max-sm:pb-1.5">
                 {entry.kicker}
@@ -83,7 +83,7 @@ export default function DocsPage() {
                   {entry.body}
                 </span>
               </span>
-              <span className="self-center pl-4 font-brand text-[15px] text-ink-3 transition-colors group-hover:text-brand">
+              <span className="self-center pl-4 font-brand text-[15px] text-ink-3 transition-[color,transform] duration-150 group-hover:translate-x-[2px] group-hover:-translate-y-[2px] group-hover:text-brand">
                 ↗
               </span>
             </a>
