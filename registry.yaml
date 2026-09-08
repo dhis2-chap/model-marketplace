@@ -49,7 +49,6 @@ review_policy:
 models:
   # Forecasting models.
   - models/chapkit_ewars_model.yaml
-  - models/chapkit_ghr_model.yaml
   - models/chapkit_rwanda_malaria_bym_model.yaml
   - models/chapkit_simple_multistep_model.yaml
   - models/auto_arima_chapkit.yaml

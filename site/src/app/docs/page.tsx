@@ -16,7 +16,7 @@ const ENTRIES = [
   {
     kicker: "marketplace",
     title: "Benchmark records",
-    body: "How benchmark results are produced, stored, validated, ranked, and rendered by the marketplace.",
+    body: "The file contract for recording an evaluation run. No benchmarks have been run yet — how the comparison will be run is still being decided.",
     href: "https://github.com/dhis2-chap/model-marketplace/blob/main/benchmarks/README.md",
   },
   {

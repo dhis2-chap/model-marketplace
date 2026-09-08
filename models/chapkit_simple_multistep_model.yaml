@@ -71,8 +71,10 @@ versions:
 configurations:
   monthly_climate:
     description: >-
-      Climate-driven configuration, matching the service defaults. Six target
-      lags give the one-step regressor half a year of history per location.
+      Climate-driven configuration: the service's own default covariates and
+      hyperparameters, at the marketplace's reference three-period horizon
+      (the service itself defaults to twelve). Six target lags give the
+      one-step regressor half a year of history per location.
     config:
       prediction_periods: 3
       n_target_lags: 6

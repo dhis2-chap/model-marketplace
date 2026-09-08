@@ -44,7 +44,6 @@ and the format is documented with an annotated example in
 | Model | `assessed_status` | Framework | Horizon |
 |---|---|---|---|
 | [CHAP-EWARS](models/chapkit_ewars_model.yaml) | orange | R · INLA | 0–100 |
-| [GHRmodel](models/chapkit_ghr_model.yaml) | red | R · INLA (GHRmodel) | 1–12 |
 | [Rwanda Malaria BYM](models/chapkit_rwanda_malaria_bym_model.yaml) | gray | R · INLA | 1–24 |
 | [Simple Multistep](models/chapkit_simple_multistep_model.yaml) | orange | Python · scikit-learn + skpro | 1–100 |
 | [Auto-ARIMA](models/auto_arima_chapkit.yaml) | red | R · fable | 0–12 |
@@ -55,6 +54,36 @@ Templates — scaffolding, not forecasting models:
 |---|---|---|
 | [Minimalist Example (Python)](models/chapkit_minimalist_example_py.yaml) | red | Python · scikit-learn |
 | [Minimalist Example (R)](models/chapkit_minimalist_example_r.yaml) | red | R · `lm()` |
+
+## Repository rules
+
+`main` is protected and there is no bypass, for anyone. Every change lands by
+pull request, and the merge is the listing.
+
+| Change | What it needs |
+|---|---|
+| `site/` and docs | Green CI. No approvals — open the PR and merge it. |
+| `models/`, `registry.yaml`, `benchmarks/`, `.github/`, `site/src/lib/schema.ts`, `site/src/lib/flags.ts` | Green CI **plus three maintainer approvals**. |
+
+Every commit must carry a verified signature.
+
+The split is enforced by two pieces. [`.github/CODEOWNERS`](.github/CODEOWNERS)
+declares which paths are registry paths — anything unlisted is deliberately
+unowned, which is what makes frontend work fast. GitHub's own code-owner rule
+only ever means "at least one owner approved", so the count of three comes
+from [`.github/workflows/model-review-gate.yml`](.github/workflows/model-review-gate.yml),
+which reads both the roster and the owned paths out of `CODEOWNERS` and
+reports a required `model-review-gate` status. `review_policy.required_approvals`
+in `registry.yaml` is the number it enforces; the author's own approval never
+counts, and approvals are dismissed when new commits are pushed.
+
+**Currently pending:** the maintainers named in `CODEOWNERS` are not yet
+collaborators on this repository, and GitHub ignores code owners without write
+access. Until they are added, `main` carries pull-request enforcement, signed
+commits and CI, while the two rules that would deadlock a single-maintainer
+repo — "require review from Code Owners" and the required `model-review-gate`
+status — stay off. The gate workflow still runs and reports on every registry
+PR, so its verdict is visible before it is binding.
 
 ## The site
 

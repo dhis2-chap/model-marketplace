@@ -1,0 +1,124 @@
+name: model-review-gate
+
+# Enforces registry.yaml's `review_policy.required_approvals` (3) on pull
+# requests that touch the registry, while leaving site-only pull requests
+# alone. GitHub cannot express "3 approvals for these paths, 0 for the rest":
+# CODEOWNERS is path-aware but counts only to one, and the ruleset's approval
+# count is repo-wide. So this job does the counting and reports a commit
+# status named `model-review-gate`, which the ruleset requires.
+#
+# Roster and owned paths both come from .github/CODEOWNERS, so that file stays
+# the single source of truth.
+#
+# SECURITY: runs on pull_request_target and pull_request_review, both of which
+# execute in the BASE repository context with a write-scoped token — necessary
+# because fork pull requests get a read-only token on the `pull_request`
+# event and could not post a status. This job therefore never checks out or
+# executes pull-request code. It reads CODEOWNERS from the base branch and
+# calls the API. Do not add a checkout of `head.sha` here.
+
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize, ready_for_review]
+  pull_request_review:
+    types: [submitted, dismissed]
+
+permissions:
+  contents: read
+  pull-requests: read
+  statuses: write
+
+concurrency:
+  group: model-review-gate-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      # Base branch only — never the pull request's own code.
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          persist-credentials: false
+
+      - name: Count code-owner approvals on registry changes
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          AUTHOR: ${{ github.event.pull_request.user.login }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+
+          required=$(grep -E '^\s*required_approvals:' registry.yaml | head -1 | grep -oE '[0-9]+')
+          : "${required:=3}"
+
+          # Owned path prefixes, read from CODEOWNERS (first field of each
+          # non-comment line), with the leading slash stripped.
+          mapfile -t owned < <(grep -vE '^\s*#' .github/CODEOWNERS | awk 'NF {print $1}' | sed 's|^/||')
+
+          # Maintainer roster, read from the same file.
+          mapfile -t roster < <(grep -vE '^\s*#' .github/CODEOWNERS \
+            | grep -oE '@[A-Za-z0-9_-]+' | sed 's/@//' | sort -u)
+
+          printf 'required approvals: %s\n' "$required"
+          printf 'owned paths: %s\n' "${owned[*]}"
+          printf 'roster: %s\n' "${roster[*]}"
+
+          changed=$(gh api "repos/$REPO/pulls/$PR/files" --paginate --jq '.[].filename')
+          printf 'changed files:\n%s\n' "$changed"
+
+          touches_registry=false
+          while IFS= read -r f; do
+            [ -z "$f" ] && continue
+            for prefix in "${owned[@]}"; do
+              case "$f" in
+                "$prefix"|"$prefix"*) touches_registry=true; break 2 ;;
+              esac
+            done
+          done <<< "$changed"
+
+          post() {
+            gh api -X POST "repos/$REPO/statuses/$HEAD_SHA" \
+              -f state="$1" -f context=model-review-gate \
+              -f description="$2" -f target_url="$RUN_URL" >/dev/null
+            printf '%s: %s\n' "$1" "$2"
+          }
+
+          if [ "$touches_registry" = false ]; then
+            post success "No registry change — site-only, no maintainer approval needed"
+            exit 0
+          fi
+
+          # Latest review state per user; only APPROVED by a roster member
+          # who is not the pull request author counts.
+          approvals=$(gh api "repos/$REPO/pulls/$PR/reviews" --paginate --jq '
+            [ .[] | select(.state == "APPROVED" or .state == "CHANGES_REQUESTED" or .state == "DISMISSED") ]
+            | group_by(.user.login)
+            | map(sort_by(.submitted_at) | last)
+            | map(select(.state == "APPROVED") | .user.login)
+            | unique | .[]' || true)
+
+          count=0
+          approvers=""
+          while IFS= read -r user; do
+            [ -z "$user" ] && continue
+            [ "$user" = "$AUTHOR" ] && continue
+            for m in "${roster[@]}"; do
+              if [ "$user" = "$m" ]; then
+                count=$((count + 1)); approvers="$approvers $user"; break
+              fi
+            done
+          done <<< "$approvals"
+
+          printf 'counted approvals: %s/%s —%s\n' "$count" "$required" "${approvers:- none}"
+
+          if [ "$count" -ge "$required" ]; then
+            post success "Registry change approved by $count/$required maintainers"
+          else
+            post failure "Registry change needs $required maintainer approvals ($count so far)"
+            exit 1
+          fi

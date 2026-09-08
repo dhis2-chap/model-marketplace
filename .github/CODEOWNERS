@@ -1,0 +1,29 @@
+# Code owners for the CHAP Model Marketplace.
+#
+# This file decides WHETHER a pull request needs maintainer review, by path.
+# It cannot decide HOW MANY approvals are needed — GitHub's code-owner rule
+# only ever means "at least one owner approved". The three-approval count in
+# registry.yaml (`review_policy.required_approvals`) is enforced separately by
+# .github/workflows/model-review-gate.yml, which reads its roster from the
+# owner entries in this file. Keep the two in sync by editing only this file.
+#
+# Anything NOT listed here is deliberately unowned: site/ changes need no
+# maintainer approval, only green CI. That is the fast path for frontend work.
+#
+# NOTE: GitHub silently ignores owners without write access to this
+# repository. Until every handle below is a collaborator, the ruleset's
+# "require review from Code Owners" rule stays OFF — see README.md.
+
+# The registry itself: models, the index, and benchmark records.
+/models/                    @edvinstava @mortenoh @knutdrand @Halvardgithub @ivargr
+/registry.yaml              @edvinstava @mortenoh @knutdrand @Halvardgithub @ivargr
+/benchmarks/                @edvinstava @mortenoh @knutdrand @Halvardgithub @ivargr
+
+# The gate itself. Without this, a "frontend" PR could edit the rules that
+# govern model review.
+/.github/                   @edvinstava @mortenoh @knutdrand @Halvardgithub @ivargr
+
+# Registry truth enforced in code: the schema every YAML file is validated
+# against, and the flag that publishes benchmark views.
+/site/src/lib/schema.ts     @edvinstava @mortenoh @knutdrand @Halvardgithub @ivargr
+/site/src/lib/flags.ts      @edvinstava @mortenoh @knutdrand @Halvardgithub @ivargr

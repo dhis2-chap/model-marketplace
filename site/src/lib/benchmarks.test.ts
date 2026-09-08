@@ -139,13 +139,13 @@ describe("buildBenchmarkSuites", () => {
     const suite = suites[0];
 
     expect(suite.heading).toBe("Laos admin-1 monthly · horizon 3");
-    expect(suite.countLine).toBe("1 of 7 listed models evaluated");
+    expect(suite.countLine).toBe("1 of 6 listed models evaluated");
     expect(suite.runContext).toContainEqual({
       k: "Suite",
       v: "chapkit_simple_multistep_model.monthly_climate",
     });
     expect(suite.runContext).toContainEqual({ k: "Observations", v: "2,808 rows" });
-    expect(suite.pendingNote).toMatch(/^Six listed models/);
+    expect(suite.pendingNote).toMatch(/^Five listed models/);
 
     expect(suite.rows).toHaveLength(registry.models.length);
     const [first, ...rest] = suite.rows;
@@ -172,24 +172,24 @@ describe("buildBenchmarkSuites", () => {
   });
 
   it("ranks measured rows by normalised CRPS ascending", () => {
-    const ghr = registry.models.find((m) => m.id === "chapkit_ghr_model")!;
-    const ghrStable = stableVersion(ghr);
+    const arima = registry.models.find((m) => m.id === "auto_arima_chapkit")!;
+    const arimaStable = stableVersion(arima);
     const suite = buildBenchmarkSuites(registry, [
       smokeRun(),
       smokeRun({
-        model: ghr.id,
-        version: ghrStable.version,
-        commit: ghrStable.commit,
+        model: arima.id,
+        version: arimaStable.version,
+        commit: arimaStable.commit,
         run: undefined,
         metrics: { crps: 39.2, norm_crps: 0.041 },
         resources: undefined,
       }),
     ])[0];
     expect(suite.rows.slice(0, 2).map((r) => r.modelId)).toEqual([
-      "chapkit_ghr_model",
+      "auto_arima_chapkit",
       "chapkit_simple_multistep_model",
     ]);
-    expect(suite.countLine).toBe("2 of 7 listed models evaluated");
-    expect(suite.pendingNote).toMatch(/^Five listed models/);
+    expect(suite.countLine).toBe("2 of 6 listed models evaluated");
+    expect(suite.pendingNote).toMatch(/^Four listed models/);
   });
 });

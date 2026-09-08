@@ -38,7 +38,7 @@ site in `site/` is a build-time rendering of it. No auth, no server state.
   `assessed_status` is the *authors'* own chapkit `AssessedStatus`, copied
   verbatim — the marketplace never assigns, upgrades or reinterprets it. Keep
   them visually and verbally distinct everywhere. No listed model is
-  self-assessed `green`; five of seven are `red` or `gray`.
+  self-assessed `green`; four of six are `red` or `gray`.
 - **Templates are not models.** `kind: template` marks scaffolding (the two
   minimalist examples). Counted, filtered and labelled separately; never
   presented as something to forecast with.

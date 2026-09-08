@@ -6,8 +6,8 @@ display_name: Rwanda Malaria BYM
 kind: model
 
 # The author's own chapkit AssessedStatus, copied from the service — not a
-# marketplace verdict. gray = not intended for general use; kept for
-# reference or backwards compatibility.
+# marketplace verdict. gray = not intended for use — deprecated, or kept only
+# for backwards compatibility.
 assessed_status: gray
 
 summary: >-

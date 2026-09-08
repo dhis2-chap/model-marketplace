@@ -89,7 +89,7 @@ configurations:
     config:
       prediction_periods: 3
       n_lags: [3, 3]
-      precision: 1
+      precision: 0.01
       region_seasonal: false
       additional_continuous_covariates:
         - rainfall
@@ -102,7 +102,7 @@ configurations:
     config:
       prediction_periods: 3
       n_lags: [3, 3]
-      precision: 1
+      precision: 0.01
       region_seasonal: true
       additional_continuous_covariates:
         - rainfall
@@ -115,6 +115,6 @@ configurations:
     config:
       prediction_periods: 3
       n_lags: [3]
-      precision: 1
+      precision: 0.01
       region_seasonal: false
       additional_continuous_covariates: []

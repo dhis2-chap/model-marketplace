@@ -95,7 +95,7 @@ export default function BenchmarksPage() {
               {records.length === 0
                 ? "No run has been recorded yet, so there is nothing to rank — a suite appears the moment its first result lands, by pull request like everything else."
                 : singleSplitSmoke
-                  ? "Only one model has been evaluated so far, and it was a single-split smoke suite, so read this as provenance rather than a ranking. Rows without a run stay empty on purpose."
+                  ? "Only one model has been evaluated so far, over a single backtest split, so read this as provenance rather than a ranking. Rows without a run stay empty on purpose."
                   : `${records.length} runs have been recorded so far — still early, so read this as provenance rather than a ranking. Rows without a run stay empty on purpose.`}
             </p>
           </div>

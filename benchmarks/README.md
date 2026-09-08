@@ -7,10 +7,12 @@ describes.
 
 The site loads this directory at build time through the same zod gate as the
 registry (`site/src/lib/schema.ts`): an invalid or inconsistent benchmark
-file fails the build. Until a model has real results here, the site shows
-mock fixtures labeled "mock data · illustrative"; the per-model label comes
-off automatically when its first real file lands, and the benchmarks page renders
-once any results exist.
+file fails the build. This directory is currently **empty** — no benchmarks
+have been run. A model with no real result here shows no score at all: there
+are no mock fixtures, no placeholder numbers and no illustrative charts
+anywhere on the site. Until the first results land, the benchmarks page and
+every per-model Benchmarks tab render a "coming soon" state, gated behind
+`BENCHMARKS_LIVE` in `site/src/lib/flags.ts`.
 
 ## How the comparison is run — added soon
 

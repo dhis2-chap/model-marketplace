@@ -20,7 +20,8 @@ summary: >-
 source:
   repository: https://github.com/chap-models/chapkit_minimalist_example_py
   image: ghcr.io/chap-models/chapkit_minimalist_example_py
-  # Pure Python (scikit-learn) on the chapkit Python base. Multi-arch.
+  # Pure Python (scikit-learn) on the chapkit Python base. The base image is
+  # multi-arch, but this service's publish workflow builds linux/amd64 only.
   runtime_image: ghcr.io/dhis2-chap/chapkit-py
 
 attribution:

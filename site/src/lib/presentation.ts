@@ -36,13 +36,6 @@ export const PRESENTATION: Record<string, Presentation> = {
     shortName: "CHAP-EWARS",
     abbrev: "EWARS",
   },
-  chapkit_ghr_model: {
-    framework: "R · INLA · GHRmodel",
-    language: "R",
-    covMode: "climate",
-    shortName: "GHRmodel",
-    abbrev: "GHR",
-  },
   chapkit_rwanda_malaria_bym_model: {
     framework: "R · INLA",
     language: "R",
@@ -106,7 +99,7 @@ export const ASSESSED_STATUS_COPY: Record<
 > = {
   green: {
     label: "Validated",
-    blurb: "Validated by its authors and ready for production use.",
+    blurb: "Validated and ready for production use.",
   },
   yellow: {
     label: "Ready for testing",
@@ -115,17 +108,17 @@ export const ASSESSED_STATUS_COPY: Record<
   orange: {
     label: "Promising",
     blurb:
-      "Shows promise on limited data. Needs manual configuration and careful evaluation.",
+      "Shows promise on limited data, needs manual configuration and careful evaluation.",
   },
   red: {
     label: "Prototype",
     blurb:
-      "Highly experimental prototype, not validated — for early experimentation only.",
+      "Highly experimental prototype, not validated, only for early experimentation.",
   },
   gray: {
-    label: "Not for general use",
+    label: "Not intended for use",
     blurb:
-      "Not intended for use: deprecated, or kept only for reference and backwards compatibility.",
+      "Not intended for use — deprecated, or kept only for backwards compatibility.",
   },
 };
 
