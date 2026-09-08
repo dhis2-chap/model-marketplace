@@ -119,9 +119,9 @@ function MenuGlyph({ open }: { open: boolean }) {
 }
 
 /**
- * Below `md` the nav collapses behind this button into a full-width sheet
- * under the header: the same four destinations, the search field the
- * desktop bar carries, and the repo link.
+ * Below `bar` (900px) the nav collapses behind this button into a
+ * full-width sheet under the header: the same four destinations, a search
+ * field, and the repo link.
  */
 function MobileNav({
   items,
@@ -151,9 +151,9 @@ function MobileNav({
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setOpen(false);
     };
-    // Widening past `md` reveals the real nav bar and hides the sheet with
+    // Widening past `bar` reveals the real nav bar and hides the sheet with
     // CSS alone — close it so the scroll lock goes with it.
-    const desktop = window.matchMedia("(min-width: 768px)");
+    const desktop = window.matchMedia("(min-width: 900px)");
     const onDesktop = () => desktop.matches && setOpen(false);
     document.addEventListener("keydown", onKey);
     desktop.addEventListener("change", onDesktop);
@@ -174,7 +174,7 @@ function MobileNav({
         aria-label={open ? "Close menu" : "Open menu"}
         aria-expanded={open}
         aria-controls="mp-mobile-nav"
-        className="grid h-9 w-9 shrink-0 cursor-pointer place-items-center rounded-[2px] border border-line bg-transparent text-ink-2 transition-colors hover:border-line-strong hover:text-ink md:hidden"
+        className="grid h-9 w-9 shrink-0 cursor-pointer place-items-center rounded-[2px] border border-line bg-transparent text-ink-2 transition-colors hover:border-line-strong hover:text-ink bar:hidden"
       >
         <MenuGlyph open={open} />
       </button>
@@ -185,14 +185,14 @@ function MobileNav({
           tabIndex={-1}
           aria-hidden
           onClick={() => setOpen(false)}
-          className="absolute inset-x-0 top-full z-30 h-[100dvh] cursor-default bg-board/35 md:hidden"
+          className="absolute inset-x-0 top-full z-30 h-[100dvh] cursor-default bg-board/35 bar:hidden"
         />
       ) : null}
 
       <div
         id="mp-mobile-nav"
         hidden={!open}
-        className="absolute inset-x-0 top-full z-40 max-h-[72dvh] overflow-y-auto border-b border-line bg-surface shadow-lift md:hidden"
+        className="absolute inset-x-0 top-full z-40 max-h-[72dvh] overflow-y-auto border-b border-line bg-surface shadow-lift bar:hidden"
       >
         <nav className="flex flex-col px-5 py-2">
           {items.map((item) => {
@@ -282,7 +282,7 @@ export function Header({ benchmarksLive }: { benchmarksLive: boolean }) {
               </span>
             </span>
           </Link>
-          <nav className="hidden items-center gap-1 md:flex">
+          <nav className="hidden items-center gap-1 bar:flex">
             {items.map((item) => {
               const active = isActive(item.href, pathname);
               return (
@@ -303,13 +303,13 @@ export function Header({ benchmarksLive }: { benchmarksLive: boolean }) {
             })}
           </nav>
           <div className="ml-auto flex items-center gap-2 sm:gap-2.5">
-            <form onSubmit={submit} className="relative hidden flex-1 md:block">
+            <form onSubmit={submit} className="relative hidden flex-1 xl:block">
               <MagnifierIcon className="pointer-events-none absolute left-2.5 top-[9px] h-3.5 w-3.5 text-ink-3" />
               <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 placeholder="Search models, frameworks, covariates"
-                className="h-8 w-[200px] max-w-[260px] rounded-[2px] border border-line bg-surface-2 pl-[30px] pr-2.5 text-[12.5px] text-ink outline-none placeholder:text-ink-3 focus:border-brand focus:bg-surface lg:w-[260px]"
+                className="h-8 w-[260px] rounded-[2px] border border-line bg-surface-2 pl-[30px] pr-2.5 text-[12.5px] text-ink outline-none placeholder:text-ink-3 focus:border-brand focus:bg-surface"
               />
             </form>
             <ThemeToggle />
@@ -317,7 +317,7 @@ export function Header({ benchmarksLive }: { benchmarksLive: boolean }) {
               href="https://github.com/dhis2-chap"
               target="_blank"
               rel="noreferrer"
-              className="hidden h-8 items-center gap-1.5 rounded-[2px] border border-line px-3 font-brand text-[11px] font-bold uppercase tracking-[0.08em] text-ink-2 transition-colors hover:border-line-strong hover:text-ink md:flex"
+              className="hidden h-8 items-center gap-1.5 rounded-[2px] border border-line px-3 font-brand text-[11px] font-bold uppercase tracking-[0.08em] text-ink-2 transition-colors hover:border-line-strong hover:text-ink bar:flex"
             >
               <GitHubMark className="h-3.5 w-3.5" />
               Repo

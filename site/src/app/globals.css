@@ -107,6 +107,9 @@
   --font-body: var(--font-schibsted);
   --font-serif: var(--font-source-serif);
   --font-mono: var(--font-spline-mono);
+  /* The header bar folds into the hamburger below this: the full rail of
+     nav links, theme toggle and repo button needs ~830px to sit flat. */
+  --breakpoint-bar: 56.25rem;
   --shadow-mp: var(--mp-shadow);
   --shadow-lift: var(--mp-shadow-lift);
   --shadow-card: var(--mp-shadow-card);
