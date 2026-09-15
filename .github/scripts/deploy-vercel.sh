@@ -1,79 +1,29 @@
 #!/usr/bin/env bash
 #
-# Build and deploy site/ to Vercel.
+#   ./.github/scripts/deploy-vercel.sh production
 #
-#   ./.github/scripts/deploy-vercel.sh production   # promote to the live domains
-#   ./.github/scripts/deploy-vercel.sh preview      # throwaway preview URL
+# Build and deploy site/ to Vercel, from the repository root. Root Directory
+# (site/), framework and Node version live in the Vercel project and arrive
+# with `vercel pull`.
 #
-# Runs from the repository root. The project's Root Directory (site/) and its
-# build settings live in the Vercel project itself and arrive with
-# `vercel pull`, so nothing here duplicates them.
-#
-# Required environment: VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID.
-# The two IDs are what stand in for the gitignored .vercel/project.json.
-# Optional: SITE_URL, the public domain to report for this deploy.
+# Needs VERCEL_TOKEN, VERCEL_ORG_ID and VERCEL_PROJECT_ID. The two IDs stand
+# in for the gitignored .vercel/project.json — without them `vercel pull
+# --yes` would happily link a NEW project rather than this one, so they are
+# checked rather than assumed. SITE_URL, if set, is reported as the public
+# address; the deployment hostname Vercel returns is behind its SSO.
 
 set -euo pipefail
 
-target="${1:-preview}"
-case "$target" in
-  production|preview) ;;
-  *) echo "usage: $(basename "$0") [production|preview]" >&2; exit 2 ;;
-esac
+target="${1:?usage: deploy-vercel.sh production|preview}"
+: "${VERCEL_TOKEN:?}" "${VERCEL_ORG_ID:?}" "${VERCEL_PROJECT_ID:?}"
 
-: "${VERCEL_TOKEN:?not set — add it as a repository secret}"
-: "${VERCEL_ORG_ID:?not set — see .vercel/project.json, field orgId}"
-: "${VERCEL_PROJECT_ID:?not set — see .vercel/project.json, field projectId}"
+vc() { pnpm dlx vercel@59.17.0 "$@" --token="$VERCEL_TOKEN"; }
 
-# Pinned so a CLI release cannot change what a push to main does.
-cli="vercel@${VERCEL_CLI_VERSION:-59.17.0}"
-
-vc() { pnpm dlx "$cli" "$@" --token="$VERCEL_TOKEN"; }
-
-echo "::group::vercel pull ($target)"
 vc pull --yes --environment="$target"
-echo "::endgroup::"
-
-# The same `next build` that CI runs: the YAML goes through the zod schema,
-# so invalid registry data fails here rather than reaching the live site.
-echo "::group::vercel build ($target)"
 vc build --target="$target"
-echo "::endgroup::"
-
-# Only the deployment URL goes to stdout; tail guards against any install
-# chatter pnpm dlx may add ahead of it.
-echo "::group::vercel deploy ($target)"
 url=$(vc deploy --prebuilt --target="$target" | tail -n 1)
-echo "::endgroup::"
 
-# $url is the immutable deployment hostname, which sits behind Vercel's
-# deployment protection — it 302s to an SSO login, so it is the wrong thing to
-# hand a reader. Prefer SITE_URL, the canonical domain the caller declares;
-# otherwise ask the deployment for its aliases and take the shortest, which is
-# a custom domain rather than a scope-suffixed one. If neither answers, the
-# deployment URL is still true, just gated.
-public_url="${SITE_URL:-}"
-if [ -z "$public_url" ]; then
-  alias_host=$(vc inspect "$url" --json 2>/dev/null \
-    | jq -r '[.aliases[]?] | min_by(length) // empty') || alias_host=""
-  if [ -n "$alias_host" ]; then
-    public_url="https://$alias_host"
-  else
-    public_url="$url"
-  fi
-fi
-
-echo "deployed $target: $public_url (deployment: $url)"
-if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
-  {
-    echo "Deployed **$target** — <$public_url>"
-    echo ""
-    echo "Deployment: \`$url\`"
-  } >> "$GITHUB_STEP_SUMMARY"
-fi
+echo "deployed $target: ${SITE_URL:-$url}"
 if [ -n "${GITHUB_OUTPUT:-}" ]; then
-  # `url` is what the GitHub deployment record links to, so it is the public
-  # one; the immutable deployment stays available under its own name.
-  echo "url=$public_url" >> "$GITHUB_OUTPUT"
-  echo "deployment_url=$url" >> "$GITHUB_OUTPUT"
+  echo "url=${SITE_URL:-$url}" >> "$GITHUB_OUTPUT"
 fi

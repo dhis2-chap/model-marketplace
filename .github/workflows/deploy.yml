@@ -1,13 +1,11 @@
 name: deploy
 
-# Publishes the site on every push to main, which is what makes merging the
-# review gate the moment a pin goes live. Before this, main and the live site
-# could drift: deploys were run by hand from a laptop.
+# Publishes the site on every push to main, so merging a pin is what makes it
+# live; before this, deploys were run by hand and the site could drift.
 #
-# The deploy builds the same `next build` CI runs, so invalid registry YAML
-# fails here too — but CI is a separate workflow, so a push whose lint or
-# tests fail can still deploy. Branch protection on main is what keeps that
-# from happening.
+# The build is the same `next build` CI runs, so invalid registry YAML fails
+# here too. CI is a separate workflow, though: a push whose tests fail still
+# deploys, and the approval rule on main is what keeps that from happening.
 
 on:
   push:
@@ -26,12 +24,9 @@ jobs:
   deploy:
     name: deploy to vercel
     runs-on: ubuntu-latest
-    # Naming an environment is what puts each run in the repository's
-    # Deployments view: GitHub creates a deployment object for the job, and
-    # `url` fills that record's environment_url, which is the "View
-    # deployment" link. It resolves after the job runs, so it can read the
-    # step's output — which is SITE_URL below, not the deployment hostname
-    # (Vercel keeps that one behind an SSO login).
+    # Naming an environment is what puts each run in the Deployments view;
+    # `url` is that record's "View deployment" link. It resolves after the job,
+    # so it can read a step output.
     environment:
       name: production
       url: ${{ steps.deploy.outputs.url }}
@@ -60,9 +55,8 @@ jobs:
         run: ./.github/scripts/deploy-vercel.sh production
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          # The site's canonical domain, aliased to the production deployment
-          # by Vercel. Named here rather than sniffed from the deployment so
-          # that changing where the site lives is a reviewable diff.
+          # Where the site actually answers; Vercel keeps the deployment's
+          # own hostname behind an SSO login.
           SITE_URL: https://chap-marketplace.dhis2.org
           # Open-PR ingestion at build time; fail-soft, but authenticated
           # requests avoid the runners' shared unauthenticated rate limit.
