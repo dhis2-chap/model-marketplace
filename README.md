@@ -135,8 +135,9 @@ repository secrets: `VERCEL_TOKEN`, plus `VERCEL_ORG_ID` and
 `production` for a throwaway deploy from a laptop.
 
 Each run is recorded under the repository's **Deployments** → `production`
-environment, linking the site's public alias (the raw deployment hostname is
-behind Vercel's SSO), so the tab is the history of what is actually live.
+environment, linking <https://chap-marketplace.dhis2.org> — the workflow names
+that domain in `SITE_URL`, because the raw deployment hostname is behind
+Vercel's SSO. So the tab is the history of what is actually live.
 
 ### Honest-data rules
 

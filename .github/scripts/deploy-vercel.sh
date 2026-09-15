@@ -11,6 +11,7 @@
 #
 # Required environment: VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID.
 # The two IDs are what stand in for the gitignored .vercel/project.json.
+# Optional: SITE_URL, the public domain to report for this deploy.
 
 set -euo pipefail
 
@@ -47,14 +48,19 @@ echo "::endgroup::"
 
 # $url is the immutable deployment hostname, which sits behind Vercel's
 # deployment protection — it 302s to an SSO login, so it is the wrong thing to
-# hand a reader. The aliases are the public entry points; take the shortest,
-# which is the custom domain rather than the scope-suffixed one. Fail soft: if
-# the lookup gives nothing, the deployment URL is still a true answer.
-public_url="$url"
-alias_host=$(vc inspect "$url" --json 2>/dev/null \
-  | jq -r '[.aliases[]?] | min_by(length) // empty') || alias_host=""
-if [ -n "$alias_host" ]; then
-  public_url="https://$alias_host"
+# hand a reader. Prefer SITE_URL, the canonical domain the caller declares;
+# otherwise ask the deployment for its aliases and take the shortest, which is
+# a custom domain rather than a scope-suffixed one. If neither answers, the
+# deployment URL is still true, just gated.
+public_url="${SITE_URL:-}"
+if [ -z "$public_url" ]; then
+  alias_host=$(vc inspect "$url" --json 2>/dev/null \
+    | jq -r '[.aliases[]?] | min_by(length) // empty') || alias_host=""
+  if [ -n "$alias_host" ]; then
+    public_url="https://$alias_host"
+  else
+    public_url="$url"
+  fi
 fi
 
 echo "deployed $target: $public_url (deployment: $url)"

@@ -30,8 +30,8 @@ jobs:
     # Deployments view: GitHub creates a deployment object for the job, and
     # `url` fills that record's environment_url, which is the "View
     # deployment" link. It resolves after the job runs, so it can read the
-    # step's output. The script resolves the public alias rather than the
-    # deployment hostname, which Vercel keeps behind an SSO login.
+    # step's output — which is SITE_URL below, not the deployment hostname
+    # (Vercel keeps that one behind an SSO login).
     environment:
       name: production
       url: ${{ steps.deploy.outputs.url }}
@@ -60,6 +60,10 @@ jobs:
         run: ./.github/scripts/deploy-vercel.sh production
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          # The site's canonical domain, aliased to the production deployment
+          # by Vercel. Named here rather than sniffed from the deployment so
+          # that changing where the site lives is a reviewable diff.
+          SITE_URL: https://chap-marketplace.dhis2.org
           # Open-PR ingestion at build time; fail-soft, but authenticated
           # requests avoid the runners' shared unauthenticated rate limit.
           GITHUB_TOKEN: ${{ github.token }}
