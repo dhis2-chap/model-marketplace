@@ -57,25 +57,26 @@ Templates — scaffolding, not forecasting models:
 
 ## Repository rules
 
-`main` is protected and there is no bypass, for anyone. Every change lands by
-pull request, and the merge is the listing.
+`main` is protected. Every change lands by pull request, needs green CI and
+**three approvals**, and the merge is the listing. The count is
+`review_policy.required_approvals` in `registry.yaml`, applied to the whole
+repository rather than to registry paths alone: a single number is easier to
+trust than a split, and nothing on the site is urgent enough to deserve a
+lane of its own.
 
-| Change | What it needs |
-|---|---|
-| `site/` and docs | Green CI. No approvals — open the PR and merge it. |
-| `models/`, `registry.yaml`, `benchmarks/`, `.github/`, `site/src/lib/schema.ts`, `site/src/lib/flags.ts` | Green CI **plus three maintainer approvals**. |
+GitHub counts an approval only from someone with write access to this
+repository, so the roster is repository membership — there is no list to keep
+in sync. An author cannot approve their own pull request, and approvals are
+dismissed when new commits are pushed.
 
 Every commit must carry a verified signature.
 
-The split is enforced by two pieces. [`.github/CODEOWNERS`](.github/CODEOWNERS)
-declares which paths are registry paths — anything unlisted is deliberately
-unowned, which is what makes frontend work fast. GitHub's own code-owner rule
-only ever means "at least one owner approved", so the count of three comes
-from [`.github/workflows/model-review-gate.yml`](.github/workflows/model-review-gate.yml),
-which reads both the roster and the owned paths out of `CODEOWNERS` and
-reports a required `model-review-gate` status. `review_policy.required_approvals`
-in `registry.yaml` is the number it enforces; the author's own approval never
-counts, and approvals are dismissed when new commits are pushed.
+[`.github/CODEOWNERS`](.github/CODEOWNERS) still declares which paths are
+registry paths, and
+[`.github/workflows/model-review-gate.yml`](.github/workflows/model-review-gate.yml)
+still reports a `model-review-gate` status saying whether a pull request
+touches them and how its count stands. That status is a **report, not a
+requirement**: the approval rule above is what blocks the merge.
 
 The applied configuration is recorded at
 [`.github/rulesets/main.json`](.github/rulesets/main.json) so it is
@@ -84,12 +85,14 @@ file is the record of what was applied, replayable with
 `gh api -X POST repos/dhis2-chap/model-marketplace/rulesets --input .github/rulesets/main.json`.
 
 **Currently pending:** the maintainers named in `CODEOWNERS` are not yet
-collaborators on this repository, and GitHub ignores code owners without write
-access. Until they are added, `main` carries pull-request enforcement, signed
-commits and CI, while the two rules that would deadlock a single-maintainer
-repo — "require review from Code Owners" and the required `model-review-gate`
-status — stay off. The gate workflow still runs and reports on every registry
-PR, so its verdict is visible before it is binding.
+collaborators on this repository, so nobody but the repository owner can cast
+an approval that counts, and three of them cannot be collected at all. Until
+they are added, the owner holds the ruleset's only bypass, scoped to
+`pull_request` — so work still goes through a pull request with CI, and only
+the approval wait can be skipped, never the branch itself. Direct pushes to
+`main` are refused for everyone. Remove the bypass once the roster has write
+access; that single edit is what turns three approvals from an intention into
+a rule.
 
 ## The site
 

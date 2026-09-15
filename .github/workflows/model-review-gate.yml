@@ -1,14 +1,19 @@
 name: model-review-gate
 
-# Enforces registry.yaml's `review_policy.required_approvals` (3) on pull
-# requests that touch the registry, while leaving site-only pull requests
-# alone. GitHub cannot express "3 approvals for these paths, 0 for the rest":
-# CODEOWNERS is path-aware but counts only to one, and the ruleset's approval
-# count is repo-wide. So this job does the counting and reports a commit
-# status named `model-review-gate`, which the ruleset requires.
+# Reports whether a pull request touches the registry, and how it stands
+# against registry.yaml's `review_policy.required_approvals` (3), as a commit
+# status named `model-review-gate`.
 #
-# Roster and owned paths both come from .github/CODEOWNERS, so that file stays
-# the single source of truth.
+# It is a REPORT, not the gate. The branch ruleset requires those three
+# approvals on every pull request, repo-wide, and that is what blocks a merge;
+# this status is not in its required list. It exists to make a registry change
+# legible as one, and is where a path-scoped count would go if the repo-wide
+# rule is ever relaxed.
+#
+# Roster and owned paths both come from .github/CODEOWNERS. GitHub counts only
+# approvals from accounts with write access, while this job counts the
+# CODEOWNERS roster, so the two numbers can differ while that roster lacks
+# access — see README.md.
 #
 # SECURITY: runs on pull_request_target and pull_request_review, both of which
 # execute in the BASE repository context with a write-scoped token — necessary
