@@ -26,7 +26,15 @@ jobs:
   deploy:
     name: deploy to vercel
     runs-on: ubuntu-latest
-    environment: production
+    # Naming an environment is what puts each run in the repository's
+    # Deployments view: GitHub creates a deployment object for the job, and
+    # `url` fills that record's environment_url, which is the "View
+    # deployment" link. It resolves after the job runs, so it can read the
+    # step's output. The script resolves the public alias rather than the
+    # deployment hostname, which Vercel keeps behind an SSO login.
+    environment:
+      name: production
+      url: ${{ steps.deploy.outputs.url }}
     permissions:
       contents: read
 

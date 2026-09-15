@@ -45,10 +45,29 @@ echo "::group::vercel deploy ($target)"
 url=$(vc deploy --prebuilt --target="$target" | tail -n 1)
 echo "::endgroup::"
 
-echo "deployed $target: $url"
+# $url is the immutable deployment hostname, which sits behind Vercel's
+# deployment protection — it 302s to an SSO login, so it is the wrong thing to
+# hand a reader. The aliases are the public entry points; take the shortest,
+# which is the custom domain rather than the scope-suffixed one. Fail soft: if
+# the lookup gives nothing, the deployment URL is still a true answer.
+public_url="$url"
+alias_host=$(vc inspect "$url" --json 2>/dev/null \
+  | jq -r '[.aliases[]?] | min_by(length) // empty') || alias_host=""
+if [ -n "$alias_host" ]; then
+  public_url="https://$alias_host"
+fi
+
+echo "deployed $target: $public_url (deployment: $url)"
 if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
-  echo "Deployed **$target** — $url" >> "$GITHUB_STEP_SUMMARY"
+  {
+    echo "Deployed **$target** — <$public_url>"
+    echo ""
+    echo "Deployment: \`$url\`"
+  } >> "$GITHUB_STEP_SUMMARY"
 fi
 if [ -n "${GITHUB_OUTPUT:-}" ]; then
-  echo "url=$url" >> "$GITHUB_OUTPUT"
+  # `url` is what the GitHub deployment record links to, so it is the public
+  # one; the immutable deployment stays available under its own name.
+  echo "url=$public_url" >> "$GITHUB_OUTPUT"
+  echo "deployment_url=$url" >> "$GITHUB_OUTPUT"
 fi

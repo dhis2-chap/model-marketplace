@@ -134,6 +134,10 @@ repository secrets: `VERCEL_TOKEN`, plus `VERCEL_ORG_ID` and
 `.vercel/project.json`. The same script takes `preview` instead of
 `production` for a throwaway deploy from a laptop.
 
+Each run is recorded under the repository's **Deployments** → `production`
+environment, linking the site's public alias (the raw deployment hostname is
+behind Vercel's SSO), so the tab is the history of what is actually live.
+
 ### Honest-data rules
 
 - Everything rendered from the YAML is real: models, pins, channels,
