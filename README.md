@@ -65,18 +65,12 @@ trust than a split, and nothing on the site is urgent enough to deserve a
 lane of its own.
 
 GitHub counts an approval only from someone with write access to this
-repository, so the roster is repository membership — there is no list to keep
-in sync. An author cannot approve their own pull request, and approvals are
-dismissed when new commits are pushed.
+repository, so the roster is repository membership: there is no `CODEOWNERS`
+file to keep in sync and no workflow tallying approvals — the branch ruleset
+is the whole mechanism. An author cannot approve their own pull request, and
+approvals are dismissed when new commits are pushed.
 
 Every commit must carry a verified signature.
-
-[`.github/CODEOWNERS`](.github/CODEOWNERS) still declares which paths are
-registry paths, and
-[`.github/workflows/model-review-gate.yml`](.github/workflows/model-review-gate.yml)
-still reports a `model-review-gate` status saying whether a pull request
-touches them and how its count stands. That status is a **report, not a
-requirement**: the approval rule above is what blocks the merge.
 
 The applied configuration is recorded at
 [`.github/rulesets/main.json`](.github/rulesets/main.json) so it is
@@ -84,15 +78,14 @@ reviewable like everything else. GitHub is the live source of truth; that
 file is the record of what was applied, replayable with
 `gh api -X POST repos/dhis2-chap/model-marketplace/rulesets --input .github/rulesets/main.json`.
 
-**Currently pending:** the maintainers named in `CODEOWNERS` are not yet
-collaborators on this repository, so nobody but the repository owner can cast
-an approval that counts, and three of them cannot be collected at all. Until
-they are added, the owner holds the ruleset's only bypass, scoped to
-`pull_request` — so work still goes through a pull request with CI, and only
-the approval wait can be skipped, never the branch itself. Direct pushes to
-`main` are refused for everyone. Remove the bypass once the roster has write
-access; that single edit is what turns three approvals from an intention into
-a rule.
+**Currently pending:** the maintainers are not yet collaborators on this
+repository, so nobody but the repository owner can cast an approval that
+counts, and three of them cannot be collected at all. Until they are added,
+the owner holds the ruleset's only bypass, scoped to `pull_request` — so work
+still goes through a pull request with CI, and only the approval wait can be
+skipped, never the branch itself. Direct pushes to `main` are refused for
+everyone. Remove the bypass once the maintainers have write access; that
+single edit is what turns three approvals from an intention into a rule.
 
 ## The site
 
