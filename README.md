@@ -125,6 +125,15 @@ pnpm build      # production build (also implies validation)
 (the loader reads `../registry.yaml`; files outside the root directory are
 available at build time by default).
 
+Every push to `main` deploys to production automatically
+(`.github/workflows/deploy.yml`, which runs `.github/scripts/deploy-vercel.sh`
+— `vercel pull` + `vercel build` + `vercel deploy --prebuilt`). Merging a pin
+therefore publishes it; no hand-run deploy. The workflow needs three
+repository secrets: `VERCEL_TOKEN`, plus `VERCEL_ORG_ID` and
+`VERCEL_PROJECT_ID`, which are the `orgId` and `projectId` of the gitignored
+`.vercel/project.json`. The same script takes `preview` instead of
+`production` for a throwaway deploy from a laptop.
+
 ### Honest-data rules
 
 - Everything rendered from the YAML is real: models, pins, channels,

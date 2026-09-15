@@ -1,0 +1,57 @@
+name: deploy
+
+# Publishes the site on every push to main, which is what makes merging the
+# review gate the moment a pin goes live. Before this, main and the live site
+# could drift: deploys were run by hand from a laptop.
+#
+# The deploy builds the same `next build` CI runs, so invalid registry YAML
+# fails here too — but CI is a separate workflow, so a push whose lint or
+# tests fail can still deploy. Branch protection on main is what keeps that
+# from happening.
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+jobs:
+  deploy:
+    name: deploy to vercel
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      contents: read
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          package_json_file: site/package.json
+
+      - name: setup node
+        uses: actions/setup-node@v4
+        with:
+          # Matches the Vercel project's Node version.
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: site/pnpm-lock.yaml
+
+      - name: deploy
+        id: deploy
+        run: ./.github/scripts/deploy-vercel.sh production
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          # Open-PR ingestion at build time; fail-soft, but authenticated
+          # requests avoid the runners' shared unauthenticated rate limit.
+          GITHUB_TOKEN: ${{ github.token }}
