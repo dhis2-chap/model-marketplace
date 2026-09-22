@@ -27,10 +27,8 @@ marketplace:
   repository: https://github.com/dhis2-chap/model-marketplace
   documentation:
     chap: https://chap.dhis2.org
-    # Only chapkit model services are supported. Every listed model is a
-    # chapkit 2.0.0 service published as a container image; the install guide
-    # is chapkit's own deployment walkthrough.
-    install: https://dhis2-chap.github.io/chapkit/guides/deploying-to-chap-core/
+    # Install published chapkit services with the CHAP CLI.
+    install: https://github.com/dhis2-chap/chap-core/blob/master/docs/chap-cli/chap-core-cli-setup.md#installing-and-updating-models
     # How CHAP talks to a running chapkit service over HTTP.
     chap_chapkit: https://chap.dhis2.org/chap-modeling-platform/external_models/chapkit/
     chapkit: https://dhis2-chap.github.io/chapkit/
