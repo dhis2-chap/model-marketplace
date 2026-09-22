@@ -1,0 +1,63 @@
+name: deploy
+
+# Publishes the site on every push to main, so merging a pin is what makes it
+# live; before this, deploys were run by hand and the site could drift.
+#
+# The build is the same `next build` CI runs, so invalid registry YAML fails
+# here too. CI is a separate workflow, though: a push whose tests fail still
+# deploys, and the approval rule on main is what keeps that from happening.
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+jobs:
+  deploy:
+    name: deploy to vercel
+    runs-on: ubuntu-latest
+    # Naming an environment is what puts each run in the Deployments view;
+    # `url` is that record's "View deployment" link. It resolves after the job,
+    # so it can read a step output.
+    environment:
+      name: production
+      url: ${{ steps.deploy.outputs.url }}
+    permissions:
+      contents: read
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          package_json_file: site/package.json
+
+      - name: setup node
+        uses: actions/setup-node@v4
+        with:
+          # Matches the Vercel project's Node version.
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: site/pnpm-lock.yaml
+
+      - name: deploy
+        id: deploy
+        run: ./.github/scripts/deploy-vercel.sh production
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          # Where the site actually answers; Vercel keeps the deployment's
+          # own hostname behind an SSO login.
+          SITE_URL: https://chap-marketplace.dhis2.org
+          # Open-PR ingestion at build time; fail-soft, but authenticated
+          # requests avoid the runners' shared unauthenticated rate limit.
+          GITHUB_TOKEN: ${{ github.token }}

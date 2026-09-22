@@ -2,7 +2,9 @@
   "name": "main protection",
   "target": "branch",
   "enforcement": "active",
-  "bypass_actors": [],
+  "bypass_actors": [
+    { "actor_id": 136808756, "actor_type": "User", "bypass_mode": "pull_request" }
+  ],
   "conditions": {
     "ref_name": { "include": ["~DEFAULT_BRANCH"], "exclude": [] }
   },
@@ -13,7 +15,7 @@
     {
       "type": "pull_request",
       "parameters": {
-        "required_approving_review_count": 0,
+        "required_approving_review_count": 3,
         "dismiss_stale_reviews_on_push": true,
         "require_code_owner_review": false,
         "require_last_push_approval": false,
