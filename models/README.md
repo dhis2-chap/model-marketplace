@@ -152,18 +152,21 @@ configurations:                  # verified, copy-pasteable configurations
 - A version pin resolves to two halves of one revision:
   `<source.repository>@<commit>` for reading the code, and
   `<source.image>:<image_tag>` for running it. The publish workflow tags every
-  build `sha-<short commit>`, so a `sha-` tag must agree with `commit` —
-  the schema enforces it. `:latest` moves and is never a pin.
+  build `sha-<short commit>`, and `image_tag` must be exactly that tag for
+  `commit` — the schema enforces it, and `chap install` refuses any other
+  form. `:latest`, `main` and release tags can move and are never a pin.
 - A listed service runs on one of chapkit's published base images
   ([dhis2-chap/chapkit-images](https://github.com/dhis2-chap/chapkit-images)),
   recorded as `source.runtime_image`: `chapkit-py` for Python services,
   `chapkit-r`, `chapkit-r-tidyverse` or `chapkit-r-inla` for R. The R-INLA
   base is amd64 only.
-- Deployment is a compose overlay next to chap-core: the service self-registers
-  through `SERVICEKIT_ORCHESTRATOR_URL` on container port 8000, and the DHIS2
-  Modeling App then picks it up automatically. A bare `docker run` registers
-  nothing. See
-  [chapkit's deployment guide](https://dhis2-chap.github.io/chapkit/guides/deploying-to-chap-core/).
+- Deployment is `chap install <id>`, run from the CHAP Compose deployment
+  directory. It reads this repository, accepts only `kind: model` with a
+  `verified` `channels.stable`, pulls that image and writes
+  `compose.marketplace.yml`; the service self-registers with chap-core on
+  container port 8000, and the DHIS2 Modeling App then picks it up
+  automatically. `--local` runs it standalone for CLI evaluations. See
+  [the CHAP CLI guide](https://github.com/dhis2-chap/chap-core/blob/master/docs/chap-cli/chap-core-cli-setup.md#installing-and-updating-models).
 - Every block under `configurations:` is the `data` object of a
   `POST /api/v1/configs` request — a running service holds no configuration
   until one is created. `prediction_periods` is required by chapkit's

@@ -47,14 +47,17 @@ export const ASSESSED_STATUSES = [
 export const MODEL_KINDS = ["model", "template"] as const;
 
 const versionSchema = z.object({
-  version: z.string().min(1),
+  /** Same pattern `chap install` accepts for a version label. */
+  version: z
+    .string()
+    .regex(/^[A-Za-z0-9][A-Za-z0-9_.+-]{0,63}$/, "version must be a plain label such as 1.0.0"),
   commit: z
     .string()
     .regex(/^[0-9a-f]{40}$/, "commit must be a full 40-char git sha"),
   /**
    * Tag on `source.image` built from `commit`. The publish workflow tags
-   * every build `sha-<short>`, so that form is the immutable image pin and
-   * has to agree with the commit — enforced below.
+   * every build `sha-<short>`, and `chap install` refuses any other form
+   * because other tags can move — enforced below.
    */
   image_tag: z.string().min(1),
   /** The chapkit requirement the pinned revision declares. */
@@ -171,17 +174,12 @@ export const modelSchema = z
         });
       }
       seen.add(v.version);
-      // A sha- tag is the commit; anything else (a semver release tag) is
-      // taken at face value.
       const shortCommit = v.commit.slice(0, 7);
-      if (
-        v.image_tag.startsWith("sha-") &&
-        v.image_tag !== `sha-${shortCommit}`
-      ) {
+      if (v.image_tag !== `sha-${shortCommit}`) {
         ctx.addIssue({
           code: "custom",
           path: ["versions", i, "image_tag"],
-          message: `image_tag "${v.image_tag}" does not match the pinned commit (expected "sha-${shortCommit}")`,
+          message: `image_tag "${v.image_tag}" must be the sha- tag of the pinned commit ("sha-${shortCommit}")`,
         });
       }
     });
@@ -251,7 +249,10 @@ export const registrySchema = z.object({
 export const benchmarkSchema = z.object({
   schema_version: z.literal(1),
   model: z.string().regex(/^[a-z0-9_]+$/),
-  version: z.string().min(1),
+  /** Same pattern `chap install` accepts for a version label. */
+  version: z
+    .string()
+    .regex(/^[A-Za-z0-9][A-Za-z0-9_.+-]{0,63}$/, "version must be a plain label such as 1.0.0"),
   commit: z
     .string()
     .regex(/^[0-9a-f]{40}$/, "commit must be a full 40-char git sha"),

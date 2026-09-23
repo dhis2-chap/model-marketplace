@@ -670,8 +670,8 @@ function InstallTab({
       title: "Install from your running CHAP deployment directory",
       cmd: installCommand,
       note: useMarketplace
-        ? "Installs the current verified stable version. CHAP pulls the image, creates compose.marketplace.yml and starts the service with self-registration."
-        : "Installs this exact image as a custom service. The CLI requires --accept-risk: you accept responsibility for running its code, sharing data and using its forecasts.",
+        ? `Installs the current verified stable version. CHAP pulls the image, creates compose.marketplace.yml and starts the service with self-registration. Later, chap update ${view.id} moves it to the new stable pin.`
+        : "Installs this exact image as a custom service. The CLI requires --accept-risk: you accept responsibility for running its code, sharing data and using its forecasts. chap update needs --accept-risk again and never switches to the marketplace pin on its own.",
     },
     {
       title: "For a CHAP deployment, confirm chap-core sees it",
@@ -820,7 +820,10 @@ function InstallTab({
             Pass --compose-file for each base file your deployment uses,
             including compose.override.yml if applicable. Include
             compose.marketplace.yml in subsequent Docker Compose commands.
-            The CLI guide covers updates, removal and custom images.
+            If the pull fails on Apple Silicon because the image is amd64
+            only, retry with --platform linux/amd64. chap uninstall{" "}
+            {view.id} removes the service and keeps its data volume. The CLI
+            guide covers updates, removal and custom images.
           </p>
           <a
             href={view.installUrl}

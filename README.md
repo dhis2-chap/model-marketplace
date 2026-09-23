@@ -34,7 +34,9 @@ image at `<image>:sha-<short commit>` for running it. The schema cross-checks
 the two, so they cannot drift; `:latest` moves and is never a pin.
 
 Channels (`stable` / `latest`) are named pointers into the version list;
-`channels.stable` must point at a version with `status: verified`. Files also
+`channels.stable` must point at a version with `status: verified`.
+`chap install <id>` reads this repository from `main` and installs only that
+verified stable pin. Files also
 declare `kind` — a forecasting `model`, or a `template` for authors to copy —
 and the format is documented with an annotated example in
 [models/README.md](models/README.md).
