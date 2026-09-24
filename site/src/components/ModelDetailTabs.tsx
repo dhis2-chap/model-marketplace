@@ -661,27 +661,20 @@ function InstallTab({
   const pinDisplay = selected?.pinDisplay ?? view.stable.pinDisplay;
   const shortPin = pinDisplay.split("@")[1];
   const tag = selected?.tag ?? view.stable.tag;
-  const verified = selected ? selected.status === "verified" : true;
-  const overlay = `compose.${view.serviceId}.yml`;
+  const verified = (selected ?? view.stable).status === "verified";
+  const useMarketplace = verified && tag === view.stable.tag && view.kind !== "template";
+  const installCommand = `chap install ${view.id}${useMarketplace ? "" : ` --image ${image} --accept-risk`}`;
   const configExample = view.configurations[0];
   const steps = [
     {
-      title: verified ? "Pull the verified image" : "Pull the image",
-      cmd: `docker pull ${image}`,
-      note: "The sha- tag is built from the pinned commit, so it names one immutable revision. :latest moves; do not deploy it.",
+      title: "Install from your running CHAP deployment directory",
+      cmd: installCommand,
+      note: useMarketplace
+        ? `Installs the current verified stable version. CHAP pulls the image, creates compose.marketplace.yml and starts the service with self-registration. Later, chap update ${view.id} moves it to the new stable pin.`
+        : "Installs this exact image as a custom service. The CLI requires --accept-risk: you accept responsibility for running its code, sharing data and using its forecasts. chap update needs --accept-risk again and never switches to the marketplace pin on its own.",
     },
     {
-      title: "Add a compose overlay next to chap-core",
-      cmd: `$EDITOR ${overlay}`,
-      note: `One service block: image ${image}, container port 8000 on a free host port, and SERVICEKIT_ORCHESTRATOR_URL pointing at chap. The service name must be unique across overlays — use ${view.serviceId}.`,
-    },
-    {
-      title: "Start the stack",
-      cmd: `docker compose -f compose.yml -f ${overlay} up -d`,
-      note: "The model self-registers with chap-core on startup and keeps the registration alive with a periodic ping. Registration only happens when SERVICEKIT_ORCHESTRATOR_URL is set — a bare docker run registers nothing.",
-    },
-    {
-      title: "Confirm chap-core sees it",
+      title: "For a CHAP deployment, confirm chap-core sees it",
       cmd: `curl -s http://localhost:8000/v2/services | grep ${view.serviceId}`,
       note: `Look for the service id ${view.serviceId}. Once it is listed, the DHIS2 Modeling App picks the model up automatically — nothing to configure inside DHIS2.`,
     },
@@ -693,11 +686,10 @@ function InstallTab({
           Add to your CHAP instance
         </h2>
         <p className="mb-[18px] max-w-[76ch] text-[13.5px] text-ink-2">
-          The marketplace lists chapkit services only. Every listing is a
-          published container image that talks to CHAP over HTTP and registers
-          itself with chap-core on startup. Run it beside your CHAP
-          deployment; the pin is the contract — the same commit, and the image
-          tagged from it, produce the same service everywhere.
+          Use the CHAP CLI with Docker and Docker Compose v2 installed.
+          CHAP must already be running. Add --local to the install command
+          for a standalone service for CLI evaluations; no CHAP server is
+          needed, and the command prints the model URL.
         </p>
         <div className="mb-3.5 flex flex-wrap items-center gap-2">
           <Kicker>Version pin</Kicker>
@@ -778,11 +770,11 @@ function InstallTab({
             ))}
             <button
               type="button"
-              onClick={() => copy(image)}
+              onClick={() => copy(installCommand)}
               className="flex h-9 w-full cursor-pointer items-center justify-center gap-2 rounded-[4px] border border-white/15 bg-white/5 font-brand text-[12.5px] font-medium text-[#D8DEE9] transition-colors hover:bg-white/10"
             >
               <CopyGlyph className="h-3 w-3" />
-              {copied === image ? "Copied" : `Copy ${tag} image ref`}
+              {copied === installCommand ? "Copied" : "Copy install command"}
             </button>
           </div>
         </div>
@@ -825,17 +817,13 @@ function InstallTab({
         <div className="rounded-lg border border-line p-5">
           <Kicker className="mb-3.5">Full instructions</Kicker>
           <p className="text-[13px] leading-relaxed text-ink-2">
-            The compose overlay, the registration environment variables, host
-            port conventions and the troubleshooting list live in{" "}
-            <a
-              href="https://dhis2-chap.github.io/chapkit/"
-              target="_blank"
-              rel="noreferrer"
-              className="font-bold text-brand hover:text-brand-dark hover:underline"
-            >
-              chapkit
-            </a>
-            &apos;s own deployment guide. Only chapkit services are supported.
+            Pass --compose-file for each base file your deployment uses,
+            including compose.override.yml if applicable. Include
+            compose.marketplace.yml in subsequent Docker Compose commands.
+            If the pull fails on Apple Silicon because the image is amd64
+            only, retry with --platform linux/amd64. chap uninstall{" "}
+            {view.id} removes the service and keeps its data volume. The CLI
+            guide covers updates, removal and custom images.
           </p>
           <a
             href={view.installUrl}
@@ -843,7 +831,7 @@ function InstallTab({
             rel="noreferrer"
             className="mt-3 inline-block text-[13px] font-bold text-brand hover:text-brand-dark hover:underline"
           >
-            chapkit → deploying to chap-core
+            CHAP → installing and updating models
           </a>
         </div>
       </div>

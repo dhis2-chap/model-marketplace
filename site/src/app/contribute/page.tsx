@@ -91,7 +91,7 @@ const SUBMISSION_CHECKS = [
   },
   {
     title: "Show it registering",
-    body: "Start the service from a compose overlay next to chap-core and confirm it appears in GET /v2/services, then run a train and a predict through it.",
+    body: "Install your image with chap install --image --accept-risk beside chap-core and confirm it appears in GET /v2/services, then run a train and a predict through it.",
   },
   {
     title: "Check the forecast output",

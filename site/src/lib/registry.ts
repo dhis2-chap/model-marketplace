@@ -153,8 +153,8 @@ export function compactPin(model: Model, version: ModelVersion): string {
 
 /**
  * The deployable pin: the published image at the tag built from this
- * commit. This is what goes in a compose overlay — the `sha-` tag is
- * immutable, unlike `:latest`.
+ * commit. This is what `chap install` runs — the `sha-` tag is immutable,
+ * unlike `:latest`.
  */
 export function imageRef(model: Model, version: ModelVersion): string {
   return `${model.source.image}:${version.image_tag}`;

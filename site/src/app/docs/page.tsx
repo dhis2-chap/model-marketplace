@@ -20,10 +20,10 @@ const ENTRIES = [
     href: "https://github.com/dhis2-chap/model-marketplace/blob/main/benchmarks/README.md",
   },
   {
-    kicker: "chapkit",
-    title: "Deploy a chapkit service to chap-core",
-    body: "The install path every listing follows: publish an image, add a compose overlay beside chap-core, self-register, appear in the DHIS2 Modeling App.",
-    href: "https://dhis2-chap.github.io/chapkit/guides/deploying-to-chap-core/",
+    kicker: "platform",
+    title: "Install and update models",
+    body: "Use chap install to add a model to your running CHAP deployment, or add --local for CLI evaluations. Includes updates, removal and custom images.",
+    href: "https://github.com/dhis2-chap/chap-core/blob/master/docs/chap-cli/chap-core-cli-setup.md#installing-and-updating-models",
   },
   {
     kicker: "platform",

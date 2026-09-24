@@ -152,12 +152,20 @@ describe("schema refinements", () => {
     expect(modelSchema.safeParse(bad).success).toBe(false);
   });
 
-  it("accepts a non-sha image tag without cross-checking it", () => {
-    const ok = {
+  it("rejects a non-sha image tag, which chap install refuses", () => {
+    const bad = {
       ...base,
       versions: [{ ...base.versions[0], image_tag: "1.0.0" }],
     };
-    expect(modelSchema.safeParse(ok).success).toBe(true);
+    expect(modelSchema.safeParse(bad).success).toBe(false);
+  });
+
+  it("rejects a version label chap install cannot use", () => {
+    const bad = {
+      ...base,
+      versions: [{ ...base.versions[0], version: "v1 $x" }],
+    };
+    expect(modelSchema.safeParse(bad).success).toBe(false);
   });
 
   it("rejects prediction_periods outside the declared range", () => {
