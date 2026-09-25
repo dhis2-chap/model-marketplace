@@ -47,6 +47,7 @@ and the format is documented with an annotated example in
 | [Rwanda Malaria BYM](models/chapkit_rwanda_malaria_bym_model.yaml) | gray | R · INLA | 1–24 |
 | [Simple Multistep](models/chapkit_simple_multistep_model.yaml) | orange | Python · scikit-learn + skpro | 1–100 |
 | [Auto-ARIMA](models/auto_arima_chapkit.yaml) | red | R · fable | 0–12 |
+| [GHRmodel](models/chapkit_ghr_model.yaml) | red | R · INLA | 1–12 |
 
 Templates — scaffolding, not forecasting models:
 
