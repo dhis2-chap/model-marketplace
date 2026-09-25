@@ -36,7 +36,7 @@ describe("the real registry", () => {
         /^ghcr\.io\/dhis2-chap\/chapkit-/,
       );
       for (const version of model.versions) {
-        expect(version.chapkit).toContain("2.0.0");
+        expect(version.chapkit).toMatch(/^>=2\.\d+\.\d+,<3$/);
       }
     }
   });

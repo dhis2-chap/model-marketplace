@@ -70,7 +70,7 @@ configurations:
 
 const SUBMISSION_CHECKS = [
   {
-    title: "Build it on chapkit 2.0.0",
+    title: "Build it on chapkit 2",
     body: "Only chapkit services are listed. Your model must be a chapkit ML service — an MLServiceBuilder app on one of the published chapkit base images.",
   },
   {

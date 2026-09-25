@@ -6,7 +6,7 @@ import { z } from "zod";
  * file violates it, so a model PR gets a machine check before the three
  * maintainer reviews.
  *
- * schema_version 2 tracks chapkit 2.0.0: a listed model is a containerised
+ * schema_version 2 tracks chapkit 2: a listed model is a containerised
  * chapkit ML service, so a pin carries both a commit and the image tag built
  * from it, and the file records what the service's own MLServiceInfo
  * declares — service id, prediction-period bounds, required covariates,

@@ -66,7 +66,7 @@ export default function DocsPage() {
             Marketplace formats are documented in this repository. The index
             links directly to the relevant CHAP and chapkit guides for running
             model services, building your own, and working in the DHIS2
-            Modeling App. Every listed model is a chapkit 2.0.0 service —
+            Modeling App. Every listed model is a chapkit 2 service —
             nothing else is supported.
           </p>
         </div>
