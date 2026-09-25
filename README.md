@@ -27,7 +27,7 @@ site/               The marketplace website (Next.js, TypeScript, pnpm)
 
 ## The registry
 
-Every listed model is a [chapkit](https://dhis2-chap.github.io/chapkit/) 2.0.0
+Every listed model is a [chapkit](https://dhis2-chap.github.io/chapkit/) 2
 ML service. A version pin therefore has two halves of one revision: a
 `repository URL + full commit hash` for reading the code, and a published
 image at `<image>:sha-<short commit>` for running it. The schema cross-checks

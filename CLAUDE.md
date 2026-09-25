@@ -8,7 +8,7 @@ site in `site/` is a build-time rendering of it. No auth, no server state.
 ## Layout
 
 - `registry.yaml` — the model whitelist; every listed model must be a chapkit
-  2.0.0 service with a published image.
+  2 service with a published image.
 - `models/*.yaml` — one file per model: metadata, configurations, version pins
   (exact 40-char commit **plus** the `sha-<short>` image tag built from it).
   Schema documented in `models/README.md`; currently `schema_version: 2`.
@@ -26,7 +26,7 @@ site in `site/` is a build-time rendering of it. No auth, no server state.
 
 ## Decisions and invariants
 
-- **Chapkit-only.** Only chapkit 2.0.0 ML services are listed. The install
+- **Chapkit-only.** Only chapkit 2 ML services are listed (any 2.x minor). The install
   path is the containerised one: pull the image, add a compose overlay beside
   chap-core, self-register via `SERVICEKIT_ORCHESTRATOR_URL`. Not
   `chapkit mlproject run` — that was the schema_version 1 world.

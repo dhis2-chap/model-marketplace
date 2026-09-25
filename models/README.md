@@ -14,7 +14,7 @@ when it does.
 
 ## What schema_version 2 changed
 
-Version 2 tracks chapkit 2.0.0. Every listed model is now a containerised
+Version 2 tracks chapkit 2 (2.0.0 onwards, any 2.x minor). Every listed model is now a containerised
 chapkit ML service rather than an MLproject repository run through chapkit's
 MLproject runner, and the file records what the service's own `MLServiceInfo`
 declares.
