@@ -57,20 +57,21 @@ covariates:
   allow_free_additional: true
 
 channels:
-  stable: 0.1.0
-  latest: 0.1.0
+  stable: 0.1.1
+  latest: 0.1.1
 
 versions:
-  - version: 0.1.0
-    commit: b1d6c312a83f07aa1a4e66fce05ae7f4eccb8188
-    image_tag: sha-b1d6c31
-    chapkit: ">=2.1.0,<3"
+  - version: 0.1.1
+    commit: 3040e8f62c450fec04e496aec03b065321d5a00e
+    image_tag: sha-3040e8f
+    chapkit: ">=2.1.2,<3"
     status: verified
     # Pinned by the maintainers without the three-approval round.
     verified_by: []
     changelog: >-
-      First listing. Requires chapkit 2.1 so the model configurations
-      chap-core sends are applied; images report their git_revision.
+      Require chapkit 2.1.2, whose failure messages keep the R error line
+      instead of trailing warnings, and which applies the model
+      configurations chap-core sends.
     notes: >-
       The service runs as its own unprivileged user (uid 10001) and keeps its
       data under /work/data.

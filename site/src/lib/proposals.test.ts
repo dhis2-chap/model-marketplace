@@ -57,7 +57,7 @@ describe("approvingReviewers", () => {
 describe("proposedPinsInFile", () => {
   const registry = loadRegistry();
   const ewars = registry.models.find((m) => m.id === "chapkit_ewars_model")!;
-  const v1 = ewars.versions.find((v) => v.version === "1.0.0")!;
+  const v1 = ewars.versions[0];
 
   const headWithNewPin = [
     "id: chapkit_ewars_model",
@@ -66,7 +66,7 @@ describe("proposedPinsInFile", () => {
     "  - version: 1.1.0",
     `    commit: ${"a".repeat(40)}`,
     "    status: unstable",
-    "  - version: 1.0.0",
+    `  - version: ${v1.version}`,
     `    commit: ${v1.commit}`,
     "    status: verified",
   ].join("\n");
@@ -87,14 +87,14 @@ describe("proposedPinsInFile", () => {
   it("treats a re-pinned existing tag as a proposal", () => {
     const repinned = headWithNewPin.replace(v1.commit, "b".repeat(40));
     const pins = proposedPinsInFile("models/chapkit_ewars_model.yaml", repinned, ewars);
-    expect(pins.map((p) => p.versionTag).sort()).toEqual(["1.0.0", "1.1.0"]);
+    expect(pins.map((p) => p.versionTag).sort()).toEqual([v1.version, "1.1.0"].sort());
   });
 
   it("reports nothing when the file matches what main lists", () => {
     const unchanged = [
       "id: chapkit_ewars_model",
       "versions:",
-      "  - version: 1.0.0",
+      `  - version: ${v1.version}`,
       `    commit: ${v1.commit}`,
     ].join("\n");
     expect(
