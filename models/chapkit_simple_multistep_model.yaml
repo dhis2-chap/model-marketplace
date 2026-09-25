@@ -49,22 +49,21 @@ covariates:
   allow_free_additional: true
 
 channels:
-  stable: 0.1.0
-  latest: 0.1.0
+  stable: 0.1.1
+  latest: 0.1.1
 
 versions:
-  - version: 0.1.0
-    commit: 5677b4d5ec694fc6d8d2805df71299e33aa7085e
-    image_tag: sha-5677b4d
-    chapkit: ">=2.1.0,<3"
+  - version: 0.1.1
+    commit: 6c1d9ee76f39194cde8df0794a761a648526bb63
+    image_tag: sha-6c1d9ee
+    chapkit: ">=2.1.2,<3"
     status: verified
     # Verified by the merge gate. Part of the chapkit 2.0.0 seed import.
     verified_by: []
     changelog: >-
-      First listed pin: the recursive multistep forecaster as a chapkit 2.0.0
-      service, with GIT_REVISION passed through to the published image.
-      Pin moved on 2026-09-25 to the build that requires chapkit 2.1, so
-      the model configurations chap-core sends are applied.
+      Require chapkit 2.1.2, whose failure messages keep the R error line
+      instead of trailing warnings, and which applies the model
+      configurations chap-core sends.
     notes: >-
       Supersedes the MLproject-based knutdrand/mstl_multistep_model listing.
       This is a different model — a RandomForest + skpro recursive
