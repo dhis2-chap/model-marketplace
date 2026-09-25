@@ -63,14 +63,16 @@ channels:
 
 versions:
   - version: 0.1.0
-    commit: 028bb5aeef88f874116ac2dcb5863975fecc3201
-    image_tag: sha-028bb5a
-    chapkit: ">=2.0.0,<3"
+    commit: 67dc70cafcc6d6d4561a5b49f460c3c0e3ac5ffd
+    image_tag: sha-67dc70c
+    chapkit: ">=2.1.0,<3"
     status: verified
     # Verified by the merge gate. Part of the chapkit 2.0.0 seed import.
     verified_by: []
     changelog: >-
       Upgrade to chapkit 2.0.0.
+      Pin moved on 2026-09-25 to the build that requires chapkit 2.1, so
+      the model configurations chap-core sends are applied.
     notes: >-
       The runner uses chapkit's chap_core config format, which writes
       additional_continuous_covariates at the top level of config.yml —

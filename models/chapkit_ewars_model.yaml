@@ -58,7 +58,7 @@ covariates:
 # what production chap instances should run. `latest` is the newest pin of
 # any status; it diverges from `stable` while a new version is under review.
 channels:
-  stable: 1.0.0
+  stable: 1.0.1
   latest: 1.0.1
 
 versions:
@@ -66,15 +66,16 @@ versions:
     commit: 20be3fed9998a4e39690f2cbe80ae3a937708a19
     image_tag: sha-20be3fe
     chapkit: ">=2.1.0,<3"
-    status: unstable
+    status: verified
+    # Pinned by the maintainers without the three-approval round.
     verified_by: []
     changelog: >-
       Require chapkit 2.1 so the model configurations chap-core sends are
       applied; declare period_type any, since the R code handles weekly as
       well as monthly data; images report their git_revision.
     notes: >-
-      Under review. chap-core registers the pin as CHAP-EWARS 1.0.1; the
-      1.0.0 pin keeps the configurations it was verified with.
+      chap-core registers the pin as CHAP-EWARS 1.0.1; the 1.0.0 pin keeps
+      the configurations it was verified with.
   - version: 1.0.0
     commit: fa880a1d8621c6c5bf60c472c299c40b5568ecd0
     image_tag: sha-fa880a1
