@@ -39,7 +39,7 @@ maintainers:
   - mortenoh
 
 compatibility:
-  period_types: [monthly]
+  period_types: [monthly, weekly]
   min_prediction_periods: 0
   max_prediction_periods: 100
   requires_geo: false
@@ -59,9 +59,22 @@ covariates:
 # any status; it diverges from `stable` while a new version is under review.
 channels:
   stable: 1.0.0
-  latest: 1.0.0
+  latest: 1.0.1
 
 versions:
+  - version: 1.0.1
+    commit: 20be3fed9998a4e39690f2cbe80ae3a937708a19
+    image_tag: sha-20be3fe
+    chapkit: ">=2.1.0,<3"
+    status: unstable
+    verified_by: []
+    changelog: >-
+      Require chapkit 2.1 so the model configurations chap-core sends are
+      applied; declare period_type any, since the R code handles weekly as
+      well as monthly data; images report their git_revision.
+    notes: >-
+      Under review. chap-core registers the pin as CHAP-EWARS 1.0.1; the
+      1.0.0 pin keeps the configurations it was verified with.
   - version: 1.0.0
     commit: fa880a1d8621c6c5bf60c472c299c40b5568ecd0
     image_tag: sha-fa880a1
