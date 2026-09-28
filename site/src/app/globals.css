@@ -183,48 +183,6 @@ body {
   background-color: var(--mp-board);
 }
 
-@keyframes mp-draw {
-  from {
-    stroke-dashoffset: 900;
-  }
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-
-@keyframes mp-blink {
-  0%,
-  49% {
-    opacity: 1;
-  }
-  50%,
-  100% {
-    opacity: 0;
-  }
-}
-
-@keyframes mp-pipeline-progress {
-  from {
-    transform: scaleX(0);
-  }
-  to {
-    transform: scaleX(1);
-  }
-}
-
-.review-pipeline-progress {
-  animation-name: mp-pipeline-progress;
-  animation-timing-function: linear;
-  animation-fill-mode: forwards;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .review-pipeline-progress {
-    animation: none;
-    transform: scaleX(1);
-  }
-}
-
 /* Edge-to-edge scroll rows (tab bars, filter rails) keep their scrollbar
    hidden — the fade and the overflowing content already say "swipe". */
 .no-scrollbar {

@@ -1,6 +1,5 @@
 import { stringify } from "yaml";
 import {
-  compactPin,
   displayPin,
   fullPin,
   imageRef,
@@ -53,13 +52,9 @@ export interface ModelCardView {
   /** e.g. "1–24 periods" — the service's declared forecast bounds. */
   horizon: string;
   requiresGeo: boolean;
-  stableTag: string;
-  /** Card-sized pin: repository name + short commit. */
-  stablePinDisplay: string;
-  stablePinFull: string;
-  /** Immutable image pin for the stable channel. */
-  image: string;
-  approvals: string;
+  author: string;
+  organization: string | null;
+  maintainers: string[];
 }
 
 /** The model's stored results, stable-channel pin first, then by dataset. */
@@ -81,7 +76,6 @@ export function horizonLabel(model: Model): string {
 
 export function toCardView(model: Model): ModelCardView {
   const pres = presentationFor(model.id);
-  const stable = stableVersion(model);
   return {
     id: model.id,
     name: model.display_name,
@@ -98,11 +92,9 @@ export function toCardView(model: Model): ModelCardView {
     periodType: model.compatibility.period_types.join(" · "),
     horizon: horizonLabel(model),
     requiresGeo: model.compatibility.requires_geo,
-    stableTag: model.channels.stable,
-    stablePinDisplay: compactPin(model, stable),
-    stablePinFull: fullPin(model, stable),
-    image: imageRef(model, stable),
-    approvals: `${verifiedCount(model) > 0 ? "3/3" : "0/3"}`,
+    author: model.attribution.author,
+    organization: model.attribution.organization ?? null,
+    maintainers: model.maintainers,
   };
 }
 

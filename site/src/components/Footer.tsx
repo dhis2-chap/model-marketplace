@@ -21,22 +21,21 @@ export function Footer() {
               <span className="font-brand text-[18px] font-extrabold tracking-[-0.02em]">
                 CHAP
               </span>
-              <span className="mt-[3px] font-brand text-[8.5px] font-bold uppercase tracking-[0.26em] text-board-ink-2">
+              <span className="mt-[3px] font-brand text-[11px] font-bold uppercase tracking-[0.16em] text-board-ink-2">
                 Model Marketplace
               </span>
             </span>
           </div>
-          <p className="mt-4 max-w-[44ch] font-serif text-[13.5px] leading-[1.7] text-board-ink-2">
-            Climate &amp; Health Analytics Platform — developed by the HISP
-            Centre at the University of Oslo. The catalog is rendered from a
-            public git repository; the repository is the source of truth.
+          <p className="mt-4 max-w-[44ch] text-[15px] leading-[1.7] text-board-ink-2">
+            Climate &amp; Health Analytics Platform, by the HISP Centre at the
+            University of Oslo.
           </p>
         </div>
         <div>
-          <div className="mb-3.5 font-mono text-[9.5px] uppercase tracking-[0.18em] text-fan">
+          <div className="mb-3.5 text-[13px] font-bold uppercase tracking-[0.1em] text-fan">
             Marketplace
           </div>
-          <ul className="space-y-2.5 text-[13px]">
+          <ul className="space-y-2.5 text-[15px]">
             <li>
               <Link href="/" className={LinkClass}>
                 Models
@@ -55,10 +54,10 @@ export function Footer() {
           </ul>
         </div>
         <div>
-          <div className="mb-3.5 font-mono text-[9.5px] uppercase tracking-[0.18em] text-fan">
+          <div className="mb-3.5 text-[13px] font-bold uppercase tracking-[0.1em] text-fan">
             Platform
           </div>
-          <ul className="space-y-2.5 text-[13px]">
+          <ul className="space-y-2.5 text-[15px]">
             <li>
               <a href="https://chap.dhis2.org" target="_blank" rel="noreferrer" className={LinkClass}>
                 chap.dhis2.org
@@ -78,7 +77,7 @@ export function Footer() {
         </div>
       </div>
       <div className="border-t border-white/10">
-        <div className="mx-auto flex max-w-[1240px] flex-wrap items-center justify-between gap-3 px-5 sm:px-8 py-4 font-mono text-[10px] uppercase tracking-[0.14em] text-board-ink-2">
+        <div className="mx-auto flex max-w-[1240px] flex-wrap items-center justify-between gap-3 px-5 sm:px-8 py-4 font-mono text-[12px] text-board-ink-2">
           <span>HISP Centre · University of Oslo</span>
           <span>catalog build {buildStamp()}</span>
         </div>

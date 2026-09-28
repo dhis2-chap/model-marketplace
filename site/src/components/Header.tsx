@@ -203,7 +203,7 @@ function MobileNav({
                 href={item.href}
                 onClick={() => setOpen(false)}
                 aria-current={active ? "page" : undefined}
-                className={`flex items-center gap-2 border-b border-line py-3.5 font-brand text-[14px] font-bold uppercase tracking-[0.1em] last:border-b-0 ${
+                className={`flex items-center gap-2 border-b border-line py-3.5 text-[16px] font-bold last:border-b-0 ${
                   active
                     ? "text-brand [box-shadow:inset_3px_0_0_var(--mp-brand)] pl-3"
                     : item.soon
@@ -238,7 +238,7 @@ function MobileNav({
             href="https://github.com/dhis2-chap"
             target="_blank"
             rel="noreferrer"
-            className="mt-3 flex h-11 items-center justify-center gap-2 rounded-[2px] border border-line-strong font-brand text-[12px] font-bold uppercase tracking-[0.08em] text-ink-2"
+            className="mt-3 flex h-11 items-center justify-center gap-2 rounded-[2px] border border-line-strong text-[15px] font-bold text-ink-2"
           >
             <GitHubMark className="h-3.5 w-3.5" />
             Repository
@@ -260,15 +260,6 @@ export function Header({ benchmarksLive }: { benchmarksLive: boolean }) {
   };
   return (
     <>
-      {/* Institutional microbar — scrolls away; the nav below stays. */}
-      <div className="bg-board text-board-ink-2">
-        <div className="mx-auto flex h-7 max-w-[1240px] items-center justify-between gap-4 px-5 font-mono text-[10px] uppercase tracking-[0.14em] sm:px-8">
-          <span className="truncate">HISP Centre · University of Oslo</span>
-          <span className="hidden shrink-0 sm:block">
-            A DHIS2 platform service
-          </span>
-        </div>
-      </div>
       <header className="sticky top-0 z-40 border-b border-line bg-surface">
         <div className="mx-auto flex h-[62px] max-w-[1240px] items-center gap-4 px-5 sm:px-8 lg:gap-8">
           <Link href="/" className="flex shrink-0 items-center gap-2.5 sm:gap-3">
@@ -277,7 +268,7 @@ export function Header({ benchmarksLive }: { benchmarksLive: boolean }) {
               <span className="font-brand text-[17px] font-extrabold tracking-[-0.02em] text-ink">
                 CHAP
               </span>
-              <span className="mt-[3px] font-brand text-[8.5px] font-bold uppercase tracking-[0.26em] text-ink-3">
+              <span className="mt-[3px] font-brand text-[11px] font-bold uppercase tracking-[0.16em] text-ink-2">
                 Model Marketplace
               </span>
             </span>
@@ -289,7 +280,7 @@ export function Header({ benchmarksLive }: { benchmarksLive: boolean }) {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`relative flex items-center gap-1.5 px-3 py-[22px] font-brand text-[11.5px] font-bold uppercase tracking-[0.1em] ${
+                  className={`relative flex items-center gap-1.5 px-3 py-[22px] text-[15px] font-bold ${
                     item.soon ? "text-ink-3" : "text-ink-2"
                   } transition-colors hover:text-brand ${active ? "text-ink" : ""}`}
                 >
@@ -304,12 +295,13 @@ export function Header({ benchmarksLive }: { benchmarksLive: boolean }) {
           </nav>
           <div className="ml-auto flex items-center gap-2 sm:gap-2.5">
             <form onSubmit={submit} className="relative hidden flex-1 xl:block">
-              <MagnifierIcon className="pointer-events-none absolute left-2.5 top-[9px] h-3.5 w-3.5 text-ink-3" />
+              <MagnifierIcon className="pointer-events-none absolute left-2.5 top-[11px] h-3.5 w-3.5 text-ink-3" />
               <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
-                placeholder="Search models, frameworks, covariates"
-                className="h-8 w-[260px] rounded-[2px] border border-line bg-surface-2 pl-[30px] pr-2.5 text-[12.5px] text-ink outline-none placeholder:text-ink-3 focus:border-brand focus:bg-surface"
+                placeholder="Search models"
+                aria-label="Search models"
+                className="h-9 w-[240px] rounded-md border border-line bg-surface-2 pl-[30px] pr-2.5 text-[14px] text-ink outline-none placeholder:text-ink-3 focus:border-brand focus:bg-surface"
               />
             </form>
             <ThemeToggle />
@@ -317,7 +309,7 @@ export function Header({ benchmarksLive }: { benchmarksLive: boolean }) {
               href="https://github.com/dhis2-chap"
               target="_blank"
               rel="noreferrer"
-              className="hidden h-8 items-center gap-1.5 rounded-[2px] border border-line px-3 font-brand text-[11px] font-bold uppercase tracking-[0.08em] text-ink-2 transition-colors hover:border-line-strong hover:text-ink bar:flex"
+              className="hidden h-8 items-center gap-1.5 rounded-[2px] border border-line px-3 text-[14px] font-bold text-ink-2 transition-colors hover:border-line-strong hover:text-ink bar:flex"
             >
               <GitHubMark className="h-3.5 w-3.5" />
               Repo
