@@ -22,7 +22,7 @@ full methodology description will be added here once that is settled and the
 first official suite has run. Until then, the sections below describe only the
 file contract for recording results, not an existing process.
 
-For the underlying evaluation command, see the CHAP documentation for
+For the underlying evaluation command, see the Chap documentation for
 [evaluating models](https://chap.dhis2.org/chap-modeling-platform/external_models/running_models_in_chap/).
 
 ## Layout

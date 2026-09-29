@@ -78,7 +78,7 @@ function OverviewTab({
         <dl className="mb-8 grid gap-4 sm:grid-cols-2">
           {(
             [
-              ["Required (supplied by CHAP)", view.requiredCovariates.length ? view.requiredCovariates : ["none"]],
+              ["Required (supplied by Chap)", view.requiredCovariates.length ? view.requiredCovariates : ["none"]],
               ["Optional", optional],
             ] as const
           ).map(([label, names]) => (
@@ -421,7 +421,7 @@ function InstallTab({
         />
         <Step
           n={4}
-          title="Check that CHAP sees it"
+          title="Check that Chap sees it"
           cmd={`curl -s http://localhost:8000/v2/services | grep ${view.serviceId}`}
         />
       </ol>

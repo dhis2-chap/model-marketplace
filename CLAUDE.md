@@ -1,7 +1,7 @@
-# CHAP Model Marketplace
+# Chap Model Marketplace
 
 Curated catalog of chapkit-based epidemiological forecasting models for
-[CHAP](https://chap.dhis2.org/) (Climate & Health Analytics Platform, DHIS2).
+[Chap](https://chap.dhis2.org/) (Climate & Health Analytics Platform, DHIS2).
 This git repository is the source of truth and the review gate; the Next.js
 site in `site/` is a build-time rendering of it. No auth, no server state.
 

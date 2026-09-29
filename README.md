@@ -1,11 +1,11 @@
-# CHAP Model Marketplace
+# Chap Model Marketplace
 
-A curated, verified catalog of forecasting models for [CHAP](https://chap.dhis2.org),
+A curated, verified catalog of forecasting models for [Chap](https://chap.dhis2.org),
 the Climate & Health Analytics Platform. **This repository is the marketplace**:
 the YAML files at the root are the source of truth, and the website is a
 rendering of them.
 
-Nothing is listed without a pull request approved by three CHAP maintainers —
+Nothing is listed without a pull request approved by three Chap maintainers —
 the merge to `main` is the verification. The same gate applies to every new
 version pin, so a `stable` channel pointer is always a reviewed commit.
 
@@ -164,7 +164,7 @@ No benchmarks have been run yet, and exactly how the comparison will be run —
 harness, datasets, backtest parameters, ranking — is still being decided. The
 methodology will be documented in the [benchmark record
 documentation](benchmarks/README.md) once it is settled and the first suite
-has run. For the underlying evaluation command, see the CHAP guide to
+has run. For the underlying evaluation command, see the Chap guide to
 [evaluating models](https://chap.dhis2.org/chap-modeling-platform/external_models/running_models_in_chap/).
 
 Until a suite has run, the only quality signal on the site is each model's

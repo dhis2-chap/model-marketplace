@@ -8,7 +8,7 @@ import { getRegistry } from "@/lib/registry";
 export const metadata: Metadata = {
   title: "Benchmarks",
   description:
-    "Benchmark results are added soon — controlled CHAP evaluations against pinned commits, nothing self-reported.",
+    "Benchmark results are added soon — controlled Chap evaluations against pinned commits, nothing self-reported.",
 };
 
 /** Rendered until real benchmark results exist — the methodology is still being decided. */
@@ -24,7 +24,7 @@ function BenchmarksComingSoon() {
             Benchmarks
           </h1>
           <p className="max-w-[58ch] text-[16px] leading-[1.7] text-ink-2">
-            Every score on this page will come from a controlled CHAP
+            Every score on this page will come from a controlled Chap
             evaluation of a pinned commit — nothing self-reported. No
             benchmarks have been run yet, and exactly how they will be run is
             still being decided, so results are not published yet.
@@ -90,7 +90,7 @@ export default function BenchmarksPage() {
               Benchmarks
             </h1>
             <p className="max-w-[58ch] text-[16px] leading-[1.7] text-ink-2">
-              Every score on this page comes from a controlled CHAP evaluation
+              Every score on this page comes from a controlled Chap evaluation
               of a pinned commit — nothing is self-reported.{" "}
               {records.length === 0
                 ? "No run has been recorded yet, so there is nothing to rank — a suite appears the moment its first result lands, by pull request like everything else."

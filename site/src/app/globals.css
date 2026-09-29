@@ -156,8 +156,9 @@ body {
   color: #fff;
 }
 
-/* theme.focus, as every DHIS2 control draws it. */
-:focus-visible {
+/* theme.focus, as every DHIS2 control draws it. Inputs draw their own
+   inset ring (.d2-input:focus), so they skip the outline. */
+:focus-visible:not(.d2-input) {
   outline: 3px solid var(--mp-focus);
   outline-offset: 2px;
 }

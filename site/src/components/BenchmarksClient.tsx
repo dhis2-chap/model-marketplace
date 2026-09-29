@@ -295,7 +295,7 @@ export function BenchmarkSuite({ suite }: { suite: BenchmarkSuiteView }) {
                 rel="noreferrer"
                 className="mt-3 inline-flex font-brand text-[12.5px] font-medium text-brand hover:text-brand-dark"
               >
-                Read the CHAP evaluation documentation ↗
+                Read the Chap evaluation documentation ↗
               </a>
             </div>
           </div>

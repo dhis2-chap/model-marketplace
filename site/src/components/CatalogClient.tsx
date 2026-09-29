@@ -157,11 +157,11 @@ export function CatalogClient({
 
   return (
     <main className="mx-auto max-w-[1240px] px-5 pb-20 pt-12 sm:px-8 sm:pt-16">
-      <h1 className="max-w-[20ch] font-brand text-[clamp(32px,4vw,46px)] font-medium leading-[1.1] text-ink">
-        Forecasting models for CHAP
+      <h1 className="font-brand text-[clamp(32px,4vw,46px)] font-medium leading-[1.1] text-ink">
+        Forecasting models for Chap
       </h1>
       <p className="mt-3 max-w-[52ch] text-[17px] leading-[1.6] text-ink-2">
-        Every model here is approved by three CHAP maintainers before it is
+        Every model here is approved by three Chap maintainers before it is
         listed.
       </p>
 

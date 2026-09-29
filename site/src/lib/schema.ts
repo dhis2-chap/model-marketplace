@@ -68,7 +68,7 @@ const versionSchema = z.object({
 /**
  * A chapkit config: the flat object POSTed to `/api/v1/configs` as `data`.
  * `prediction_periods` is required by chapkit's own `BaseConfig`;
- * `additional_continuous_covariates` is the other field CHAP interprets.
+ * `additional_continuous_covariates` is the other field Chap interprets.
  * Everything else is the model's own option set.
  */
 const configurationSchema = z.object({

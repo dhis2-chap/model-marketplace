@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Docs",
   description:
-    "Marketplace reference material and direct links to the CHAP modeling documentation.",
+    "Marketplace reference material and direct links to the Chap modeling documentation.",
 };
 
 const ENTRIES = [
@@ -27,13 +27,13 @@ const ENTRIES = [
   },
   {
     kicker: "platform",
-    title: "Run chapkit models in CHAP",
-    body: "How CHAP talks to chapkit services over HTTP, including the data format.",
+    title: "Run chapkit models in Chap",
+    body: "How Chap talks to chapkit services over HTTP, including the data format.",
     href: "https://chap.dhis2.org/chap-modeling-platform/external_models/chapkit/",
   },
   {
     kicker: "platform",
-    title: "DHIS2 CHAP app",
+    title: "DHIS2 Chap app",
     body: "Evaluate, predict, configure, and compare models from the DHIS2 Modeling App.",
     href: "https://chap.dhis2.org/chap-modeling-platform/modeling-app/using-the-modeling-app/getting-started/",
   },

@@ -18,7 +18,7 @@ export function Footer() {
           <div className="flex items-center gap-3">
             <Dhis2Mark className="h-[22px] w-auto text-white" />
             <span className="text-[14px] font-medium leading-none">
-              CHAP Model Marketplace
+              Chap Model Marketplace
             </span>
           </div>
           <p className="mt-4 max-w-[44ch] text-[15px] leading-[1.7] text-board-ink-2">
