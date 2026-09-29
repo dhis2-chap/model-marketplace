@@ -115,7 +115,7 @@ function MobileNav({
         aria-label={open ? "Close menu" : "Open menu"}
         aria-expanded={open}
         aria-controls="mp-mobile-nav"
-        className="grid h-12 w-12 shrink-0 cursor-pointer place-items-center border-0 bg-transparent text-white hover:bg-white/10 bar:hidden"
+        className="grid h-16 w-16 shrink-0 cursor-pointer place-items-center border-0 bg-transparent text-white hover:bg-white/10 bar:hidden"
       >
         <MenuGlyph open={open} />
       </button>
@@ -203,12 +203,13 @@ export function Header({ benchmarksLive }: { benchmarksLive: boolean }) {
   };
   return (
     <>
-      {/* The DHIS2 HeaderBar: 48px, #2c6693, white type. */}
+      {/* The DHIS2 HeaderBar colour and type, taller than its 48px — this is
+          a site, not an app shell. */}
       <header className="sticky top-0 z-40 bg-[#2c6693] text-white">
-        <div className="mx-auto flex h-12 max-w-[1240px] items-center gap-4 pl-5 sm:px-8 lg:gap-8">
+        <div className="mx-auto flex h-16 max-w-[1240px] items-center gap-4 pl-5 sm:px-8 lg:gap-8">
           <Link href="/" className="flex shrink-0 items-center gap-2.5">
-            <Dhis2Mark className="h-[22px] w-auto text-white" />
-            <span className="text-[14px] font-medium leading-none">
+            <Dhis2Mark className="h-7 w-auto text-white" />
+            <span className="text-[17px] font-medium leading-none">
               CHAP Model Marketplace
             </span>
           </Link>
@@ -220,7 +221,7 @@ export function Header({ benchmarksLive }: { benchmarksLive: boolean }) {
                   key={item.href}
                   href={item.href}
                   aria-current={active ? "page" : undefined}
-                  className={`relative flex items-center gap-1.5 px-3 text-[14px] transition-colors hover:bg-white/10 ${
+                  className={`relative flex items-center gap-1.5 px-3.5 text-[15px] transition-colors hover:bg-white/10 ${
                     active ? "font-medium text-white" : "text-white/80"
                   }`}
                 >
@@ -235,7 +236,7 @@ export function Header({ benchmarksLive }: { benchmarksLive: boolean }) {
           </nav>
           <div className="ml-auto flex items-center gap-2 sm:gap-3">
             <form onSubmit={submit} className="relative hidden xl:block">
-              <span className="pointer-events-none absolute left-2 top-2 flex text-ink-3">
+              <span className="pointer-events-none absolute left-3 top-3 flex text-ink-3">
                 <IconSearch16 />
               </span>
               <input
@@ -243,16 +244,16 @@ export function Header({ benchmarksLive }: { benchmarksLive: boolean }) {
                 onChange={(e) => setQ(e.target.value)}
                 placeholder="Search models"
                 aria-label="Search models"
-                className="d2-input d2-input-dense w-[240px] pl-8"
+                className="d2-input w-[260px] pl-9"
               />
             </form>
             <a
               href="https://github.com/dhis2-chap"
               target="_blank"
               rel="noreferrer"
-              className="hidden h-8 items-center gap-1.5 rounded-[3px] border border-white/40 px-3 text-[14px] text-white transition-colors hover:bg-white/10 bar:flex"
+              className="hidden h-9 items-center gap-2 rounded-[4px] border border-white/40 px-3.5 text-[15px] text-white transition-colors hover:bg-white/10 bar:flex"
             >
-              <GitHubMark className="h-3.5 w-3.5" />
+              <GitHubMark className="h-4 w-4" />
               Repo
             </a>
             <MobileNav
