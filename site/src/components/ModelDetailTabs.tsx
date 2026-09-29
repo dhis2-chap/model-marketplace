@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState, type KeyboardEvent, type ReactNode } from "react";
+import { IconWarningFilled24 } from "@dhis2/ui-icons";
 import { BENCHMARKS_LIVE } from "@/lib/flags";
 import type { ModelDetailView } from "@/lib/views";
 import { AssessedStatusBadge, ChannelChip, StatusBadge } from "./badges";
@@ -21,17 +22,21 @@ const TABS: { id: Tab; label: string }[] = [
     : []),
 ];
 
-const H2 = "mb-2 font-brand text-[22px] font-bold text-ink";
+const H2 = "mb-2 font-brand text-[22px] font-medium text-ink";
 const LEDE = "mb-6 max-w-[70ch] text-[15px] leading-[1.6] text-ink-2";
 const Code = ({ children }: { children: ReactNode }) => (
   <code className="font-mono text-[14px] text-ink">{children}</code>
 );
 
+/** A DHIS2 NoticeBox, warning variant (yellow700 icon). */
 function Notice({ children }: { children: ReactNode }) {
   return (
-    <p className="mb-6 max-w-[70ch] rounded-md border border-dashed border-exp bg-exp-tint px-4 py-3 text-[15px] leading-[1.55] text-exp">
-      {children}
-    </p>
+    <div className="d2-notice d2-notice-warning mb-6 max-w-[70ch]">
+      <span className="flex shrink-0">
+        <IconWarningFilled24 color="#e56408" />
+      </span>
+      <p className="pt-0.5">{children}</p>
+    </div>
   );
 }
 
@@ -59,8 +64,8 @@ function OverviewTab({
 
         {/* The authors' own verdict, visibly apart from the review gate. */}
         <h2 className={H2}>Status</h2>
-        <div className="mb-8 rounded-md border border-line bg-surface p-5">
-          <AssessedStatusBadge status={view.assessedStatus} size="md" />
+        <div className="d2-card mb-8 p-5">
+          <AssessedStatusBadge status={view.assessedStatus} />
           <p className="mt-3 text-[15px] leading-[1.55] text-ink-2">
             {view.assessedBlurb}
           </p>
@@ -77,8 +82,8 @@ function OverviewTab({
               ["Optional", optional],
             ] as const
           ).map(([label, names]) => (
-            <div key={label} className="rounded-md border border-line bg-surface p-5">
-              <dt className="mb-2 text-[14px] font-bold text-ink-2">{label}</dt>
+            <div key={label} className="d2-card p-5">
+              <dt className="mb-2 text-[14px] font-medium text-ink-2">{label}</dt>
               {names.map((n) => (
                 <dd key={n} className="font-mono text-[15px] text-ink">
                   {n}
@@ -91,15 +96,15 @@ function OverviewTab({
         {view.attribution.citation ? (
           <>
             <h2 className={H2}>Citation</h2>
-            <p className="max-w-[70ch] font-serif text-[15px] leading-[1.65] text-ink-2">
+            <p className="max-w-[70ch] text-[15px] leading-[1.65] text-ink-2">
               {view.attribution.citation}
             </p>
           </>
         ) : null}
       </div>
 
-      <div className="rounded-md border border-line bg-surface-2 p-5">
-        <h2 className="mb-2 font-brand text-[18px] font-bold text-ink">
+      <div className="d2-card p-5">
+        <h2 className="mb-2 font-brand text-[18px] font-medium text-ink">
           Details
         </h2>
         <dl>
@@ -127,7 +132,7 @@ function OverviewTab({
         <button
           type="button"
           onClick={goInstall}
-          className="mt-5 h-11 w-full cursor-pointer rounded-md bg-brand text-[15px] font-bold text-white hover:bg-brand-dark"
+          className="d2-button d2-button-primary d2-button-large mt-5 w-full"
         >
           Install
         </button>
@@ -142,7 +147,7 @@ function VersionsTab({ view }: { view: ModelDetailView }) {
       {view.inReview.length > 0 ? (
         <>
           <h2 className={H2}>In review</h2>
-          <ul className="mb-10 divide-y divide-line overflow-hidden rounded-md border border-dashed border-exp bg-surface">
+          <ul className="d2-card mb-10 divide-y divide-line overflow-hidden">
             {view.inReview.map((pin) => (
               <li key={`${pin.prNumber}-${pin.label}`}>
                 <a
@@ -152,14 +157,14 @@ function VersionsTab({ view }: { view: ModelDetailView }) {
                   className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 hover:bg-surface-2"
                 >
                   <span>
-                    <span className="font-mono font-bold text-ink">
+                    <span className="font-mono font-medium text-ink">
                       {pin.label}
                     </span>
                     <span className="ml-3 text-[14px] text-ink-2">
                       by @{pin.author} · #{pin.prNumber}
                     </span>
                   </span>
-                  <span className="text-[14px] font-bold text-exp">
+                  <span className="d2-tag bg-as-yellow-tint text-as-yellow">
                     {pin.approvals} approvals
                   </span>
                 </a>
@@ -174,14 +179,14 @@ function VersionsTab({ view }: { view: ModelDetailView }) {
         Each version pins one commit and the image built from it. Production
         should run <Code>stable</Code>.
       </p>
-      <div className="overflow-x-auto rounded-md border border-line bg-surface">
+      <div className="d2-card overflow-x-auto">
         <table className="w-full min-w-[720px] text-left text-[15px]">
-          <thead className="border-b border-line bg-surface-2 text-[14px] text-ink-2">
+          <thead className="border-b border-line bg-surface-2 text-[14px] text-ink">
             <tr>
-              <th scope="col" className="px-5 py-3 font-bold">Version</th>
-              <th scope="col" className="px-5 py-3 font-bold">Status</th>
-              <th scope="col" className="px-5 py-3 font-bold">Image</th>
-              <th scope="col" className="px-5 py-3 font-bold">Changes</th>
+              <th scope="col" className="px-5 py-3 font-medium">Version</th>
+              <th scope="col" className="px-5 py-3 font-medium">Status</th>
+              <th scope="col" className="px-5 py-3 font-medium">Image</th>
+              <th scope="col" className="px-5 py-3 font-medium">Changes</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-line">
@@ -189,7 +194,7 @@ function VersionsTab({ view }: { view: ModelDetailView }) {
               <tr key={v.tag} className="align-top">
                 <td className="px-5 py-4">
                   <span className="flex flex-wrap items-center gap-2">
-                    <span className="font-mono font-bold text-ink">{v.tag}</span>
+                    <span className="font-mono font-medium text-ink">{v.tag}</span>
                     {v.isStable ? <ChannelChip channel="stable" /> : null}
                     {v.isLatest && !v.isStable ? (
                       <ChannelChip channel="latest" />
@@ -231,11 +236,11 @@ function ConfigsTab({ view }: { view: ModelDetailView }) {
         {view.configurations.map((config) => (
           <div
             key={config.key}
-            className="overflow-hidden rounded-md border border-line bg-surface"
+            className="d2-card overflow-hidden"
           >
             <div className="flex flex-wrap items-start justify-between gap-4 border-b border-line px-5 py-4">
               <div className="min-w-0">
-                <div className="font-mono text-[16px] font-bold text-ink">
+                <div className="font-mono text-[16px] font-medium text-ink">
                   {config.key}
                 </div>
                 <p className="mt-1 max-w-[80ch] text-[15px] leading-[1.55] text-ink-2">
@@ -287,10 +292,10 @@ function BenchmarksTab({ view }: { view: ModelDetailView }) {
         .
       </p>
       {b.headline.length > 0 ? (
-        <dl className="mb-5 grid grid-cols-2 gap-4 rounded-md border border-line bg-surface-2 px-5 py-4 sm:grid-cols-4">
+        <dl className="d2-card mb-5 grid grid-cols-2 gap-4 px-5 py-4 sm:grid-cols-4">
           {b.headline.map((h) => (
             <div key={h.label}>
-              <dd className="font-brand text-[22px] font-bold text-ink">
+              <dd className="font-brand text-[22px] font-medium text-ink">
                 {h.value}
               </dd>
               <dt className="mt-1 text-[14px] text-ink-2">{h.label}</dt>
@@ -300,8 +305,8 @@ function BenchmarksTab({ view }: { view: ModelDetailView }) {
       ) : null}
       <div className="grid gap-5 lg:grid-cols-2">
         {b.crpsByHorizon.length > 0 ? (
-          <div className="rounded-md border border-line bg-surface p-5">
-            <div className="mb-3 font-bold text-ink">
+          <div className="d2-card p-5">
+            <div className="mb-3 font-medium text-ink">
               CRPS by forecast horizon
             </div>
             <CrpsByHorizonChart
@@ -312,8 +317,8 @@ function BenchmarksTab({ view }: { view: ModelDetailView }) {
           </div>
         ) : null}
         {b.comparison.length > 0 ? (
-          <div className="rounded-md border border-line bg-surface p-5">
-            <div className="mb-3 font-bold text-ink">
+          <div className="d2-card p-5">
+            <div className="mb-3 font-medium text-ink">
               Model comparison · {p.dataset}
             </div>
             <ComparisonChart items={b.comparison} />
@@ -322,7 +327,7 @@ function BenchmarksTab({ view }: { view: ModelDetailView }) {
       </div>
       <Link
         href="/benchmarks"
-        className="mt-5 inline-block font-bold text-brand hover:underline"
+        className="mt-5 inline-block font-medium text-brand hover:underline"
       >
         All benchmarks →
       </Link>
@@ -333,12 +338,12 @@ function BenchmarksTab({ view }: { view: ModelDetailView }) {
 function Step({ n, title, cmd }: { n: number; title: string; cmd: string }) {
   return (
     <li className="grid grid-cols-[32px_1fr] gap-3">
-      <span className="grid h-8 w-8 place-items-center rounded-full bg-ink font-bold text-surface">
+      <span className="grid h-8 w-8 place-items-center rounded-full bg-brand font-medium text-white">
         {n}
       </span>
       <div className="min-w-0">
-        <div className="mb-2 pt-1 text-[16px] font-bold text-ink">{title}</div>
-        <div className="flex items-center gap-2 rounded-md border border-line bg-surface-2 py-2 pl-4 pr-2">
+        <div className="mb-2 pt-1 text-[16px] font-medium text-ink">{title}</div>
+        <div className="d2-card flex items-center gap-2 py-2 pl-4 pr-2">
           <code className="min-w-0 flex-1 overflow-x-auto whitespace-nowrap font-mono text-[14px] text-ink">
             {cmd}
           </code>
@@ -374,7 +379,7 @@ function InstallTab({
         <div
           role="group"
           aria-label="Version"
-          className="mb-6 flex flex-wrap gap-2"
+          className="d2-segmented mb-6 max-w-full flex-wrap"
         >
           {view.versions.map((v) => (
             <button
@@ -382,11 +387,7 @@ function InstallTab({
               type="button"
               onClick={() => onSelect(v.tag)}
               aria-pressed={v.tag === tag}
-              className={`h-9 cursor-pointer rounded-md border px-3 font-mono text-[14px] ${
-                v.tag === tag
-                  ? "border-ink bg-ink text-surface"
-                  : "border-line-strong bg-surface text-ink-2"
-              }`}
+              className="d2-segment font-mono"
             >
               {v.tag}
               {v.isStable ? " · stable" : ""}
@@ -432,7 +433,7 @@ function InstallTab({
           href={view.installUrl}
           target="_blank"
           rel="noreferrer"
-          className="font-bold text-brand hover:underline"
+          className="font-medium text-brand hover:underline"
         >
           Full guide →
         </a>
@@ -463,14 +464,14 @@ export function ModelDetailTabs({
 
   return (
     <>
-      <div className="border-b border-line bg-surface-2">
+      <div className="bg-surface">
         <div className="mx-auto max-w-[1240px] px-5 pt-8 sm:px-8">
           {header}
           <div
             role="tablist"
             aria-label="Model sections"
             onKeyDown={onKeyDown}
-            className="no-scrollbar -mx-5 flex gap-1 overflow-x-auto px-5 sm:mx-0 sm:px-0"
+            className="d2-tabs no-scrollbar -mx-5 overflow-x-auto sm:mx-0"
           >
             {TABS.map((t) => (
               <button
@@ -482,11 +483,7 @@ export function ModelDetailTabs({
                 aria-controls="tab-panel"
                 tabIndex={tab === t.id ? 0 : -1}
                 onClick={() => setTab(t.id)}
-                className={`shrink-0 cursor-pointer border-b-[3px] bg-transparent px-4 pb-3 pt-2 text-[16px] font-bold ${
-                  tab === t.id
-                    ? "border-brand text-ink"
-                    : "border-transparent text-ink-2 hover:text-ink"
-                }`}
+                className="d2-tab"
               >
                 {t.label}
               </button>

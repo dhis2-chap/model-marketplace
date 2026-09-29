@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
+import { IconSearch24 } from "@dhis2/ui-icons";
 import type { InReviewPinView, ModelCardView } from "@/lib/views";
 import {
   ASSESSED_STATUS_COPY,
@@ -10,7 +11,6 @@ import {
 } from "@/lib/presentation";
 import { AssessedStatusBadge, KindBadge } from "./badges";
 import { Avatar, AuthorLine } from "./author";
-import { MagnifierIcon } from "./icons";
 
 type Kind = ModelCardView["kind"];
 type Filters = Partial<Record<"period" | "cov" | "lang" | "geo", string>>;
@@ -49,14 +49,10 @@ function ModelCard({ m }: { m: ModelCardView }) {
   return (
     <Link
       href={`/models/${m.id}`}
-      className={`flex min-w-0 flex-col gap-4 rounded-md bg-surface p-5 transition-colors hover:border-brand ${
-        m.kind === "template"
-          ? "border border-dashed border-line-strong"
-          : "border border-line"
-      }`}
+      className="d2-card flex min-w-0 flex-col gap-4 p-5 transition-shadow hover:shadow-card"
     >
       <div className="flex items-start justify-between gap-3">
-        <h3 className="font-brand text-[20px] font-bold leading-tight text-ink">
+        <h3 className="font-brand text-[20px] font-medium leading-tight text-ink">
           {m.name}
         </h3>
         <AssessedStatusBadge status={m.assessedStatus} />
@@ -67,10 +63,7 @@ function ModelCard({ m }: { m: ModelCardView }) {
       <div className="mt-auto flex flex-wrap gap-1.5">
         <KindBadge kind={m.kind} />
         {[m.framework, m.periodType, m.covLabel].filter((t) => t !== "—").map((tag) => (
-          <span
-            key={tag}
-            className="rounded-[2px] bg-surface-3 px-2 py-0.5 text-[13px] text-ink-2"
-          >
+          <span key={tag} className="d2-tag">
             {tag}
           </span>
         ))}
@@ -90,10 +83,10 @@ function ModelCard({ m }: { m: ModelCardView }) {
 function InReview({ pins }: { pins: InReviewPinView[] }) {
   return (
     <section className="mt-14">
-      <h2 className="mb-4 font-brand text-[20px] font-bold text-ink">
+      <h2 className="mb-4 font-brand text-[20px] font-medium text-ink">
         In review
       </h2>
-      <ul className="divide-y divide-line overflow-hidden rounded-md border border-dashed border-exp bg-surface">
+      <ul className="divide-y divide-line overflow-hidden d2-card">
         {pins.map((pin) => (
           <li key={`${pin.prNumber}-${pin.modelId}-${pin.label}`}>
             <a
@@ -104,10 +97,10 @@ function InReview({ pins }: { pins: InReviewPinView[] }) {
             >
               <Avatar handle={pin.author} size={32} />
               <span className="min-w-0 flex-1">
-                <span className="block font-bold text-ink">
+                <span className="block font-medium text-ink">
                   {pin.catalogLabel}
                   {pin.isNewModel ? (
-                    <span className="ml-2 text-[13px] font-bold text-exp">
+                    <span className="d2-tag d2-tag-neutral ml-2">
                       New model
                     </span>
                   ) : null}
@@ -116,7 +109,7 @@ function InReview({ pins }: { pins: InReviewPinView[] }) {
                   Submitted by @{pin.author} · #{pin.prNumber}
                 </span>
               </span>
-              <span className="text-[14px] font-bold text-exp">
+              <span className="d2-tag bg-as-yellow-tint text-as-yellow">
                 {pin.approvals} approvals
               </span>
             </a>
@@ -164,7 +157,7 @@ export function CatalogClient({
 
   return (
     <main className="mx-auto max-w-[1240px] px-5 pb-20 pt-12 sm:px-8 sm:pt-16">
-      <h1 className="max-w-[20ch] font-brand text-[clamp(32px,4vw,46px)] font-bold leading-[1.1] tracking-[-0.02em] text-ink">
+      <h1 className="max-w-[20ch] font-brand text-[clamp(32px,4vw,46px)] font-medium leading-[1.1] text-ink">
         Forecasting models for CHAP
       </h1>
       <p className="mt-3 max-w-[52ch] text-[17px] leading-[1.6] text-ink-2">
@@ -172,53 +165,52 @@ export function CatalogClient({
         listed.
       </p>
 
-      <div className="relative mt-8 max-w-[560px]">
-        <MagnifierIcon className="pointer-events-none absolute left-4 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-ink-3" />
-        <input
-          type="search"
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="Search by name, method or author"
-          aria-label="Search models"
-          className="h-12 w-full rounded-md border border-line-strong bg-surface pl-11 pr-4 text-[16px] text-ink placeholder:text-ink-3 focus:border-brand"
-        />
-      </div>
+      {/* A white toolbar: DHIS2 chips and segments are drawn for a white
+          ground, and vanish on the grey page. */}
+      <div className="d2-card mt-8 p-4 sm:p-5">
+        <div className="relative max-w-[560px]">
+          <span className="pointer-events-none absolute left-2.5 top-1/2 flex -translate-y-1/2 text-ink-3">
+            <IconSearch24 />
+          </span>
+          <input
+            type="search"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Search by name, method or author"
+            aria-label="Search models"
+            className="d2-input pl-10 text-[16px]"
+          />
+        </div>
 
-      <div className="mt-8 flex flex-wrap items-center gap-2">
-        {KINDS.map((k) => (
-          <button
-            key={k.id}
-            type="button"
-            onClick={() => setKind(k.id)}
-            aria-pressed={kind === k.id}
-            className={`h-10 cursor-pointer rounded-md border px-4 text-[15px] font-bold ${
-              kind === k.id
-                ? "border-ink bg-ink text-surface"
-                : "border-line-strong bg-surface text-ink-2 hover:text-ink"
-            }`}
-          >
-            {k.label} <span className="font-normal opacity-75">{count(k.id)}</span>
-          </button>
-        ))}
-        <span className="mx-1 hidden h-6 w-px bg-line-strong sm:block" aria-hidden />
-        {CHIPS.map((chip) => {
-          const active = filters[chip.key] === chip.val;
-          return (
-            <button
-              key={chip.label}
-              type="button"
-              onClick={() => toggleChip(chip.key, chip.val)}
-              aria-pressed={active}
-              className={`h-9 cursor-pointer rounded-full border px-3.5 text-[14px] ${
-                active
-                  ? "border-brand bg-brand-tint text-brand"
-                  : "border-line bg-surface text-ink-2 hover:border-line-strong"
-              }`}
-            >
-              {chip.label}
-            </button>
-          );
-        })}
+        {/* DHIS2 SegmentedControl for the kind, Chips for the filters. */}
+        <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-3">
+          <div role="group" aria-label="Kind" className="d2-segmented">
+            {KINDS.map((k) => (
+              <button
+                key={k.id}
+                type="button"
+                onClick={() => setKind(k.id)}
+                aria-pressed={kind === k.id}
+                className="d2-segment"
+              >
+                {k.label} <span className="text-ink-3">{count(k.id)}</span>
+              </button>
+            ))}
+          </div>
+          <div role="group" aria-label="Filters" className="flex flex-wrap gap-2">
+            {CHIPS.map((chip) => (
+              <button
+                key={chip.label}
+                type="button"
+                onClick={() => toggleChip(chip.key, chip.val)}
+                aria-pressed={filters[chip.key] === chip.val}
+                className="d2-chip"
+              >
+                {chip.label}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
       {kind === "template" ? (
@@ -235,12 +227,12 @@ export function CatalogClient({
           ))}
         </div>
       ) : (
-        <div className="mt-6 rounded-md border border-dashed border-line-strong bg-surface p-12 text-center">
-          <p className="text-[16px] font-bold text-ink">No matches</p>
+        <div className="d2-card mt-6 p-12 text-center">
+          <p className="text-[16px] font-medium text-ink">No matches</p>
           <button
             type="button"
             onClick={clearAll}
-            className="mt-4 h-10 cursor-pointer rounded-md border border-line-strong bg-surface px-4 text-[15px] font-bold text-ink"
+            className="d2-button mt-4"
           >
             Clear filters
           </button>
@@ -248,7 +240,7 @@ export function CatalogClient({
       )}
 
       <details className="mt-8 max-w-[760px] text-[15px] text-ink-2">
-        <summary className="cursor-pointer font-bold text-brand">
+        <summary className="cursor-pointer font-medium text-brand">
           What does the coloured status mean?
         </summary>
         <p className="mt-3">
@@ -269,9 +261,9 @@ export function CatalogClient({
 
       {inReview.length > 0 ? <InReview pins={inReview} /> : null}
 
-      <section className="mt-14 flex flex-wrap items-center justify-between gap-5 rounded-md border border-line bg-surface p-6 sm:p-8">
+      <section className="d2-card mt-14 flex flex-wrap items-center justify-between gap-5 p-6 sm:p-8">
         <div>
-          <h2 className="font-brand text-[20px] font-bold text-ink">
+          <h2 className="font-brand text-[20px] font-medium text-ink">
             Built a model?
           </h2>
           <p className="mt-1 text-[15px] text-ink-2">
@@ -280,7 +272,7 @@ export function CatalogClient({
         </div>
         <Link
           href="/contribute"
-          className="inline-flex h-11 items-center rounded-md bg-brand px-6 text-[15px] font-bold text-white hover:bg-brand-dark"
+          className="d2-button d2-button-primary d2-button-large"
         >
           Submit a model
         </Link>

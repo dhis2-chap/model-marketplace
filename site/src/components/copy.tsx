@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { CopyGlyph } from "./icons";
+import { IconCopy16 } from "@dhis2/ui-icons";
 
 /** Clipboard write with the design's 1600 ms "Copied" swap. */
 export function useCopy() {
@@ -21,35 +21,28 @@ export function useCopy() {
   return { copied, copy };
 }
 
+/** A DHIS2 secondary Button — small in rows, medium in panel headers. */
 export function CopyButton({
   text,
   label = "Copy",
   copiedLabel = "Copied",
   size = "sm",
-  accent = "brand",
 }: {
   text: string;
   label?: string;
   copiedLabel?: string;
   size?: "sm" | "md";
-  accent?: "brand" | "verified";
 }) {
   const { copied, copy } = useCopy();
-  const hover =
-    accent === "verified"
-      ? "hover:border-verified hover:text-verified"
-      : "hover:border-brand hover:text-brand";
   return (
     <button
       type="button"
       onClick={() => copy(text)}
-      className={`inline-flex shrink-0 cursor-pointer items-center gap-1.5 border border-line-strong bg-transparent font-brand font-medium text-ink-2 transition-colors ${hover} ${
-        size === "md"
-          ? "h-9 rounded-md px-3 text-[14px]"
-          : "h-8 rounded-md px-2.5 text-[13px]"
+      className={`d2-button d2-button-secondary shrink-0 ${
+        size === "sm" ? "d2-button-small" : ""
       }`}
     >
-      <CopyGlyph className="h-3 w-3" />
+      <IconCopy16 />
       <span aria-live="polite">{copied === text ? copiedLabel : label}</span>
     </button>
   );

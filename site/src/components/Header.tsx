@@ -2,13 +2,9 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import {
-  useEffect,
-  useState,
-  useSyncExternalStore,
-  type FormEvent,
-} from "react";
-import { Dhis2Mark, GitHubMark, MagnifierIcon } from "./icons";
+import { useEffect, useState, type FormEvent } from "react";
+import { IconSearch16 } from "@dhis2/ui-icons";
+import { Dhis2Mark, GitHubMark } from "./icons";
 import { SoonPill } from "./badges";
 
 interface NavItem {
@@ -30,61 +26,6 @@ function isActive(href: string, pathname: string): boolean {
   return href === "/"
     ? pathname === "/" || pathname.startsWith("/models")
     : pathname.startsWith(href);
-}
-
-function subscribeToTheme(callback: () => void) {
-  const observer = new MutationObserver(callback);
-  observer.observe(document.documentElement, {
-    attributes: true,
-    attributeFilter: ["data-theme"],
-  });
-  return () => observer.disconnect();
-}
-
-function ThemeToggle() {
-  const dark = useSyncExternalStore(
-    subscribeToTheme,
-    () => document.documentElement.dataset.theme === "dark",
-    () => false,
-  );
-  const toggle = () => {
-    const next = !dark;
-    if (next) document.documentElement.dataset.theme = "dark";
-    else delete document.documentElement.dataset.theme;
-    try {
-      localStorage.setItem("chap-mp-theme", next ? "dark" : "light");
-    } catch {
-      /* private mode */
-    }
-  };
-  return (
-    <button
-      type="button"
-      onClick={toggle}
-      aria-label={dark ? "Switch to light theme" : "Switch to dark theme"}
-      className="grid h-9 w-9 cursor-pointer place-items-center rounded-[2px] border border-line bg-transparent text-ink-2 transition-colors hover:border-line-strong hover:text-ink sm:h-8 sm:w-8"
-    >
-      {dark ? (
-        <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.6} aria-hidden>
-          <circle cx={10} cy={10} r={3.6} />
-          {[0, 45, 90, 135, 180, 225, 270, 315].map((deg) => (
-            <line
-              key={deg}
-              x1={10}
-              y1={1.5}
-              x2={10}
-              y2={4}
-              transform={`rotate(${deg} 10 10)`}
-            />
-          ))}
-        </svg>
-      ) : (
-        <svg viewBox="0 0 20 20" className="h-4 w-4" fill="currentColor" aria-hidden>
-          <path d="M15.5 12.6A6 6 0 0 1 7.4 4.5a6.2 6.2 0 1 0 8.1 8.1Z" />
-        </svg>
-      )}
-    </button>
-  );
 }
 
 /** Three rules, folding into a cross — the board's own line weight. */
@@ -174,7 +115,7 @@ function MobileNav({
         aria-label={open ? "Close menu" : "Open menu"}
         aria-expanded={open}
         aria-controls="mp-mobile-nav"
-        className="grid h-9 w-9 shrink-0 cursor-pointer place-items-center rounded-[2px] border border-line bg-transparent text-ink-2 transition-colors hover:border-line-strong hover:text-ink bar:hidden"
+        className="grid h-12 w-12 shrink-0 cursor-pointer place-items-center border-0 bg-transparent text-white hover:bg-white/10 bar:hidden"
       >
         <MenuGlyph open={open} />
       </button>
@@ -185,14 +126,14 @@ function MobileNav({
           tabIndex={-1}
           aria-hidden
           onClick={() => setOpen(false)}
-          className="absolute inset-x-0 top-full z-30 h-[100dvh] cursor-default bg-board/35 bar:hidden"
+          className="absolute inset-x-0 top-full z-30 h-[100dvh] cursor-default bg-ink/35 bar:hidden"
         />
       ) : null}
 
       <div
         id="mp-mobile-nav"
         hidden={!open}
-        className="absolute inset-x-0 top-full z-40 max-h-[72dvh] overflow-y-auto border-b border-line bg-surface shadow-lift bar:hidden"
+        className="absolute inset-x-0 top-full z-40 max-h-[72dvh] overflow-y-auto bg-surface shadow-lift bar:hidden"
       >
         <nav className="flex flex-col px-5 py-2">
           {items.map((item) => {
@@ -203,12 +144,12 @@ function MobileNav({
                 href={item.href}
                 onClick={() => setOpen(false)}
                 aria-current={active ? "page" : undefined}
-                className={`flex items-center gap-2 border-b border-line py-3.5 text-[16px] font-bold last:border-b-0 ${
+                className={`flex items-center gap-2 border-b border-line py-3.5 text-[16px] last:border-b-0 ${
                   active
-                    ? "text-brand [box-shadow:inset_3px_0_0_var(--mp-brand)] pl-3"
+                    ? "pl-3 font-medium text-brand-dark [box-shadow:inset_4px_0_0_var(--mp-brand)]"
                     : item.soon
                       ? "text-ink-3"
-                      : "text-ink-2"
+                      : "text-ink"
                 }`}
               >
                 {item.label}
@@ -225,20 +166,22 @@ function MobileNav({
             }}
             className="relative"
           >
-            <MagnifierIcon className="pointer-events-none absolute left-3 top-[13px] h-4 w-4 text-ink-3" />
+            <span className="pointer-events-none absolute left-3 top-3 flex text-ink-3">
+              <IconSearch16 />
+            </span>
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search models"
               aria-label="Search models"
-              className="h-11 w-full rounded-[2px] border border-line bg-surface pl-9 pr-3 text-[16px] text-ink outline-none placeholder:text-ink-3 focus:border-brand"
+              className="d2-input pl-9 text-[16px]"
             />
           </form>
           <a
             href="https://github.com/dhis2-chap"
             target="_blank"
             rel="noreferrer"
-            className="mt-3 flex h-11 items-center justify-center gap-2 rounded-[2px] border border-line-strong text-[15px] font-bold text-ink-2"
+            className="d2-button d2-button-secondary mt-3 w-full"
           >
             <GitHubMark className="h-3.5 w-3.5" />
             Repository
@@ -260,56 +203,54 @@ export function Header({ benchmarksLive }: { benchmarksLive: boolean }) {
   };
   return (
     <>
-      <header className="sticky top-0 z-40 border-b border-line bg-surface">
-        <div className="mx-auto flex h-[62px] max-w-[1240px] items-center gap-4 px-5 sm:px-8 lg:gap-8">
-          <Link href="/" className="flex shrink-0 items-center gap-2.5 sm:gap-3">
-            <Dhis2Mark className="h-[26px] w-auto text-brand" />
-            <span className="flex flex-col leading-none">
-              <span className="font-brand text-[17px] font-extrabold tracking-[-0.02em] text-ink">
-                CHAP
-              </span>
-              <span className="mt-[3px] font-brand text-[11px] font-bold uppercase tracking-[0.16em] text-ink-2">
-                Model Marketplace
-              </span>
+      {/* The DHIS2 HeaderBar: 48px, #2c6693, white type. */}
+      <header className="sticky top-0 z-40 bg-[#2c6693] text-white">
+        <div className="mx-auto flex h-12 max-w-[1240px] items-center gap-4 pl-5 sm:px-8 lg:gap-8">
+          <Link href="/" className="flex shrink-0 items-center gap-2.5">
+            <Dhis2Mark className="h-[22px] w-auto text-white" />
+            <span className="text-[14px] font-medium leading-none">
+              CHAP Model Marketplace
             </span>
           </Link>
-          <nav className="hidden items-center gap-1 bar:flex">
+          <nav className="hidden h-full items-stretch bar:flex">
             {items.map((item) => {
               const active = isActive(item.href, pathname);
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`relative flex items-center gap-1.5 px-3 py-[22px] text-[15px] font-bold ${
-                    item.soon ? "text-ink-3" : "text-ink-2"
-                  } transition-colors hover:text-brand ${active ? "text-ink" : ""}`}
+                  aria-current={active ? "page" : undefined}
+                  className={`relative flex items-center gap-1.5 px-3 text-[14px] transition-colors hover:bg-white/10 ${
+                    active ? "font-medium text-white" : "text-white/80"
+                  }`}
                 >
                   {item.label}
                   {item.soon ? <SoonPill /> : null}
                   {active ? (
-                    <span className="absolute inset-x-3 bottom-0 h-[3px] bg-brand" />
+                    <span className="absolute inset-x-3 bottom-0 h-[3px] bg-white" />
                   ) : null}
                 </Link>
               );
             })}
           </nav>
-          <div className="ml-auto flex items-center gap-2 sm:gap-2.5">
-            <form onSubmit={submit} className="relative hidden flex-1 xl:block">
-              <MagnifierIcon className="pointer-events-none absolute left-2.5 top-[11px] h-3.5 w-3.5 text-ink-3" />
+          <div className="ml-auto flex items-center gap-2 sm:gap-3">
+            <form onSubmit={submit} className="relative hidden xl:block">
+              <span className="pointer-events-none absolute left-2 top-2 flex text-ink-3">
+                <IconSearch16 />
+              </span>
               <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 placeholder="Search models"
                 aria-label="Search models"
-                className="h-9 w-[240px] rounded-md border border-line bg-surface-2 pl-[30px] pr-2.5 text-[14px] text-ink outline-none placeholder:text-ink-3 focus:border-brand focus:bg-surface"
+                className="d2-input d2-input-dense w-[240px] pl-8"
               />
             </form>
-            <ThemeToggle />
             <a
               href="https://github.com/dhis2-chap"
               target="_blank"
               rel="noreferrer"
-              className="hidden h-8 items-center gap-1.5 rounded-[2px] border border-line px-3 text-[14px] font-bold text-ink-2 transition-colors hover:border-line-strong hover:text-ink bar:flex"
+              className="hidden h-8 items-center gap-1.5 rounded-[3px] border border-white/40 px-3 text-[14px] text-white transition-colors hover:bg-white/10 bar:flex"
             >
               <GitHubMark className="h-3.5 w-3.5" />
               Repo

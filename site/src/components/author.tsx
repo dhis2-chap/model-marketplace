@@ -54,7 +54,7 @@ export function AuthorLine({
     <div className="flex min-w-0 items-center gap-3">
       <AvatarStack handles={maintainers} />
       <div className="min-w-0 leading-tight">
-        <div className="text-[14px] font-bold text-ink">
+        <div className="text-[14px] font-medium text-ink">
           <span className="font-normal text-ink-2">By </span>
           {author}
         </div>
@@ -81,12 +81,12 @@ export function AuthorPanel({
   return (
     <section
       aria-label="Submitted by"
-      className="rounded-md border border-line bg-surface p-5"
+      className="d2-card p-5"
     >
-      <div className="text-[13px] font-bold uppercase tracking-[0.08em] text-brand">
+      <div className="text-[13px] font-medium uppercase tracking-[0.08em] text-ink-3">
         Submitted by
       </div>
-      <div className="mt-2 font-brand text-[22px] font-bold leading-tight text-ink">
+      <div className="mt-2 font-brand text-[22px] font-medium leading-tight text-ink">
         {author}
       </div>
       {organization ? (

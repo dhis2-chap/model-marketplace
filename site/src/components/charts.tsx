@@ -38,7 +38,7 @@ function ChartTooltip({
 }: TooltipContentProps<ValueType, NameType>) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-[4px] border border-line bg-surface px-2.5 py-2 shadow-lift">
+    <div className="rounded-[3px] border border-line bg-surface px-2.5 py-2 shadow-lift">
       <div className="mb-1 font-brand text-[10px] font-medium uppercase tracking-[0.08em] text-ink-3">
         {label}
       </div>
@@ -157,10 +157,10 @@ export function ComparisonChart({
       </div>
       <div className="mt-2.5 flex items-center gap-4 text-[11px] text-ink-2">
         <span className="flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-[2px] bg-brand" /> this model
+          <span className="h-2.5 w-2.5 rounded-[3px] bg-brand" /> this model
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-[2px] border border-line-strong bg-surface-3" /> others in set
+          <span className="h-2.5 w-2.5 rounded-[3px] border border-line-strong bg-surface-3" /> others in set
         </span>
       </div>
     </div>

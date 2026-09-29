@@ -46,20 +46,20 @@ export default async function ModelPage({
     <>
       <Link
         href="/"
-        className="text-[15px] font-bold text-brand hover:underline"
+        className="text-[15px] font-medium text-brand hover:underline"
       >
         ← All models
       </Link>
       <div className="mt-5 grid items-start gap-8 pb-8 lg:grid-cols-[1fr_360px] lg:gap-12">
         <div className="min-w-0">
-          <h1 className="font-brand text-[clamp(30px,5vw,44px)] font-bold leading-[1.05] tracking-[-0.02em] text-ink">
+          <h1 className="font-brand text-[clamp(30px,5vw,44px)] font-medium leading-[1.05] text-ink">
             {view.name}
           </h1>
           {/* The authors' own status first; the review gate beside it, never
               merged into it. */}
           <div className="mt-4 flex flex-wrap items-center gap-2">
             <KindBadge kind={view.kind} />
-            <AssessedStatusBadge status={view.assessedStatus} size="md" />
+            <AssessedStatusBadge status={view.assessedStatus} />
             <VerifiedChip approvals="3/3" />
           </div>
           <p className="mt-5 max-w-[64ch] text-[17px] leading-[1.65] text-ink-2">
@@ -69,7 +69,7 @@ export default async function ModelPage({
             href={view.repoUrl}
             target="_blank"
             rel="noreferrer"
-            className="mt-5 inline-flex items-center gap-2 text-[15px] font-bold text-brand hover:underline"
+            className="d2-button d2-button-secondary mt-5"
           >
             <GitHubMark className="h-4 w-4 shrink-0" />
             Source code

@@ -12,18 +12,13 @@ const LinkClass =
 
 export function Footer() {
   return (
-    <footer className="board-panel border-t border-line text-board-ink">
+    <footer className="board-panel text-board-ink">
       <div className="mx-auto grid max-w-[1240px] gap-x-10 gap-y-9 px-5 pb-10 pt-11 sm:grid-cols-2 sm:px-8 sm:pt-12 md:grid-cols-[1.5fr_1fr_1fr]">
         <div>
           <div className="flex items-center gap-3">
-            <Dhis2Mark className="h-6 w-auto text-fan" />
-            <span className="flex flex-col leading-none">
-              <span className="font-brand text-[18px] font-extrabold tracking-[-0.02em]">
-                CHAP
-              </span>
-              <span className="mt-[3px] font-brand text-[11px] font-bold uppercase tracking-[0.16em] text-board-ink-2">
-                Model Marketplace
-              </span>
+            <Dhis2Mark className="h-[22px] w-auto text-white" />
+            <span className="text-[14px] font-medium leading-none">
+              CHAP Model Marketplace
             </span>
           </div>
           <p className="mt-4 max-w-[44ch] text-[15px] leading-[1.7] text-board-ink-2">
@@ -32,7 +27,7 @@ export function Footer() {
           </p>
         </div>
         <div>
-          <div className="mb-3.5 text-[13px] font-bold uppercase tracking-[0.1em] text-fan">
+          <div className="mb-3.5 text-[13px] font-medium uppercase tracking-[0.1em] text-board-ink-2">
             Marketplace
           </div>
           <ul className="space-y-2.5 text-[15px]">
@@ -54,7 +49,7 @@ export function Footer() {
           </ul>
         </div>
         <div>
-          <div className="mb-3.5 text-[13px] font-bold uppercase tracking-[0.1em] text-fan">
+          <div className="mb-3.5 text-[13px] font-medium uppercase tracking-[0.1em] text-board-ink-2">
             Platform
           </div>
           <ul className="space-y-2.5 text-[15px]">

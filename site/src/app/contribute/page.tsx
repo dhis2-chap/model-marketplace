@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { CheckIcon, GitHubMark } from "@/components/icons";
+import { IconCheckmarkCircle24 } from "@dhis2/ui-icons";
+import { GitHubMark } from "@/components/icons";
 import { CodePanel } from "@/components/CodePanel";
 import { CopyButton } from "@/components/copy";
 import { getRegistry } from "@/lib/registry";
@@ -86,7 +87,7 @@ export default function ContributePage() {
   const repository = registry.index.marketplace.repository;
   return (
     <main className="mx-auto max-w-[1240px] px-5 pb-20 pt-12 sm:px-8 sm:pt-16">
-      <h1 className="max-w-[20ch] font-brand text-[clamp(32px,4vw,46px)] font-bold leading-[1.1] tracking-[-0.02em] text-ink">
+      <h1 className="max-w-[20ch] font-brand text-[clamp(32px,4vw,46px)] font-medium leading-[1.1] text-ink">
         Submit a model
       </h1>
       <p className="mt-3 max-w-[52ch] text-[17px] leading-[1.6] text-ink-2">
@@ -96,11 +97,11 @@ export default function ContributePage() {
 
       <ol className="mt-10 grid gap-4 md:grid-cols-3">
         {STEPS.map(([title, body], i) => (
-          <li key={title} className="rounded-md border border-line bg-surface p-5">
-            <span className="grid h-8 w-8 place-items-center rounded-full bg-ink font-bold text-surface">
+          <li key={title} className="d2-card p-5">
+            <span className="grid h-8 w-8 place-items-center rounded-full bg-brand font-medium text-white">
               {i + 1}
             </span>
-            <h2 className="mt-3 text-[17px] font-bold text-ink">{title}</h2>
+            <h2 className="mt-3 text-[17px] font-medium text-ink">{title}</h2>
             <p className="mt-1 text-[15px] text-ink-2">{body}</p>
           </li>
         ))}
@@ -110,7 +111,7 @@ export default function ContributePage() {
         {/* min-w-0: without it the grid track sizes to the widest YAML line
             instead of letting the code panel scroll. */}
         <div className="min-w-0">
-          <h2 className="mb-2 font-brand text-[22px] font-bold text-ink">
+          <h2 className="mb-2 font-brand text-[22px] font-medium text-ink">
             Example file
           </h2>
           <p className="mb-5 text-[15px] text-ink-2">
@@ -119,13 +120,13 @@ export default function ContributePage() {
               href={`${repository}/blob/main/models/README.md`}
               target="_blank"
               rel="noreferrer"
-              className="font-bold text-brand hover:underline"
+              className="font-medium text-brand hover:underline"
             >
               models/README.md
             </a>
             .
           </p>
-          <div className="overflow-hidden rounded-md border border-line">
+          <div className="overflow-hidden rounded-[3px] border border-line">
             <div className="flex items-center justify-between gap-4 border-b border-line bg-surface-2 px-4 py-3">
               <span className="font-mono text-[14px] text-ink-2">
                 models/my_model.yaml
@@ -136,13 +137,15 @@ export default function ContributePage() {
           </div>
         </div>
         <aside className="min-w-0">
-          <h2 className="mb-4 font-brand text-[22px] font-bold text-ink">
+          <h2 className="mb-4 font-brand text-[22px] font-medium text-ink">
             Before you open the PR
           </h2>
           <ul className="space-y-3">
             {CHECKS.map((c) => (
               <li key={c} className="flex gap-3 text-[15px] leading-[1.5] text-ink-2">
-                <CheckIcon className="mt-0.5 h-5 w-5 shrink-0 text-verified" />
+                <span className="flex shrink-0">
+                  <IconCheckmarkCircle24 color="var(--mp-verified)" />
+                </span>
                 {c}
               </li>
             ))}
@@ -151,7 +154,7 @@ export default function ContributePage() {
             href={`${repository}/compare`}
             target="_blank"
             rel="noreferrer"
-            className="mt-8 flex h-12 items-center justify-center gap-2 rounded-md bg-brand text-[16px] font-bold text-white hover:bg-brand-dark"
+            className="d2-button d2-button-primary d2-button-large mt-8 w-full"
           >
             <GitHubMark className="h-4 w-4" />
             Open a pull request
