@@ -20,8 +20,8 @@ import type {
 } from "recharts/types/component/DefaultTooltipContent";
 
 /**
- * Benchmark charts. Every series rendered here comes from a real record in
- * the repo's benchmarks/ store — there are no illustrative fixtures behind
+ * Benchmark charts. Every series rendered here comes from a real record
+ * fetched from Chap's benchmarking server — there are no illustrative fixtures behind
  * these components, and nothing here derives a value it was not given.
  */
 

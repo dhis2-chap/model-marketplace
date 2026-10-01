@@ -287,7 +287,7 @@ export function BenchmarkSuite({ suite }: { suite: BenchmarkSuiteView }) {
                   benchmarks/README.md
                 </code>{" "}
                 once it is settled. Until then, each row&apos;s run record on
-                the left documents what its file actually recorded.
+                the left documents what was actually recorded for it.
               </p>
               <a
                 href="https://chap.dhis2.org/chap-modeling-platform/external_models/running_models_in_chap/"
