@@ -24,53 +24,6 @@ export function SealIcon({
   );
 }
 
-export function MagnifierIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      viewBox="0 0 16 16"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.6}
-      aria-hidden
-      {...props}
-    >
-      <circle cx={7} cy={7} r={4.5} />
-      <path d="M10.5 10.5 L14 14" />
-    </svg>
-  );
-}
-
-export function CopyGlyph(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      viewBox="0 0 16 16"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.5}
-      aria-hidden
-      {...props}
-    >
-      <rect x={5.5} y={5.5} width={8} height={8} rx={1.2} />
-      <path d="M10.5 3.5v-1h-8v8h1" />
-    </svg>
-  );
-}
-
-export function CheckIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      viewBox="0 0 16 16"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.8}
-      aria-hidden
-      {...props}
-    >
-      <path d="M3 8.5 6.2 11.7 13 5" />
-    </svg>
-  );
-}
-
 export function GitHubMark(props: SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden {...props}>

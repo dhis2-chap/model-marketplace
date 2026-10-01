@@ -1,7 +1,7 @@
 # Model registry format (draft, schema_version 2)
 
 One YAML file per whitelisted model. Everything in this directory has been
-reviewed and verified by the CHAP maintainers — a model, a new version pin, or
+reviewed and verified by the Chap maintainers — a model, a new version pin, or
 a new verified configuration only lands here through a pull request approved
 by three maintainers. The marketplace site is a rendering of these files; the
 repo stays the source of truth and the review gate.
@@ -168,7 +168,7 @@ configurations:                  # verified, copy-pasteable configurations
   `POST /api/v1/configs` request — a running service holds no configuration
   until one is created. `prediction_periods` is required by chapkit's
   `BaseConfig` and validated here against the service's declared bounds;
-  `additional_continuous_covariates` is the other field CHAP interprets.
+  `additional_continuous_covariates` is the other field Chap interprets.
 - `covariates.required` are supplied automatically by chap and are therefore
   never repeated under `additional_continuous_covariates` in configurations.
 - When `allow_free_additional` is `false`, a configuration may only name

@@ -1,101 +1,79 @@
 @import "tailwindcss";
 
-/* Quiet surfaces, with blue reserved for links and controls. */
+/* The DHIS2 design system (https://ui.dhis2.nu). Every colour, shadow and
+   radius below is a value from @dhis2/ui-constants 10.x, named after the
+   constant it copies; `tokens.test.ts` fails if one drifts. The @dhis2/ui
+   React components themselves cannot render here (browser-only module
+   code, React 16/18 peers, styled-jsx 4), so the `d2-*` component classes
+   further down transcribe their stylesheets instead. DHIS2 has no dark
+   theme, so neither does the site. */
 :root {
   color-scheme: light;
-  --mp-paper: #f7f8f9;
-  --mp-surface: #ffffff;
-  --mp-surface-2: #f5f6f7;
-  --mp-surface-3: #eceff1;
-  --mp-border: #dfe3e6;
-  --mp-border-strong: #bbc3ca;
-  --mp-text: #242c33;
-  --mp-text-2: #56616b;
-  --mp-text-3: #687681;
-  --mp-brand: #0e72c4;
-  --mp-brand-dark: #0a5697;
-  --mp-brand-tint: #e2f0fb;
-  --mp-verified: #157a44;
-  --mp-verified-tint: #e3f4ea;
-  --mp-exp: #c14e0d;
-  --mp-exp-tint: #fcefe4;
-  --mp-danger: #c84141;
-  --mp-danger-tint: #fbecec;
+  --mp-paper: #f3f5f7; /* grey200 */
+  --mp-surface: #ffffff; /* white */
+  --mp-surface-2: #f8f9fa; /* grey100 */
+  --mp-surface-3: #e8edf2; /* grey300 */
+  --mp-border: #d5dde5; /* grey400 */
+  --mp-border-strong: #a0adba; /* grey500 */
+  --mp-text: #212934; /* grey900 */
+  --mp-text-2: #4a5768; /* grey700 */
+  --mp-text-3: #6c7787; /* grey600 */
+  --mp-brand: #1565c0; /* blue700 — primary700 */
+  --mp-brand-dark: #0d47a1; /* blue800 */
+  --mp-brand-tint: #f5fbff; /* blue050 */
+  --mp-focus: #147cd7; /* blue600 — theme.focus */
+  --mp-verified: #2e7d32; /* green700 */
+  --mp-verified-tint: #f4fbf4; /* green050 */
+  --mp-exp: #bb460d; /* yellow800 */
+  --mp-exp-tint: #fff8e1; /* yellow050 */
+  --mp-danger: #b71c1c; /* red700 */
+  --mp-danger-tint: #fff5f6; /* red050 */
 
   /* chapkit's AssessedStatus scale — the model author's own judgement of how
      far their model has been validated. Five fixed steps, so they get their
      own tokens rather than borrowing the verified/exp pair, which means
-     something else entirely (the marketplace review gate). */
-  --mp-as-green: #157a44;
-  --mp-as-green-tint: #e3f4ea;
-  --mp-as-yellow: #8a6a08;
-  --mp-as-yellow-tint: #fbf1d6;
-  --mp-as-orange: #c14e0d;
-  --mp-as-orange-tint: #fcefe4;
-  --mp-as-red: #c84141;
-  --mp-as-red-tint: #fbecec;
-  --mp-as-gray: #687681;
-  --mp-as-gray-tint: #eceff1;
+     something else entirely (the marketplace review gate). Text and fill
+     follow the DHIS2 Tag variants; DHIS2 has no orange, so yellow/orange
+     share the yellow ramp and are told apart by their dot. */
+  --mp-as-green: #103713; /* green900 */
+  --mp-as-green-tint: #e8f5e9; /* green100 */
+  --mp-as-green-dot: #43a047; /* green500 */
+  --mp-as-yellow: #6f3205; /* yellow900 */
+  --mp-as-yellow-tint: #ffecb3; /* yellow100 */
+  --mp-as-yellow-dot: #ffc324; /* yellow300 */
+  --mp-as-orange: #6f3205; /* yellow900 */
+  --mp-as-orange-tint: #fff8e1; /* yellow050 */
+  --mp-as-orange-dot: #e56408; /* yellow700 */
+  --mp-as-red: #330202; /* red900 */
+  --mp-as-red-tint: #ffe5e8; /* red100 */
+  --mp-as-red-dot: #d32f2f; /* red500 */
+  --mp-as-gray: #212934; /* grey900 */
+  --mp-as-gray-tint: #e8edf2; /* grey300 */
+  --mp-as-gray-dot: #6c7787; /* grey600 */
 
-  /* The plotting board — near-constant across themes. */
-  --mp-board: #293741;
-  --mp-board-2: #34434e;
-  --mp-board-line: rgba(158, 203, 238, 0.14);
-  --mp-board-ink: #ecf4fa;
-  --mp-board-ink-2: #b4c0ca;
-  --mp-fan: #6fc3f2;
+  /* Dark panels: the footer and the (flagged-off) benchmark charts. */
+  --mp-board: #212934; /* grey900 */
+  --mp-board-2: #404b5a; /* grey800 */
+  --mp-board-line: rgba(255, 255, 255, 0.1);
+  --mp-board-ink: #fbfcfd; /* grey050 */
+  --mp-board-ink-2: #a0adba; /* grey500 */
+  --mp-fan: #90caf9; /* blue300 */
 
-  --mp-code-bg: #071a2c;
-  --mp-code-fg: #d9e4ef;
-  --mp-code-key: #7cc0f0;
-  --mp-code-str: #8fd79a;
-  --mp-code-num: #efb868;
-  --mp-code-com: #5e7a93;
-  --mp-shadow: 0 1px 2px rgba(11, 46, 78, 0.07);
-  --mp-shadow-lift: 0 14px 32px -12px rgba(11, 46, 78, 0.35);
-  --mp-shadow-card: 0 6px 16px -10px rgba(11, 46, 78, 0.22);
-}
+  --mp-code-bg: #212934; /* grey900 */
+  --mp-code-fg: #e8edf2; /* grey300 */
+  --mp-code-key: #90caf9; /* blue300 */
+  --mp-code-str: #a5d6a7; /* green300 */
+  --mp-code-num: #ffc324; /* yellow300 */
+  --mp-code-com: #a0adba; /* grey500 */
 
-[data-theme="dark"] {
-  color-scheme: dark;
-  --mp-paper: #171b1f;
-  --mp-surface: #1e2328;
-  --mp-surface-2: #242a30;
-  --mp-surface-3: #2d343b;
-  --mp-border: #343c44;
-  --mp-border-strong: #505b65;
-  --mp-text: #e5e9ed;
-  --mp-text-2: #b3bdc6;
-  --mp-text-3: #929fa9;
-  --mp-brand: #80b8e1;
-  --mp-brand-dark: #8ac7f3;
-  --mp-brand-tint: #253b4c;
-  --mp-verified: #80c39c;
-  --mp-verified-tint: #263b30;
-  --mp-exp: #dfa574;
-  --mp-exp-tint: #3e3127;
-  --mp-danger: #e58484;
-  --mp-danger-tint: #2e1717;
-
-  --mp-as-green: #80c39c;
-  --mp-as-green-tint: #263b30;
-  --mp-as-yellow: #dcc07a;
-  --mp-as-yellow-tint: #3a331f;
-  --mp-as-orange: #dfa574;
-  --mp-as-orange-tint: #3e3127;
-  --mp-as-red: #e58484;
-  --mp-as-red-tint: #2e1717;
-  --mp-as-gray: #929fa9;
-  --mp-as-gray-tint: #2d343b;
-
-  --mp-board: #1b2228;
-  --mp-board-2: #2b353e;
-  --mp-board-line: rgba(158, 203, 238, 0.11);
-
-  --mp-code-bg: #05121f;
-  --mp-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --mp-shadow-lift: 0 14px 32px -10px rgba(0, 0, 0, 0.55);
-  --mp-shadow-card: 0 6px 16px -10px rgba(0, 0, 0, 0.4);
+  /* elevations.e100 / e200 / e300 */
+  --mp-shadow: 0px 1px 2px rgba(33, 41, 52, 0.06),
+    0px 1px 3px rgba(33, 41, 52, 0.1);
+  --mp-shadow-card: 0px 0px 1px rgba(33, 41, 52, 0.1),
+    0px 4px 6px -1px rgba(33, 41, 52, 0.1),
+    0px 2px 4px -1px rgba(33, 41, 52, 0.06);
+  --mp-shadow-lift: 0px 10px 15px -3px rgba(33, 41, 52, 0.1),
+    0px 4px 6px -2px rgba(33, 41, 52, 0.05);
 }
 
 @theme inline {
@@ -119,14 +97,19 @@
   --color-danger-tint: var(--mp-danger-tint);
   --color-as-green: var(--mp-as-green);
   --color-as-green-tint: var(--mp-as-green-tint);
+  --color-as-green-dot: var(--mp-as-green-dot);
   --color-as-yellow: var(--mp-as-yellow);
   --color-as-yellow-tint: var(--mp-as-yellow-tint);
+  --color-as-yellow-dot: var(--mp-as-yellow-dot);
   --color-as-orange: var(--mp-as-orange);
   --color-as-orange-tint: var(--mp-as-orange-tint);
+  --color-as-orange-dot: var(--mp-as-orange-dot);
   --color-as-red: var(--mp-as-red);
   --color-as-red-tint: var(--mp-as-red-tint);
+  --color-as-red-dot: var(--mp-as-red-dot);
   --color-as-gray: var(--mp-as-gray);
   --color-as-gray-tint: var(--mp-as-gray-tint);
+  --color-as-gray-dot: var(--mp-as-gray-dot);
   --color-board: var(--mp-board);
   --color-board-2: var(--mp-board-2);
   --color-board-line: var(--mp-board-line);
@@ -139,12 +122,12 @@
   --color-code-str: var(--mp-code-str);
   --color-code-num: var(--mp-code-num);
   --color-code-com: var(--mp-code-com);
-  --font-brand: var(--font-schibsted);
-  --font-body: var(--font-schibsted);
-  --font-serif: var(--font-source-serif);
-  --font-mono: var(--font-spline-mono);
+  /* theme.fonts: Roboto, everywhere. */
+  --font-brand: var(--font-roboto), sans-serif;
+  --font-body: var(--font-roboto), sans-serif;
+  --font-mono: var(--font-roboto-mono), monospace;
   /* The header bar folds into the hamburger below this: the full rail of
-     nav links, theme toggle and repo button needs ~830px to sit flat. */
+     nav links and repo button needs ~830px to sit flat. */
   --breakpoint-bar: 56.25rem;
   --shadow-mp: var(--mp-shadow);
   --shadow-lift: var(--mp-shadow-lift);
@@ -169,60 +152,20 @@ body {
 }
 
 ::selection {
-  background: var(--mp-brand);
+  background: var(--mp-focus);
   color: #fff;
 }
 
-:focus-visible {
-  outline: 2px solid var(--mp-brand);
+/* theme.focus, as every DHIS2 control draws it. Inputs draw their own
+   inset ring (.d2-input:focus), so they skip the outline. */
+:focus-visible:not(.d2-input) {
+  outline: 3px solid var(--mp-focus);
   outline-offset: 2px;
 }
 
 /* Shared solid panels; chart gridlines belong inside the chart. */
 .board-panel {
   background-color: var(--mp-board);
-}
-
-@keyframes mp-draw {
-  from {
-    stroke-dashoffset: 900;
-  }
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-
-@keyframes mp-blink {
-  0%,
-  49% {
-    opacity: 1;
-  }
-  50%,
-  100% {
-    opacity: 0;
-  }
-}
-
-@keyframes mp-pipeline-progress {
-  from {
-    transform: scaleX(0);
-  }
-  to {
-    transform: scaleX(1);
-  }
-}
-
-.review-pipeline-progress {
-  animation-name: mp-pipeline-progress;
-  animation-timing-function: linear;
-  animation-fill-mode: forwards;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .review-pipeline-progress {
-    animation: none;
-    transform: scaleX(1);
-  }
 }
 
 /* Edge-to-edge scroll rows (tab bars, filter rails) keep their scrollbar
@@ -233,4 +176,270 @@ body {
 }
 .no-scrollbar::-webkit-scrollbar {
   display: none;
+}
+
+/* DHIS2 components, transcribed from the @dhis2-ui/* 10.18 stylesheets. */
+@layer components {
+  /* @dhis2-ui/card */
+  .d2-card {
+    border-radius: 3px;
+    background: #ffffff;
+    box-shadow: var(--mp-shadow);
+  }
+
+  /* @dhis2-ui/button — basic, medium */
+  .d2-button {
+    display: inline-flex;
+    position: relative;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 36px;
+    padding: 0 12px;
+    border: 1px solid #a0adba;
+    border-radius: 4px;
+    background-color: #f9fafb;
+    color: #212934;
+    fill: currentColor;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 16px;
+    letter-spacing: 0.5px;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+  }
+  .d2-button:hover {
+    background-color: #f3f5f7;
+  }
+  .d2-button:active {
+    background-color: #f3f5f7;
+    box-shadow: 0 0 0 1px rgb(0, 0, 0, 0.1) inset;
+  }
+  .d2-button:focus-visible {
+    outline: 3px solid var(--mp-focus);
+    outline-offset: -3px;
+    text-decoration: underline;
+  }
+  .d2-button-small {
+    height: 28px;
+    padding: 0 6px;
+    gap: 2px;
+  }
+  .d2-button-large {
+    height: 43px;
+    padding: 0 24px;
+    font-size: 16px;
+    line-height: 19px;
+    letter-spacing: 0.57px;
+  }
+  .d2-button-primary {
+    border-color: #0d47a1;
+    background: linear-gradient(180deg, #1565c0 0%, #0650a3 100%);
+    background-color: #2b61b3;
+    color: #ffffff;
+    font-weight: 500;
+  }
+  .d2-button-primary:hover,
+  .d2-button-primary:active {
+    background: linear-gradient(180deg, #054fa3 0%, #034793 100%);
+    background-color: #21539f;
+  }
+  .d2-button-primary:focus-visible {
+    background: #0d47a1;
+    border-color: #093371;
+    outline-offset: -5px;
+  }
+  .d2-button-secondary {
+    border-color: rgba(74, 87, 104, 0.25);
+    background-color: transparent;
+  }
+  .d2-button-secondary:hover {
+    border-color: rgba(74, 87, 104, 0.5);
+    background-color: rgba(160, 173, 186, 0.05);
+  }
+  .d2-button-secondary:active {
+    background-color: rgba(160, 173, 186, 0.2);
+    box-shadow: none;
+  }
+
+  /* @dhis2-ui/tag */
+  .d2-tag {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 4px;
+    height: 23px;
+    padding: 5px 6px;
+    border-radius: 3px;
+    background-color: #e8edf2;
+    color: #212934;
+    fill: #4a5768;
+    font-size: 13px;
+    line-height: 1;
+    white-space: nowrap;
+  }
+  .d2-tag-neutral {
+    background-color: #e3f2fd;
+    color: #093371;
+    fill: #0d47a1;
+  }
+  .d2-tag-positive {
+    background-color: #e8f5e9;
+    color: #103713;
+    fill: #1b5e20;
+  }
+  .d2-tag-negative {
+    background-color: #ffe5e8;
+    color: #330202;
+    fill: #891515;
+  }
+  .d2-tag-bold {
+    font-weight: 700;
+    background-color: #4a5768;
+    color: #ffffff;
+    fill: #ffffff;
+  }
+  .d2-tag-bold.d2-tag-neutral {
+    background-color: #0d47a1;
+    color: #f5fbff;
+  }
+  .d2-tag-bold.d2-tag-positive {
+    background-color: #2e7d32;
+    color: #f4fbf4;
+  }
+
+  /* @dhis2-ui/segmented-control */
+  .d2-segmented {
+    display: inline-flex;
+    align-items: stretch;
+    padding: 2px;
+    border-radius: 5px;
+    background: #e8edf2;
+  }
+  .d2-segment {
+    min-width: 72px;
+    max-width: 320px;
+    padding: 6px 12px;
+    border: 0;
+    border-radius: 5px;
+    background: transparent;
+    color: #4a5768;
+    font-size: 14px;
+    text-align: center;
+    cursor: pointer;
+  }
+  .d2-segment:focus-visible {
+    outline: 3px solid var(--mp-focus);
+    outline-offset: -3px;
+  }
+  .d2-segment:not([aria-pressed="true"]):hover {
+    background: #d5dde5;
+    color: #212934;
+  }
+  .d2-segment[aria-pressed="true"] {
+    cursor: default;
+    box-shadow: var(--mp-shadow);
+    background: #ffffff;
+    color: #212934;
+  }
+
+  /* @dhis2-ui/tab — TabBar + Tab */
+  .d2-tabs {
+    display: flex;
+    align-items: flex-start;
+    box-shadow: inset 0 -1px 0 0 #d5dde5;
+  }
+  .d2-tab {
+    position: relative;
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 16px 11px;
+    border: 0;
+    border-bottom: 1px solid #d5dde5;
+    background-color: transparent;
+    color: #6c7787;
+    font-size: 14px;
+    line-height: 20px;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  .d2-tab::after {
+    content: " ";
+    position: absolute;
+    bottom: -1px;
+    inset-inline-start: 0;
+    height: 4px;
+    width: 100%;
+    background-color: transparent;
+  }
+  .d2-tab:focus-visible {
+    outline: 3px solid var(--mp-focus);
+    outline-offset: -3px;
+  }
+  .d2-tab:hover {
+    color: #212934;
+  }
+  .d2-tab:hover::after {
+    background-color: #6c7787;
+    height: 2px;
+  }
+  .d2-tab[aria-selected="true"] {
+    color: #0d47a1;
+  }
+  .d2-tab[aria-selected="true"]::after,
+  .d2-tab[aria-selected="true"]:hover::after {
+    background-color: #1565c0;
+    height: 4px;
+  }
+
+  /* @dhis2-ui/input */
+  .d2-input {
+    box-sizing: border-box;
+    width: 100%;
+    max-height: 40px;
+    padding: 11px 12px;
+    border: 1px solid #a0adba;
+    border-radius: 3px;
+    background-color: #ffffff;
+    box-shadow: inset 0 0 1px 0 rgba(48, 54, 60, 0.1);
+    color: #212934;
+    font-size: 14px;
+    line-height: 16px;
+    outline: 0;
+    text-overflow: ellipsis;
+  }
+  .d2-input-dense {
+    max-height: 32px;
+    padding: 7px 8px;
+  }
+  .d2-input:focus {
+    outline: none;
+    border-color: var(--mp-focus);
+    box-shadow: inset 0 0 0 2px var(--mp-focus);
+  }
+  .d2-input::placeholder {
+    color: #6c7787;
+    opacity: 1;
+  }
+
+  /* @dhis2-ui/notice-box */
+  .d2-notice {
+    display: flex;
+    gap: 12px;
+    padding: 12px 16px;
+    border: 1px solid #c5e3fc;
+    border-radius: 3px;
+    background: #f5fbff;
+    color: #212934;
+    font-size: 14px;
+    line-height: 19px;
+  }
+  .d2-notice-warning {
+    border-color: #ffe082;
+    background: #fff8e1;
+  }
 }

@@ -12,6 +12,7 @@
     "validate": "tsx scripts/validate.ts"
   },
   "dependencies": {
+    "@dhis2/ui-icons": "10.18.0",
     "next": "16.3.3",
     "react": "19.2.8",
     "react-dom": "19.2.8",
@@ -20,6 +21,7 @@
     "zod": "^4.5.2"
   },
   "devDependencies": {
+    "@dhis2/ui-constants": "10.18.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

@@ -8,7 +8,7 @@ import { getRegistry } from "@/lib/registry";
 export const metadata: Metadata = {
   title: "Benchmarks",
   description:
-    "Benchmark results are added soon — controlled CHAP evaluations against pinned commits, nothing self-reported.",
+    "Benchmark results are added soon — controlled Chap evaluations against pinned commits, nothing self-reported.",
 };
 
 /** Rendered until real benchmark results exist — the methodology is still being decided. */
@@ -20,11 +20,11 @@ function BenchmarksComingSoon() {
           <span className="font-mono text-[10.5px] uppercase tracking-[0.18em] text-exp">
             Coming soon
           </span>
-          <h1 className="my-4 font-brand text-[clamp(36px,4vw,50px)] font-extrabold leading-[1.02] tracking-[-0.03em] text-ink">
+          <h1 className="my-4 font-brand text-[clamp(36px,4vw,50px)] font-medium leading-[1.02] text-ink">
             Benchmarks
           </h1>
-          <p className="max-w-[58ch] font-serif text-[16px] leading-[1.7] text-ink-2">
-            Every score on this page will come from a controlled CHAP
+          <p className="max-w-[58ch] text-[16px] leading-[1.7] text-ink-2">
+            Every score on this page will come from a controlled Chap
             evaluation of a pinned commit — nothing self-reported. No
             benchmarks have been run yet, and exactly how they will be run is
             still being decided, so results are not published yet.
@@ -33,7 +33,7 @@ function BenchmarksComingSoon() {
       </section>
 
       <section className="mx-auto max-w-[1240px] px-5 sm:px-8 pt-9">
-        <div className="rounded-lg border border-dashed border-line-strong bg-surface px-[26px] py-6">
+        <div className="d2-card px-[26px] py-6">
           <div className="font-brand text-[15px] font-medium text-ink">
             What will appear here
           </div>
@@ -57,7 +57,7 @@ function BenchmarksComingSoon() {
           </span>
           <Link
             href="/"
-            className="inline-flex h-9 items-center rounded-[4px] border border-line-strong bg-surface px-4 font-brand text-[13px] font-medium text-ink transition-colors hover:border-brand hover:text-brand"
+            className="d2-button"
           >
             Browse models
           </Link>
@@ -86,11 +86,11 @@ export default function BenchmarksPage() {
                   ? "Early results · one suite"
                   : `Early results · ${suites.length} suites`}
             </span>
-            <h1 className="my-4 font-brand text-[clamp(36px,4vw,50px)] font-extrabold leading-[1.02] tracking-[-0.03em] text-ink">
+            <h1 className="my-4 font-brand text-[clamp(36px,4vw,50px)] font-medium leading-[1.02] text-ink">
               Benchmarks
             </h1>
-            <p className="max-w-[58ch] font-serif text-[16px] leading-[1.7] text-ink-2">
-              Every score on this page comes from a controlled CHAP evaluation
+            <p className="max-w-[58ch] text-[16px] leading-[1.7] text-ink-2">
+              Every score on this page comes from a controlled Chap evaluation
               of a pinned commit — nothing is self-reported.{" "}
               {records.length === 0
                 ? "No run has been recorded yet, so there is nothing to rank — a suite appears the moment its first result lands, by pull request like everything else."
@@ -100,7 +100,7 @@ export default function BenchmarksPage() {
             </p>
           </div>
           {suites.length === 1 ? (
-            <div className="rounded-lg border border-line bg-surface px-5 py-[18px]">
+            <div className="d2-card px-5 py-[18px]">
               <div className="mb-3 font-brand text-[10px] font-medium uppercase tracking-[0.1em] text-ink-3">
                 Run context — identical for every row
               </div>
@@ -128,7 +128,7 @@ export default function BenchmarksPage() {
 
       {suites.length === 0 ? (
         <section className="mx-auto max-w-[1240px] px-5 sm:px-8 pt-9">
-          <div className="rounded-lg border border-line bg-surface px-[26px] py-6">
+          <div className="d2-card px-[26px] py-6">
             <div className="font-brand text-[15px] font-medium text-ink">
               Waiting for the first results
             </div>
@@ -153,7 +153,7 @@ export default function BenchmarksPage() {
           </span>
           <Link
             href="/"
-            className="inline-flex h-9 items-center rounded-[4px] border border-line-strong bg-surface px-4 font-brand text-[13px] font-medium text-ink transition-colors hover:border-brand hover:text-brand"
+            className="d2-button"
           >
             Browse models
           </Link>

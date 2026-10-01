@@ -47,13 +47,13 @@ function CommandBlock({ cmd }: { cmd: string }) {
   const { copied, copy } = useCopy();
   return (
     <div className="flex items-stretch gap-2">
-      <code className="min-w-0 flex-1 overflow-x-auto whitespace-pre rounded-[4px] border border-line bg-surface-2 px-[11px] py-[9px] font-mono text-[12px] leading-normal text-ink">
+      <code className="min-w-0 flex-1 overflow-x-auto whitespace-pre rounded-[3px] border border-line bg-surface-2 px-[11px] py-[9px] font-mono text-[12px] leading-normal text-ink">
         {cmd}
       </code>
       <button
         type="button"
         onClick={() => copy(cmd)}
-        className="shrink-0 cursor-pointer rounded-[4px] border border-line-strong bg-surface px-3.5 font-brand text-[12.5px] font-medium text-ink transition-colors hover:border-brand hover:text-brand"
+        className="shrink-0 cursor-pointer rounded-[3px] border border-line-strong bg-surface px-3.5 font-brand text-[12.5px] font-medium text-ink transition-colors hover:border-brand hover:text-brand"
       >
         {copied === cmd ? "Copied" : "Copy"}
       </button>
@@ -80,7 +80,7 @@ function RunRecord({ row }: { row: BenchmarkRowView }) {
       ]
     : [];
   return (
-    <div className="overflow-hidden rounded-lg border border-line-strong bg-surface">
+    <div className="overflow-hidden rounded-[3px] border border-line-strong bg-surface">
       <div className="flex items-center justify-between gap-3 border-b border-line px-5 py-4">
         <div className="min-w-0">
           <Link
@@ -168,7 +168,7 @@ export function BenchmarkSuite({ suite }: { suite: BenchmarkSuiteView }) {
       <section className="mx-auto max-w-[1240px] px-5 sm:px-8 pt-9">
         <div className="mb-3.5 flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
           <div>
-            <h2 className="mb-1.5 font-brand text-[22px] font-bold tracking-[-0.01em] text-ink">
+            <h2 className="mb-1.5 font-brand text-[22px] font-medium text-ink">
               {suite.heading}
             </h2>
             <p className="text-[13px] text-ink-2">
@@ -182,7 +182,7 @@ export function BenchmarkSuite({ suite }: { suite: BenchmarkSuiteView }) {
           </span>
         </div>
 
-        <div className="overflow-x-auto rounded-lg border border-line bg-surface">
+        <div className="overflow-x-auto rounded-[3px] border border-line bg-surface">
           <div className="min-w-[980px]">
             <div
               className={`grid ${GRID} gap-3 border-b border-line bg-surface-2 px-5 py-[11px]`}
@@ -274,7 +274,7 @@ export function BenchmarkSuite({ suite }: { suite: BenchmarkSuiteView }) {
         <div className="grid items-start gap-6 lg:grid-cols-2">
           <RunRecord row={selected} />
           <div className="flex flex-col gap-6">
-            <div className="rounded-lg border border-line bg-surface p-5">
+            <div className="rounded-[3px] border border-line bg-surface p-5">
               <div className="mb-3 font-brand text-[15px] font-medium text-ink">
                 Methodology — added soon
               </div>
@@ -295,7 +295,7 @@ export function BenchmarkSuite({ suite }: { suite: BenchmarkSuiteView }) {
                 rel="noreferrer"
                 className="mt-3 inline-flex font-brand text-[12.5px] font-medium text-brand hover:text-brand-dark"
               >
-                Read the CHAP evaluation documentation ↗
+                Read the Chap evaluation documentation ↗
               </a>
             </div>
           </div>

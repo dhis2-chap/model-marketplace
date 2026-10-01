@@ -105,11 +105,6 @@ export function repoPath(model: Model): string {
   return repoSlug(model).split("/").slice(1).join("/");
 }
 
-/** Just the repository name, for places too narrow for org and host. */
-export function repoName(model: Model): string {
-  return repoSlug(model).split("/")[2] ?? repoSlug(model);
-}
-
 export function shortCommit(commit: string): string {
   return commit.slice(0, 7);
 }
@@ -141,14 +136,6 @@ export function fullPin(model: Model, version: ModelVersion): string {
 /** The source pin as the UI displays it: repo slug + short commit. */
 export function displayPin(model: Model, version: ModelVersion): string {
   return `${repoSlug(model)}@${shortCommit(version.commit)}`;
-}
-
-/**
- * The pin for a catalog card, where the full slug truncates away the commit
- * — which is the half worth reading. Repository name + short commit.
- */
-export function compactPin(model: Model, version: ModelVersion): string {
-  return `${repoName(model)}@${shortCommit(version.commit)}`;
 }
 
 /**

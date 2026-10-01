@@ -6,13 +6,13 @@ import {
   KindBadge,
   VerifiedChip,
 } from "@/components/badges";
-import { CopyButton } from "@/components/copy";
+import { AuthorPanel } from "@/components/author";
 import { GitHubMark } from "@/components/icons";
 import { ModelDetailTabs } from "@/components/ModelDetailTabs";
 import { getBenchmarks } from "@/lib/benchmarks";
 import { getProposals } from "@/lib/proposals";
 import { getModel, getRegistry } from "@/lib/registry";
-import { toDetailView, type ChannelView } from "@/lib/views";
+import { toDetailView } from "@/lib/views";
 
 export function generateStaticParams() {
   return getRegistry().models.map((m) => ({ id: m.id }));
@@ -30,72 +30,6 @@ export async function generateMetadata({
   return { title: model.display_name, description: model.summary };
 }
 
-function PinPanel({
-  channel,
-  note,
-  verifiedTone,
-}: {
-  channel: ChannelView;
-  note: string;
-  verifiedTone: boolean;
-}) {
-  return (
-    <div
-      className={`overflow-hidden rounded-[3px] border ${
-        verifiedTone ? "border-verified" : "border-line-strong"
-      }`}
-    >
-      <div
-        className={`flex items-center justify-between gap-3 border-b px-3 py-2 ${
-          verifiedTone
-            ? "border-verified bg-verified-tint"
-            : "border-line bg-surface-3"
-        }`}
-      >
-        <span className="flex items-baseline gap-2">
-          <span
-            className={`font-mono text-[12px] font-bold ${
-              verifiedTone ? "text-verified" : "text-ink-2"
-            }`}
-          >
-            {channel.channel}
-          </span>
-          <span className={`text-[11px] ${verifiedTone ? "text-ink-2" : "text-ink-3"}`}>
-            {note}
-          </span>
-        </span>
-        <span
-          className={`font-brand text-[10px] font-medium uppercase tracking-[0.06em] ${
-            verifiedTone ? "text-verified" : "text-ink-3"
-          }`}
-        >
-          {channel.tag}
-        </span>
-      </div>
-      <div className="flex items-start gap-2 bg-surface px-3 py-2.5">
-        <span className="min-w-0 flex-1 font-mono text-[12.5px] leading-[1.5] text-ink [overflow-wrap:anywhere]">
-          {channel.pinDisplay}
-        </span>
-        <CopyButton
-          text={channel.pinFull}
-          accent={verifiedTone ? "verified" : "brand"}
-        />
-      </div>
-      {/* The deployable half of the pin. The sha- tag is built from the same
-          commit, so the two lines always describe one revision. */}
-      <div className="flex items-start gap-2 border-t border-line bg-surface-2 px-3 py-2.5">
-        <span className="min-w-0 flex-1 font-mono text-[12.5px] leading-[1.5] text-ink-2 [overflow-wrap:anywhere]">
-          {channel.image}
-        </span>
-        <CopyButton
-          text={channel.image}
-          accent={verifiedTone ? "verified" : "brand"}
-        />
-      </div>
-    </div>
-  );
-}
-
 export default async function ModelPage({
   params,
 }: {
@@ -108,68 +42,45 @@ export default async function ModelPage({
   const proposals = await getProposals(registry);
   const view = toDetailView(model, registry, getBenchmarks(), proposals);
 
-  const latestNote = view.latestSameAsStable
-    ? "currently the same as stable"
-    : view.latest.status === "verified"
-      ? "newest pin"
-      : "unreviewed — evaluation only";
-
   const header = (
     <>
-      <div className="mb-6 flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-[11px] uppercase tracking-[0.1em] text-ink-3">
-        <Link href="/" className="text-brand hover:text-brand-dark hover:underline">
-          Catalog
-        </Link>
-        <span>/</span>
-        <span>{view.kind === "model" ? "Models" : "Templates"}</span>
-        <span>/</span>
-        <span className="text-ink-2">{view.name}</span>
-      </div>
-      <div className="grid items-start gap-7 pb-[22px] lg:grid-cols-[1fr_auto] lg:gap-10">
+      <Link
+        href="/"
+        className="text-[15px] font-medium text-brand hover:underline"
+      >
+        ← All models
+      </Link>
+      <div className="mt-5 grid items-start gap-8 pb-8 lg:grid-cols-[1fr_360px] lg:gap-12">
         <div className="min-w-0">
-          <div className="mb-3 flex flex-wrap items-center gap-3">
-            <h1 className="font-brand text-[clamp(26px,5vw,40px)] font-extrabold leading-[1.02] tracking-[-0.025em] text-ink">
-              {view.name}
-            </h1>
-            <KindBadge kind={view.kind} size="md" />
-            {/* Author's own assessment leads, as it does on the catalog card;
-                the review gate follows it, never merged into it. */}
-            <AssessedStatusBadge status={view.assessedStatus} size="md" />
+          <h1 className="font-brand text-[clamp(30px,5vw,44px)] font-medium leading-[1.05] text-ink">
+            {view.name}
+          </h1>
+          {/* The authors' own status first; the review gate beside it, never
+              merged into it. */}
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <KindBadge kind={view.kind} />
+            <AssessedStatusBadge status={view.assessedStatus} />
             <VerifiedChip approvals="3/3" />
           </div>
-          <p className="mb-3.5 max-w-[64ch] font-serif text-[16px] leading-[1.65] text-ink-2">
+          <p className="mt-5 max-w-[64ch] text-[17px] leading-[1.65] text-ink-2">
             {view.summary}
           </p>
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[12.5px] text-ink-2">
-            <span>
-              Maintained by{" "}
-              <strong className="text-ink">
-                {view.maintainers.length > 0
-                  ? view.maintainers.join(", ")
-                  : view.org}
-              </strong>
-            </span>
-            <a
-              href={view.repoUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="flex min-w-0 items-center gap-1.5 text-brand hover:text-brand-dark hover:underline"
-            >
-              <GitHubMark className="h-[13px] w-[13px] shrink-0" />
-              <span className="font-mono text-[12px] [overflow-wrap:anywhere]">
-                {view.repo}
-              </span>
-            </a>
-          </div>
+          <a
+            href={view.repoUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="d2-button d2-button-secondary mt-5"
+          >
+            <GitHubMark className="h-4 w-4 shrink-0" />
+            Source code
+          </a>
         </div>
-        <div className="flex w-full min-w-0 flex-col gap-2.5 lg:min-w-[400px] lg:max-w-[440px]">
-          <PinPanel
-            channel={view.stable}
-            note="newest verified pin — commit and image"
-            verifiedTone
-          />
-          <PinPanel channel={view.latest} note={latestNote} verifiedTone={false} />
-        </div>
+        <AuthorPanel
+          author={view.attribution.author}
+          organization={view.attribution.organization}
+          contact={view.attribution.contact}
+          maintainers={view.maintainers}
+        />
       </div>
     </>
   );
