@@ -27,8 +27,9 @@ site in `site/` is a build-time rendering of it. No auth, no server state.
 ## Decisions and invariants
 
 - **Chapkit-only.** Only chapkit 2 ML services are listed (any 2.x minor). The install
-  path is the containerised one: pull the image, add a compose overlay beside
-  chap-core, self-register via `SERVICEKIT_ORCHESTRATOR_URL`. Not
+  path is `chap-admin install <id>` (chap-core) against a running chap: it starts
+  the stable pin, waits for self-registration and adds the entry's
+  configurations. Not hand-written compose overlays, and not
   `chapkit mlproject run` — that was the schema_version 1 world.
 - **Verification semantics.** Merging a pin to `main` IS the 3/3 maintainer
   verification. Open-PR pins render as in-review with n/3 approvals; the site

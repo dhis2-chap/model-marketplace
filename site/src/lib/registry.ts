@@ -140,7 +140,7 @@ export function displayPin(model: Model, version: ModelVersion): string {
 
 /**
  * The deployable pin: the published image at the tag built from this
- * commit. This is what goes in a compose overlay — the `sha-` tag is
+ * commit. This is what chap-admin runs — the `sha-` tag is
  * immutable, unlike `:latest`.
  */
 export function imageRef(model: Model, version: ModelVersion): string {

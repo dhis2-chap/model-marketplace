@@ -159,11 +159,12 @@ configurations:                  # verified, copy-pasteable configurations
   recorded as `source.runtime_image`: `chapkit-py` for Python services,
   `chapkit-r`, `chapkit-r-tidyverse` or `chapkit-r-inla` for R. The R-INLA
   base is amd64 only.
-- Deployment is a compose overlay next to chap-core: the service self-registers
-  through `SERVICEKIT_ORCHESTRATOR_URL` on container port 8000, and the DHIS2
-  Modeling App then picks it up automatically. A bare `docker run` registers
-  nothing. See
-  [chapkit's deployment guide](https://dhis2-chap.github.io/chapkit/guides/deploying-to-chap-core/).
+- `chap-admin install <id>` installs the `stable` pin into a running chap: it
+  writes the service into `compose.marketplace.yml`, starts it, waits for it to
+  self-register with the pinned commit, and adds the entry's `configurations`
+  (one default configuration when there are none). A service that only
+  self-registers gets no configuration and cannot be run. See
+  [Running marketplace models](https://chap.dhis2.org/chap-modeling-platform/chap-cli/chap-core-cli-setup/#running-marketplace-models).
 - Every block under `configurations:` is the `data` object of a
   `POST /api/v1/configs` request — a running service holds no configuration
   until one is created. `prediction_periods` is required by chapkit's

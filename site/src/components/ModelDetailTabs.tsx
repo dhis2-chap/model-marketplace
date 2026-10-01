@@ -142,6 +142,11 @@ function OverviewTab({
 }
 
 function VersionsTab({ view }: { view: ModelDetailView }) {
+  const installable = view.kind !== "template";
+  const installCmd = (v: ModelDetailView["versions"][number]) =>
+    v.isStable
+      ? `chap-admin install ${view.id}`
+      : `chap-admin install ${view.id} --image ${v.image}`;
   return (
     <div>
       {view.inReview.length > 0 ? (
@@ -178,6 +183,9 @@ function VersionsTab({ view }: { view: ModelDetailView }) {
       <p className={LEDE}>
         Each version pins one commit and the image built from it. Production
         should run <Code>stable</Code>.
+        {installable
+          ? " Any other version installs as a custom image, with one default configuration instead of the verified ones, and only once you add --accept-risk yourself."
+          : null}
       </p>
       <div className="d2-card overflow-x-auto">
         <table className="w-full min-w-[720px] text-left text-[15px]">
@@ -187,6 +195,9 @@ function VersionsTab({ view }: { view: ModelDetailView }) {
               <th scope="col" className="px-5 py-3 font-medium">Status</th>
               <th scope="col" className="px-5 py-3 font-medium">Image</th>
               <th scope="col" className="px-5 py-3 font-medium">Changes</th>
+              {installable ? (
+                <th scope="col" className="px-5 py-3 font-medium">Install</th>
+              ) : null}
             </tr>
           </thead>
           <tbody className="divide-y divide-line">
@@ -215,6 +226,11 @@ function VersionsTab({ view }: { view: ModelDetailView }) {
                 <td className="max-w-[48ch] px-5 py-4 text-ink-2">
                   {v.changelog ?? "—"}
                 </td>
+                {installable ? (
+                  <td className="px-5 py-4">
+                    <CopyButton text={installCmd(v)} />
+                  </td>
+                ) : null}
               </tr>
             ))}
           </tbody>
@@ -335,109 +351,49 @@ function BenchmarksTab({ view }: { view: ModelDetailView }) {
   );
 }
 
-function Step({ n, title, cmd }: { n: number; title: string; cmd: string }) {
-  return (
-    <li className="grid grid-cols-[32px_1fr] gap-3">
-      <span className="grid h-8 w-8 place-items-center rounded-full bg-brand font-medium text-white">
-        {n}
-      </span>
-      <div className="min-w-0">
-        <div className="mb-2 pt-1 text-[16px] font-medium text-ink">{title}</div>
-        <div className="d2-card flex items-center gap-2 py-2 pl-4 pr-2">
-          <code className="min-w-0 flex-1 overflow-x-auto whitespace-nowrap font-mono text-[14px] text-ink">
-            {cmd}
-          </code>
-          <CopyButton text={cmd} />
-        </div>
-      </div>
-    </li>
-  );
-}
-
-function InstallTab({
-  view,
-  tag,
-  onSelect,
-}: {
-  view: ModelDetailView;
-  tag: string;
-  onSelect: (tag: string) => void;
-}) {
-  const selected = view.versions.find((v) => v.tag === tag);
-  const image = selected?.image ?? view.stable.image;
-  const verified = selected ? selected.status === "verified" : true;
-  const overlay = `compose.${view.serviceId}.yml`;
+function InstallTab({ view }: { view: ModelDetailView }) {
+  const cmd = `chap-admin install ${view.id}`;
   return (
     <div className="max-w-[820px]">
       <h2 className={H2}>Install</h2>
-      <p className={LEDE}>
-        Run the model next to chap-core. It registers itself and shows up in
-        the DHIS2 Modeling App.
-      </p>
-
-      {view.versions.length > 1 ? (
-        <div
-          role="group"
-          aria-label="Version"
-          className="d2-segmented mb-6 max-w-full flex-wrap"
-        >
-          {view.versions.map((v) => (
-            <button
-              key={v.tag}
-              type="button"
-              onClick={() => onSelect(v.tag)}
-              aria-pressed={v.tag === tag}
-              className="d2-segment font-mono"
+      {view.kind === "template" ? (
+        <Notice>
+          A template is not installed into Chap. Copy its repository to start
+          a model of your own.
+        </Notice>
+      ) : (
+        <>
+          <p className={LEDE}>
+            Run this in the chap-core directory of a running Chap. It starts
+            the model, registers it and adds its verified configurations, so it
+            shows up in the DHIS2 Modeling App.
+          </p>
+          {view.requiresGeo ? (
+            <Notice>
+              Needs geometry: your dataset must include org-unit boundaries.
+            </Notice>
+          ) : null}
+          <div className="d2-card flex items-center gap-2 py-2 pl-4 pr-2">
+            <code className="min-w-0 flex-1 overflow-x-auto whitespace-nowrap font-mono text-[14px] text-ink">
+              {cmd}
+            </code>
+            <CopyButton text={cmd} />
+          </div>
+          <p className="mt-8 text-[15px] text-ink-2">
+            Installs the verified stable version, {view.stable.tag} (
+            <Code>{view.stable.image}</Code>).{" "}
+            <Code>chap-admin install-all</Code> installs every listed model.{" "}
+            <a
+              href={view.installUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="font-medium text-brand hover:underline"
             >
-              {v.tag}
-              {v.isStable ? " · stable" : ""}
-            </button>
-          ))}
-        </div>
-      ) : null}
-
-      {!verified ? (
-        <Notice>
-          {tag} is not approved yet. Use it for testing only.
-        </Notice>
-      ) : null}
-      {view.requiresGeo ? (
-        <Notice>
-          Needs geometry: your dataset must include org-unit boundaries.
-        </Notice>
-      ) : null}
-
-      <ol className="flex flex-col gap-6">
-        <Step n={1} title="Pull the image" cmd={`docker pull ${image}`} />
-        <Step
-          n={2}
-          title={`Add a compose overlay (${overlay})`}
-          cmd={`$EDITOR ${overlay}`}
-        />
-        <Step
-          n={3}
-          title="Start it"
-          cmd={`docker compose -f compose.yml -f ${overlay} up -d`}
-        />
-        <Step
-          n={4}
-          title="Check that Chap sees it"
-          cmd={`curl -s http://localhost:8000/v2/services | grep ${view.serviceId}`}
-        />
-      </ol>
-
-      <p className="mt-8 text-[15px] text-ink-2">
-        The overlay runs <Code>{image}</Code> on port 8000 with{" "}
-        <Code>SERVICEKIT_ORCHESTRATOR_URL</Code> pointing at chap.{" "}
-        <a
-          href={view.installUrl}
-          target="_blank"
-          rel="noreferrer"
-          className="font-medium text-brand hover:underline"
-        >
-          Full guide →
-        </a>
-      </p>
+              Full guide →
+            </a>
+          </p>
+        </>
+      )}
     </div>
   );
 }
@@ -450,7 +406,6 @@ export function ModelDetailTabs({
   header: ReactNode;
 }) {
   const [tab, setTab] = useState<Tab>("overview");
-  const [installTag, setInstallTag] = useState<string>(view.stable.tag);
 
   // Arrow keys move between tabs, as the WAI-ARIA tabs pattern expects.
   const onKeyDown = (e: KeyboardEvent) => {
@@ -500,14 +455,11 @@ export function ModelDetailTabs({
         {tab === "overview" ? (
           <OverviewTab
             view={view}
-            goInstall={() => {
-              setInstallTag(view.stable.tag);
-              setTab("install");
-            }}
+            goInstall={() => setTab("install")}
           />
         ) : null}
         {tab === "install" ? (
-          <InstallTab view={view} tag={installTag} onSelect={setInstallTag} />
+          <InstallTab view={view} />
         ) : null}
         {tab === "versions" ? <VersionsTab view={view} /> : null}
         {tab === "configs" ? <ConfigsTab view={view} /> : null}
