@@ -34,12 +34,16 @@ as read. It is a repository secret used only by the deploy workflow, which
 never runs on pull requests. If it leaks, rotate it on the server and update
 the secret.
 
-To fetch locally:
+To fetch locally, put both variables in the gitignored `site/.env.local`
+(variables already set in the environment take precedence):
 
 ```bash
-cd site
-CHAP_API_URL=http://158.37.66.207:8000 CHAP_API_TOKEN=... pnpm fetch-benchmarks
+# site/.env.local
+CHAP_API_URL=http://158.37.66.207:8000
+CHAP_API_TOKEN=...
 ```
+
+then run `pnpm fetch-benchmarks` in `site/`.
 
 ## Record mapping
 
