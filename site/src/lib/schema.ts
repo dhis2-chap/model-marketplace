@@ -244,12 +244,11 @@ export const registrySchema = z.object({
 });
 
 /**
- * One benchmark result file: one (model, version, dataset) triple, stored at
- * benchmarks/<model>/<version>/<dataset>.yaml. The loader additionally
- * cross-checks model, version and commit against the registry.
+ * One benchmark result: a listed pin's newest run on one suite, as fetched
+ * from the benchmarking server into benchmarks/results.json. The loader
+ * additionally cross-checks model, version and commit against the registry.
  */
 export const benchmarkSchema = z.object({
-  schema_version: z.literal(1),
   model: z.string().regex(/^[a-z0-9_]+$/),
   version: z.string().min(1),
   commit: z
