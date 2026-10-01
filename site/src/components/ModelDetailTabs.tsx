@@ -146,7 +146,7 @@ function VersionsTab({ view }: { view: ModelDetailView }) {
   const installCmd = (v: ModelDetailView["versions"][number]) =>
     v.isStable
       ? `chap-admin install ${view.id}`
-      : `chap-admin install ${view.id} --image ${v.image} --accept-risk`;
+      : `chap-admin install ${view.id} --image ${v.image}`;
   return (
     <div>
       {view.inReview.length > 0 ? (
@@ -184,7 +184,7 @@ function VersionsTab({ view }: { view: ModelDetailView }) {
         Each version pins one commit and the image built from it. Production
         should run <Code>stable</Code>.
         {installable
-          ? " Any other version installs as a custom image, with one default configuration instead of the verified ones."
+          ? " Any other version installs as a custom image, with one default configuration instead of the verified ones, and only once you add --accept-risk yourself."
           : null}
       </p>
       <div className="d2-card overflow-x-auto">
