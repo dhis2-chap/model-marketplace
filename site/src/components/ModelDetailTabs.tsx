@@ -142,6 +142,11 @@ function OverviewTab({
 }
 
 function VersionsTab({ view }: { view: ModelDetailView }) {
+  const installable = view.kind !== "template";
+  const installCmd = (v: ModelDetailView["versions"][number]) =>
+    v.isStable
+      ? `chap-admin install ${view.id}`
+      : `chap-admin install ${view.id} --image ${v.image} --accept-risk`;
   return (
     <div>
       {view.inReview.length > 0 ? (
@@ -178,6 +183,9 @@ function VersionsTab({ view }: { view: ModelDetailView }) {
       <p className={LEDE}>
         Each version pins one commit and the image built from it. Production
         should run <Code>stable</Code>.
+        {installable
+          ? " Any other version installs as a custom image, with one default configuration instead of the verified ones."
+          : null}
       </p>
       <div className="d2-card overflow-x-auto">
         <table className="w-full min-w-[720px] text-left text-[15px]">
@@ -187,6 +195,9 @@ function VersionsTab({ view }: { view: ModelDetailView }) {
               <th scope="col" className="px-5 py-3 font-medium">Status</th>
               <th scope="col" className="px-5 py-3 font-medium">Image</th>
               <th scope="col" className="px-5 py-3 font-medium">Changes</th>
+              {installable ? (
+                <th scope="col" className="px-5 py-3 font-medium">Install</th>
+              ) : null}
             </tr>
           </thead>
           <tbody className="divide-y divide-line">
@@ -215,6 +226,11 @@ function VersionsTab({ view }: { view: ModelDetailView }) {
                 <td className="max-w-[48ch] px-5 py-4 text-ink-2">
                   {v.changelog ?? "—"}
                 </td>
+                {installable ? (
+                  <td className="px-5 py-4">
+                    <CopyButton text={installCmd(v)} />
+                  </td>
+                ) : null}
               </tr>
             ))}
           </tbody>
