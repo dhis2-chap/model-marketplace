@@ -54,7 +54,6 @@ export interface ModelCardView {
   requiresGeo: boolean;
   author: string;
   organization: string | null;
-  maintainers: string[];
 }
 
 /** The model's stored results, stable-channel pin first, then by dataset. */
@@ -94,7 +93,6 @@ export function toCardView(model: Model): ModelCardView {
     requiresGeo: model.compatibility.requires_geo,
     author: model.attribution.author,
     organization: model.attribution.organization ?? null,
-    maintainers: model.maintainers,
   };
 }
 

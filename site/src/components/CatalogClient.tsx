@@ -10,7 +10,7 @@ import {
   ASSESSED_STATUS_ORDER,
 } from "@/lib/presentation";
 import { AssessedStatusBadge, KindBadge } from "./badges";
-import { Avatar, AuthorLine } from "./author";
+import { AuthorLine } from "./author";
 
 
 function matches(m: ModelCardView, q: string): boolean {
@@ -52,7 +52,6 @@ function ModelCard({ m }: { m: ModelCardView }) {
         <AuthorLine
           author={m.author}
           organization={m.organization}
-          maintainers={m.maintainers}
         />
       </div>
     </Link>
@@ -85,7 +84,6 @@ function InReview({ pins }: { pins: InReviewPinView[] }) {
               rel="noreferrer"
               className="flex flex-wrap items-center gap-x-4 gap-y-2 px-5 py-4 hover:bg-surface-2"
             >
-              <Avatar handle={pin.author} size={32} />
               <span className="min-w-0 flex-1">
                 <span className="block font-medium text-ink">
                   {pin.catalogLabel}
