@@ -354,90 +354,59 @@ function Step({ n, title, cmd }: { n: number; title: string; cmd: string }) {
   );
 }
 
-function InstallTab({
-  view,
-  tag,
-  onSelect,
-}: {
-  view: ModelDetailView;
-  tag: string;
-  onSelect: (tag: string) => void;
-}) {
-  const selected = view.versions.find((v) => v.tag === tag);
-  const image = selected?.image ?? view.stable.image;
-  const verified = selected ? selected.status === "verified" : true;
-  const overlay = `compose.${view.serviceId}.yml`;
+function InstallTab({ view }: { view: ModelDetailView }) {
+  const install = `chap-admin install ${view.id}${
+    view.runtimeImage.endsWith("-r-inla") ? " --platform linux/amd64" : ""
+  }`;
   return (
     <div className="max-w-[820px]">
       <h2 className={H2}>Install</h2>
-      <p className={LEDE}>
-        Run the model next to chap-core. It registers itself and shows up in
-        the DHIS2 Modeling App.
-      </p>
-
-      {view.versions.length > 1 ? (
-        <div
-          role="group"
-          aria-label="Version"
-          className="d2-segmented mb-6 max-w-full flex-wrap"
-        >
-          {view.versions.map((v) => (
-            <button
-              key={v.tag}
-              type="button"
-              onClick={() => onSelect(v.tag)}
-              aria-pressed={v.tag === tag}
-              className="d2-segment font-mono"
+      {view.kind === "template" ? (
+        <Notice>
+          A template is not installed into Chap. Copy its repository to start
+          a model of your own.
+        </Notice>
+      ) : (
+        <>
+          <p className={LEDE}>
+            Run these in the chap-core directory of a running Chap.{" "}
+            <Code>chap-admin</Code> starts the service, registers it with Chap
+            and adds its verified configurations, so it shows up in the DHIS2
+            Modeling App.
+          </p>
+          {view.requiresGeo ? (
+            <Notice>
+              Needs geometry: your dataset must include org-unit boundaries.
+            </Notice>
+          ) : null}
+          <ol className="flex flex-col gap-6">
+            <Step
+              n={1}
+              title="Install chap-admin, at your Chap version"
+              cmd="uv tool install chap-core --python 3.13"
+            />
+            <Step n={2} title="Install the model" cmd={install} />
+            <Step
+              n={3}
+              title="Start Chap with the overlay it wrote from now on"
+              cmd="docker compose -f compose.yml -f compose.marketplace.yml up -d"
+            />
+          </ol>
+          <p className="mt-8 text-[15px] text-ink-2">
+            Installs the verified stable version, {view.stable.tag} (
+            <Code>{view.stable.image}</Code>).{" "}
+            <Code>chap-admin install-all</Code> installs every listed model.{" "}
+            <a
+              href={view.installUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="font-medium text-brand hover:underline"
             >
-              {v.tag}
-              {v.isStable ? " · stable" : ""}
-            </button>
-          ))}
-        </div>
-      ) : null}
-
-      {!verified ? (
-        <Notice>
-          {tag} is not approved yet. Use it for testing only.
-        </Notice>
-      ) : null}
-      {view.requiresGeo ? (
-        <Notice>
-          Needs geometry: your dataset must include org-unit boundaries.
-        </Notice>
-      ) : null}
-
-      <ol className="flex flex-col gap-6">
-        <Step n={1} title="Pull the image" cmd={`docker pull ${image}`} />
-        <Step
-          n={2}
-          title={`Add a compose overlay (${overlay})`}
-          cmd={`$EDITOR ${overlay}`}
-        />
-        <Step
-          n={3}
-          title="Start it"
-          cmd={`docker compose -f compose.yml -f ${overlay} up -d`}
-        />
-        <Step
-          n={4}
-          title="Check that Chap sees it"
-          cmd={`curl -s http://localhost:8000/v2/services | grep ${view.serviceId}`}
-        />
-      </ol>
-
-      <p className="mt-8 text-[15px] text-ink-2">
-        The overlay runs <Code>{image}</Code> on port 8000 with{" "}
-        <Code>SERVICEKIT_ORCHESTRATOR_URL</Code> pointing at chap.{" "}
-        <a
-          href={view.installUrl}
-          target="_blank"
-          rel="noreferrer"
-          className="font-medium text-brand hover:underline"
-        >
-          Full guide →
-        </a>
-      </p>
+              Full guide →
+            </a>
+          </p>
+        </>
+      )}
     </div>
   );
 }
@@ -450,7 +419,6 @@ export function ModelDetailTabs({
   header: ReactNode;
 }) {
   const [tab, setTab] = useState<Tab>("overview");
-  const [installTag, setInstallTag] = useState<string>(view.stable.tag);
 
   // Arrow keys move between tabs, as the WAI-ARIA tabs pattern expects.
   const onKeyDown = (e: KeyboardEvent) => {
@@ -500,14 +468,11 @@ export function ModelDetailTabs({
         {tab === "overview" ? (
           <OverviewTab
             view={view}
-            goInstall={() => {
-              setInstallTag(view.stable.tag);
-              setTab("install");
-            }}
+            goInstall={() => setTab("install")}
           />
         ) : null}
         {tab === "install" ? (
-          <InstallTab view={view} tag={installTag} onSelect={setInstallTag} />
+          <InstallTab view={view} />
         ) : null}
         {tab === "versions" ? <VersionsTab view={view} /> : null}
         {tab === "configs" ? <ConfigsTab view={view} /> : null}
