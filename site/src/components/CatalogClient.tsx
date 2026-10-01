@@ -12,7 +12,6 @@ import {
 import { AssessedStatusBadge, KindBadge } from "./badges";
 import { Avatar, AuthorLine } from "./author";
 
-type Kind = ModelCardView["kind"];
 
 function matches(m: ModelCardView, q: string): boolean {
   if (!q) return true;
@@ -57,6 +56,16 @@ function ModelCard({ m }: { m: ModelCardView }) {
         />
       </div>
     </Link>
+  );
+}
+
+function CardGrid({ models }: { models: ModelCardView[] }) {
+  return (
+    <div className="mt-6 grid gap-4 [grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr))]">
+      {models.map((m) => (
+        <ModelCard key={m.id} m={m} />
+      ))}
+    </div>
   );
 }
 
@@ -110,7 +119,6 @@ export function CatalogClient({
 }) {
   const searchParams = useSearchParams();
   const urlQuery = searchParams.get("q") ?? "";
-  const [kind, setKind] = useState<Kind>("model");
   const [q, setQ] = useState(urlQuery);
   // Adopt a new header-search query mid-session (state adjusted during render).
   const [prevUrlQuery, setPrevUrlQuery] = useState(urlQuery);
@@ -119,15 +127,9 @@ export function CatalogClient({
     setQ(urlQuery);
   }
 
-  const count = (k: Kind) => models.filter((m) => m.kind === k).length;
-  const visible = models.filter(
-    (m) => m.kind === kind && matches(m, q),
-  );
-
-  const KINDS: { id: Kind; label: string }[] = [
-    { id: "model", label: "Models" },
-    { id: "template", label: "Templates" },
-  ];
+  const hits = models.filter((m) => matches(m, q));
+  const forecasting = hits.filter((m) => m.kind === "model");
+  const templates = hits.filter((m) => m.kind === "template");
 
   return (
     <main className="mx-auto max-w-[1240px] px-5 pb-20 pt-12 sm:px-8 sm:pt-16">
@@ -139,55 +141,21 @@ export function CatalogClient({
         listed.
       </p>
 
-      {/* A white toolbar: DHIS2 segments are drawn for a white
-          ground, and vanish on the grey page. */}
-      <div className="d2-card mt-8 p-4 sm:p-5">
-        <div className="relative max-w-[560px]">
-          <span className="pointer-events-none absolute left-2.5 top-1/2 flex -translate-y-1/2 text-ink-3">
-            <IconSearch24 />
-          </span>
-          <input
-            type="search"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Search by name, method or author"
-            aria-label="Search models"
-            className="d2-input pl-10 text-[16px]"
-          />
-        </div>
-
-        {/* DHIS2 SegmentedControl for the kind. */}
-        <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-3">
-          <div role="group" aria-label="Kind" className="d2-segmented">
-            {KINDS.map((k) => (
-              <button
-                key={k.id}
-                type="button"
-                onClick={() => setKind(k.id)}
-                aria-pressed={kind === k.id}
-                className="d2-segment"
-              >
-                {k.label} <span className="text-ink-3">{count(k.id)}</span>
-              </button>
-            ))}
-          </div>
-        </div>
+      <div className="relative mt-8 max-w-[560px]">
+        <span className="pointer-events-none absolute left-2.5 top-1/2 flex -translate-y-1/2 text-ink-3">
+          <IconSearch24 />
+        </span>
+        <input
+          type="search"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="Search by name, method or author"
+          aria-label="Search models"
+          className="d2-input pl-10 text-[16px]"
+        />
       </div>
 
-      {kind === "template" ? (
-        <p className="mt-4 text-[15px] text-ink-2">
-          Templates are starting points for writing a model — not for making
-          forecasts.
-        </p>
-      ) : null}
-
-      {visible.length > 0 ? (
-        <div className="mt-6 grid gap-4 [grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr))]">
-          {visible.map((m) => (
-            <ModelCard key={m.id} m={m} />
-          ))}
-        </div>
-      ) : (
+      {hits.length === 0 ? (
         <div className="d2-card mt-6 p-12 text-center">
           <p className="text-[16px] font-medium text-ink">No matches</p>
           <button
@@ -198,6 +166,10 @@ export function CatalogClient({
             Clear search
           </button>
         </div>
+      ) : forecasting.length > 0 ? (
+        <CardGrid models={forecasting} />
+      ) : (
+        <p className="mt-6 text-[15px] text-ink-2">No models match.</p>
       )}
 
       <details className="mt-8 max-w-[760px] text-[15px] text-ink-2">
@@ -219,6 +191,18 @@ export function CatalogClient({
           ))}
         </dl>
       </details>
+
+      {templates.length > 0 ? (
+        <section className="mt-14">
+          <h2 className="font-brand text-[20px] font-medium text-ink">
+            Templates
+          </h2>
+          <p className="mt-1 text-[15px] text-ink-2">
+            Starting points for writing a model — not for making forecasts.
+          </p>
+          <CardGrid models={templates} />
+        </section>
+      ) : null}
 
       {inReview.length > 0 ? <InReview pins={inReview} /> : null}
 
