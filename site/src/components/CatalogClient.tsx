@@ -13,31 +13,12 @@ import { AssessedStatusBadge, KindBadge } from "./badges";
 import { Avatar, AuthorLine } from "./author";
 
 type Kind = ModelCardView["kind"];
-type Filters = Partial<Record<"period" | "cov" | "lang" | "geo", string>>;
 
-const CHIPS: { label: string; key: keyof Filters; val: string }[] = [
-  { label: "Monthly", key: "period", val: "monthly" },
-  { label: "Climate-driven", key: "cov", val: "climate" },
-  { label: "No covariates", key: "cov", val: "none" },
-  { label: "Needs geometry", key: "geo", val: "yes" },
-  { label: "Python", key: "lang", val: "Python" },
-  { label: "R", key: "lang", val: "R" },
-];
-
-function matches(m: ModelCardView, q: string, filters: Filters): boolean {
-  if (q) {
-    const hay =
-      `${m.name} ${m.summary} ${m.framework} ${m.repo} ${m.covLabel} ${m.author} ${m.organization ?? ""}`.toLowerCase();
-    if (!hay.includes(q.toLowerCase())) return false;
-  }
-  if (filters.period && !m.periodType.includes(filters.period)) return false;
-  if (filters.cov === "climate" && !["climate", "both"].includes(m.covMode))
-    return false;
-  if (filters.cov === "none" && !["none", "both"].includes(m.covMode))
-    return false;
-  if (filters.geo === "yes" && !m.requiresGeo) return false;
-  if (filters.lang && m.language !== filters.lang) return false;
-  return true;
+function matches(m: ModelCardView, q: string): boolean {
+  if (!q) return true;
+  const hay =
+    `${m.name} ${m.summary} ${m.framework} ${m.repo} ${m.covLabel} ${m.author} ${m.organization ?? ""}`.toLowerCase();
+  return hay.includes(q.toLowerCase());
 }
 
 /**
@@ -131,7 +112,6 @@ export function CatalogClient({
   const urlQuery = searchParams.get("q") ?? "";
   const [kind, setKind] = useState<Kind>("model");
   const [q, setQ] = useState(urlQuery);
-  const [filters, setFilters] = useState<Filters>({});
   // Adopt a new header-search query mid-session (state adjusted during render).
   const [prevUrlQuery, setPrevUrlQuery] = useState(urlQuery);
   if (prevUrlQuery !== urlQuery) {
@@ -141,14 +121,8 @@ export function CatalogClient({
 
   const count = (k: Kind) => models.filter((m) => m.kind === k).length;
   const visible = models.filter(
-    (m) => m.kind === kind && matches(m, q, filters),
+    (m) => m.kind === kind && matches(m, q),
   );
-  const toggleChip = (key: keyof Filters, val: string) =>
-    setFilters((f) => ({ ...f, [key]: f[key] === val ? undefined : val }));
-  const clearAll = () => {
-    setFilters({});
-    setQ("");
-  };
 
   const KINDS: { id: Kind; label: string }[] = [
     { id: "model", label: "Models" },
@@ -165,7 +139,7 @@ export function CatalogClient({
         listed.
       </p>
 
-      {/* A white toolbar: DHIS2 chips and segments are drawn for a white
+      {/* A white toolbar: DHIS2 segments are drawn for a white
           ground, and vanish on the grey page. */}
       <div className="d2-card mt-8 p-4 sm:p-5">
         <div className="relative max-w-[560px]">
@@ -182,7 +156,7 @@ export function CatalogClient({
           />
         </div>
 
-        {/* DHIS2 SegmentedControl for the kind, Chips for the filters. */}
+        {/* DHIS2 SegmentedControl for the kind. */}
         <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-3">
           <div role="group" aria-label="Kind" className="d2-segmented">
             {KINDS.map((k) => (
@@ -194,19 +168,6 @@ export function CatalogClient({
                 className="d2-segment"
               >
                 {k.label} <span className="text-ink-3">{count(k.id)}</span>
-              </button>
-            ))}
-          </div>
-          <div role="group" aria-label="Filters" className="flex flex-wrap gap-2">
-            {CHIPS.map((chip) => (
-              <button
-                key={chip.label}
-                type="button"
-                onClick={() => toggleChip(chip.key, chip.val)}
-                aria-pressed={filters[chip.key] === chip.val}
-                className="d2-chip"
-              >
-                {chip.label}
               </button>
             ))}
           </div>
@@ -231,10 +192,10 @@ export function CatalogClient({
           <p className="text-[16px] font-medium text-ink">No matches</p>
           <button
             type="button"
-            onClick={clearAll}
+            onClick={() => setQ("")}
             className="d2-button mt-4"
           >
-            Clear filters
+            Clear search
           </button>
         </div>
       )}
