@@ -1,11 +1,11 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { stringify } from "yaml";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   buildBenchmarkSuites,
   loadBenchmarks,
+  RESULTS_FILE,
   skillOf,
 } from "./benchmarks";
 import { loadRegistry, shortCommit, stableVersion } from "./registry";
@@ -19,7 +19,6 @@ const multistepStable = stableVersion(multistep);
 
 function benchmark(overrides: Partial<Benchmark> = {}): Benchmark {
   return {
-    schema_version: 1,
     model: ewars.id,
     version: ewarsStable.version,
     commit: ewarsStable.commit,
@@ -37,7 +36,7 @@ function smokeRun(overrides: Partial<Benchmark> = {}): Benchmark {
     model: multistep.id,
     version: multistepStable.version,
     commit: multistepStable.commit,
-    dataset: "laos-admin1-monthly",
+    dataset: "rwanda-monthly",
     harness: { tool: "chap eval" },
     run: {
       configuration: "monthly_climate",
@@ -62,20 +61,16 @@ describe("loadBenchmarks", () => {
     fs.rmSync(root, { recursive: true, force: true });
   });
 
-  function write(b: Benchmark, relPath?: string) {
-    const file = path.join(
-      root,
-      relPath ?? `benchmarks/${b.model}/${b.version}/${b.dataset}.yaml`,
-    );
-    fs.mkdirSync(path.dirname(file), { recursive: true });
-    fs.writeFileSync(file, stringify(b));
+  function write(...records: Benchmark[]) {
+    fs.mkdirSync(path.join(root, "benchmarks"));
+    fs.writeFileSync(path.join(root, RESULTS_FILE), JSON.stringify(records));
   }
 
-  it("returns [] when the benchmarks directory does not exist", () => {
+  it("returns [] when no results were fetched", () => {
     expect(loadBenchmarks(registry, root)).toEqual([]);
   });
 
-  it("loads a valid file addressed by its (model, version, dataset) path", () => {
+  it("loads valid records", () => {
     write(benchmark());
     const loaded = loadBenchmarks(registry, root);
     expect(loaded).toHaveLength(1);
@@ -92,15 +87,9 @@ describe("loadBenchmarks", () => {
     expect(loaded.resources?.peak_memory_mb).toBeCloseTo(2061.8);
   });
 
-  it("rejects a file whose path disagrees with its content", () => {
-    const b = benchmark();
-    write(b, `benchmarks/${b.model}/${b.version}/other-dataset.yaml`);
-    expect(() => loadBenchmarks(registry, root)).toThrow(/does not match the file path/);
-  });
-
-  it("rejects a file outside the <model>/<version>/<dataset> layout", () => {
-    write(benchmark(), "benchmarks/loose.yaml");
-    expect(() => loadBenchmarks(registry, root)).toThrow(/must be benchmarks\//);
+  it("rejects a record that fails the schema", () => {
+    write(benchmark({ commit: "abc" }));
+    expect(() => loadBenchmarks(registry, root)).toThrow(/results\.json is invalid/);
   });
 
   it("rejects a model the registry does not list", () => {
@@ -138,7 +127,7 @@ describe("buildBenchmarkSuites", () => {
     expect(suites).toHaveLength(1);
     const suite = suites[0];
 
-    expect(suite.heading).toBe("Laos admin-1 monthly · horizon 3");
+    expect(suite.heading).toBe("Rwanda monthly · horizon 3");
     expect(suite.countLine).toBe("1 of 7 listed models evaluated");
     expect(suite.runContext).toContainEqual({
       k: "Suite",
@@ -167,7 +156,7 @@ describe("buildBenchmarkSuites", () => {
     const suite = buildBenchmarkSuites(registry, [smokeRun()])[0];
     const pendingEwars = suite.rows.find((r) => r.modelId === ewars.id)!;
     expect(pendingEwars.cmd).toBe(
-      `chap eval --model chapkit_ewars_model \\\n  --commit ${shortCommit(ewarsStable.commit)} --dataset laos-admin1-monthly \\\n  --horizon 3 --splits 1 --samples 200`,
+      `chap eval --model chapkit_ewars_model \\\n  --commit ${shortCommit(ewarsStable.commit)} --dataset rwanda-monthly \\\n  --horizon 3 --splits 1 --samples 200`,
     );
   });
 

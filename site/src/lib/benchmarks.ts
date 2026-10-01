@@ -1,6 +1,5 @@
 import fs from "node:fs";
 import path from "node:path";
-import { parse } from "yaml";
 import {
   getRegistry,
   shortCommit,
@@ -12,76 +11,52 @@ import { datasetNameFor } from "./presentation";
 import { benchmarkSchema, type Benchmark } from "./schema";
 
 /**
- * Build-time loader for the benchmark store at <repo>/benchmarks — real
- * evaluation output, one file per (model, version, dataset). Like the
- * registry, any violation throws and fails the build: the path encodes the
- * triple and must agree with the file content, and model/version/commit must
- * resolve against the registry.
+ * Build-time loader for benchmark results. They are fetched from the
+ * benchmarking server's chap API at deploy time (`pnpm fetch-benchmarks`) into
+ * the gitignored <repo>/benchmarks/results.json; a build without that file —
+ * CI, local dev — has no results. Every record is validated like the registry,
+ * and any violation throws and fails the build: model, version, commit and
+ * configuration must resolve against the registry.
  */
 
-const FILE_PATTERN = /^benchmarks\/([a-z0-9_]+)\/([^/]+)\/([a-z0-9-]+)\.yaml$/;
+export const RESULTS_FILE = path.join("benchmarks", "results.json");
 
 export function loadBenchmarks(
   registry: Registry,
   root: string,
 ): Benchmark[] {
-  const dir = path.join(root, "benchmarks");
-  if (!fs.existsSync(dir)) return [];
+  const file = path.join(root, RESULTS_FILE);
+  if (!fs.existsSync(file)) return [];
 
-  const files = fs
-    .readdirSync(dir, { recursive: true, encoding: "utf8" })
-    .filter((f) => f.endsWith(".yaml"))
-    .map((f) => path.join("benchmarks", f))
-    .sort();
+  const parsed = benchmarkSchema
+    .array()
+    .safeParse(JSON.parse(fs.readFileSync(file, "utf8")));
+  if (!parsed.success) {
+    throw new Error(`${RESULTS_FILE} is invalid:\n${parsed.error.message}`);
+  }
 
   const byId = new Map(registry.models.map((m) => [m.id, m]));
-  return files.map((relPath) => {
-    const match = relPath.match(FILE_PATTERN);
-    if (!match) {
-      throw new Error(
-        `${relPath}: benchmark files must be benchmarks/<model_id>/<version>/<dataset>.yaml`,
-      );
-    }
-    const [, modelId, versionTag, dataset] = match;
-
-    const parsed = benchmarkSchema.safeParse(
-      parse(fs.readFileSync(path.join(root, relPath), "utf8")),
-    );
-    if (!parsed.success) {
-      throw new Error(`${relPath} is invalid:\n${parsed.error.message}`);
-    }
-    const bench = parsed.data;
-
-    for (const [field, fromPath] of [
-      ["model", modelId],
-      ["version", versionTag],
-      ["dataset", dataset],
-    ] as const) {
-      if (bench[field] !== fromPath) {
-        throw new Error(
-          `${relPath}: ${field} "${bench[field]}" does not match the file path`,
-        );
-      }
-    }
+  return parsed.data.map((bench) => {
+    const label = `${RESULTS_FILE}: ${bench.model}@${bench.version} on ${bench.dataset}`;
     const model = byId.get(bench.model);
     if (!model) {
-      throw new Error(`${relPath}: model "${bench.model}" is not in the registry`);
+      throw new Error(`${label}: model "${bench.model}" is not in the registry`);
     }
     const version = versionByTag(model, bench.version);
     if (!version) {
       throw new Error(
-        `${relPath}: version "${bench.version}" is not in models/${bench.model}.yaml`,
+        `${label}: version "${bench.version}" is not in models/${bench.model}.yaml`,
       );
     }
     if (version.commit !== bench.commit) {
       throw new Error(
-        `${relPath}: commit does not match the pin for ${bench.model}@${bench.version} (${version.commit})`,
+        `${label}: commit does not match the pin for ${bench.model}@${bench.version} (${version.commit})`,
       );
     }
     const config = bench.run?.configuration;
     if (config && !(config in model.configurations)) {
       throw new Error(
-        `${relPath}: configuration "${config}" is not in models/${bench.model}.yaml`,
+        `${label}: configuration "${config}" is not in models/${bench.model}.yaml`,
       );
     }
     return bench;
@@ -117,7 +92,7 @@ export function skillOf(bench: Benchmark): number | null {
  * never interpolates a score for the latter.
  */
 export interface BenchmarkRowView {
-  /** Selection key: "<model>@<version>". */
+  /** Selection key: "<model>@<version>[.<configuration>]". */
   id: string;
   modelId: string;
   name: string;
@@ -214,7 +189,7 @@ export function buildBenchmarkSuites(
       .map((b): BenchmarkRowView => {
         const model = byId.get(b.model)!;
         return {
-          id: `${b.model}@${b.version}`,
+          id: `${b.model}@${b.version}${b.run?.configuration ? `.${b.run.configuration}` : ""}`,
           modelId: b.model,
           name: model.display_name,
           versionTag: b.version,

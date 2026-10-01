@@ -20,8 +20,8 @@ site. No listed model is currently self-assessed `green`.
 ```
 registry.yaml       Marketplace index: metadata, review policy, model list
 models/*.yaml       One file per whitelisted model (see models/README.md)
-benchmarks/         Real evaluation output, one file per model + version +
-                    dataset (see benchmarks/README.md)
+benchmarks/         How benchmark results are fetched from Chap's benchmarking
+                    server at deploy time (see benchmarks/README.md)
 site/               The marketplace website (Next.js, TypeScript, pnpm)
 ```
 
@@ -96,8 +96,8 @@ pnpm install
 pnpm dev        # http://localhost:3000
 ```
 
-The site is fully static: at build time it loads the YAML (registry, models
-and benchmarks) through a zod schema (`site/src/lib/schema.ts`) and
+The site is fully static: at build time it loads the YAML (registry and
+models) and any fetched benchmark results through a zod schema (`site/src/lib/schema.ts`) and
 prerenders every page, so an invalid file fails the build.
 
 The build also ingests this repo's **open pull requests** (via the GitHub
@@ -125,10 +125,12 @@ available at build time by default).
 Every push to `main` deploys to production automatically
 (`.github/workflows/deploy.yml`, which runs `.github/scripts/deploy-vercel.sh`
 — `vercel pull` + `vercel build` + `vercel deploy --prebuilt`). Merging a pin
-therefore publishes it; no hand-run deploy. The workflow needs three
-repository secrets: `VERCEL_TOKEN`, plus `VERCEL_ORG_ID` and
-`VERCEL_PROJECT_ID`, which are the `orgId` and `projectId` of the gitignored
-`.vercel/project.json`. The same script takes `preview` instead of
+therefore publishes it; no hand-run deploy. The workflow also runs hourly and on manual
+dispatch, to pick up new benchmark results (see
+[benchmarks/README.md](benchmarks/README.md)). It needs four repository
+secrets: `VERCEL_TOKEN`, `VERCEL_ORG_ID` and `VERCEL_PROJECT_ID` — the
+`orgId` and `projectId` of the gitignored `.vercel/project.json` — and
+`CHAP_API_TOKEN` for the benchmarking server. The same script takes `preview` instead of
 `production` for a throwaway deploy from a laptop.
 
 Each run is recorded under the repository's **Deployments** → `production`
@@ -139,12 +141,12 @@ Vercel's SSO. So the tab is the history of what is actually live.
 ### Honest-data rules
 
 - Everything rendered from the YAML is real: models, pins, channels,
-  configurations, maintainers — and benchmark results present in
-  `benchmarks/`.
+  configurations, maintainers — and benchmark results read from Chap's
+  benchmarking server.
 - There are no mock benchmark figures anywhere. A model with no real results
   shows no scores at all — not an illustrative sparkline, not a placeholder
   number. The benchmarks page and each model's Benchmarks tab render only
-  from files in `benchmarks/`.
+  the fetched results.
 - `assessed_status` is transcribed from each service's own chapkit metadata
   and shown as the authors' claim, never as a marketplace grade. The two
   signals are never merged into one badge.
@@ -160,11 +162,11 @@ The benchmark views on the site (the benchmarks page and each model's
 Benchmarks tab) are gated behind a "coming soon" state until real results
 exist — flip `BENCHMARKS_LIVE` in `site/src/lib/flags.ts` when they land.
 
-No benchmarks have been run yet, and exactly how the comparison will be run —
-harness, datasets, backtest parameters, ranking — is still being decided. The
-methodology will be documented in the [benchmark record
-documentation](benchmarks/README.md) once it is settled and the first suite
-has run. For the underlying evaluation command, see the Chap guide to
+Results are read from Chap's benchmarking server at each deploy and only
+backtests of listed pins are kept — none of those has been run yet. Exactly
+how the comparison will be run — datasets, backtest parameters, ranking — is
+still being decided; the methodology will be documented in
+[benchmarks/README.md](benchmarks/README.md) once it is settled. For the underlying evaluation command, see the Chap guide to
 [evaluating models](https://chap.dhis2.org/chap-modeling-platform/external_models/running_models_in_chap/).
 
 Until a suite has run, the only quality signal on the site is each model's

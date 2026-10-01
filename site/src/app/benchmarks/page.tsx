@@ -40,10 +40,9 @@ function BenchmarksComingSoon() {
           <p className="mt-1 max-w-[72ch] text-[13px] leading-[1.6] text-ink-2">
             One ranked table per reference dataset, with a full run record
             behind every row. The exact datasets, metrics and run parameters
-            will be documented once the methodology is settled. Results land
-            in the repo&apos;s{" "}
-            <code className="font-mono text-[12px] text-ink">benchmarks/</code>{" "}
-            directory by pull request, like everything else.
+            will be documented once the methodology is settled. Results are
+            read from Chap&apos;s benchmarking server each time the site is
+            published.
           </p>
         </div>
       </section>
@@ -93,7 +92,7 @@ export default function BenchmarksPage() {
               Every score on this page comes from a controlled Chap evaluation
               of a pinned commit — nothing is self-reported.{" "}
               {records.length === 0
-                ? "No run has been recorded yet, so there is nothing to rank — a suite appears the moment its first result lands, by pull request like everything else."
+                ? "No run has been recorded yet, so there is nothing to rank — a suite appears once its first result is published."
                 : singleSplitSmoke
                   ? "Only one model has been evaluated so far, over a single backtest split, so read this as provenance rather than a ranking. Rows without a run stay empty on purpose."
                   : `${records.length} runs have been recorded so far — still early, so read this as provenance rather than a ranking. Rows without a run stay empty on purpose.`}
@@ -133,13 +132,9 @@ export default function BenchmarksPage() {
               Waiting for the first results
             </div>
             <p className="mt-1 max-w-[64ch] text-[13px] leading-[1.6] text-ink-2">
-              This page renders recorded runs from the repo&apos;s{" "}
-              <code className="font-mono text-[12px] text-ink">
-                benchmarks/
-              </code>{" "}
-              directory — results land by pull request, like everything else.
-              The first file defines the first suite; a row appears the moment
-              a run lands.
+              This page renders the runs read from Chap&apos;s benchmarking
+              server each time the site is published. A row appears once a
+              listed model&apos;s run has been published.
             </p>
           </div>
         </section>
