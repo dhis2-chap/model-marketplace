@@ -335,29 +335,8 @@ function BenchmarksTab({ view }: { view: ModelDetailView }) {
   );
 }
 
-function Step({ n, title, cmd }: { n: number; title: string; cmd: string }) {
-  return (
-    <li className="grid grid-cols-[32px_1fr] gap-3">
-      <span className="grid h-8 w-8 place-items-center rounded-full bg-brand font-medium text-white">
-        {n}
-      </span>
-      <div className="min-w-0">
-        <div className="mb-2 pt-1 text-[16px] font-medium text-ink">{title}</div>
-        <div className="d2-card flex items-center gap-2 py-2 pl-4 pr-2">
-          <code className="min-w-0 flex-1 overflow-x-auto whitespace-nowrap font-mono text-[14px] text-ink">
-            {cmd}
-          </code>
-          <CopyButton text={cmd} />
-        </div>
-      </div>
-    </li>
-  );
-}
-
 function InstallTab({ view }: { view: ModelDetailView }) {
-  const install = `chap-admin install ${view.id}${
-    view.runtimeImage.endsWith("-r-inla") ? " --platform linux/amd64" : ""
-  }`;
+  const cmd = `chap-admin install ${view.id}`;
   return (
     <div className="max-w-[820px]">
       <h2 className={H2}>Install</h2>
@@ -369,29 +348,21 @@ function InstallTab({ view }: { view: ModelDetailView }) {
       ) : (
         <>
           <p className={LEDE}>
-            Run these in the chap-core directory of a running Chap.{" "}
-            <Code>chap-admin</Code> starts the service, registers it with Chap
-            and adds its verified configurations, so it shows up in the DHIS2
-            Modeling App.
+            Run this in the chap-core directory of a running Chap. It starts
+            the model, registers it and adds its verified configurations, so it
+            shows up in the DHIS2 Modeling App.
           </p>
           {view.requiresGeo ? (
             <Notice>
               Needs geometry: your dataset must include org-unit boundaries.
             </Notice>
           ) : null}
-          <ol className="flex flex-col gap-6">
-            <Step
-              n={1}
-              title="Install chap-admin, at your Chap version"
-              cmd="uv tool install chap-core --python 3.13"
-            />
-            <Step n={2} title="Install the model" cmd={install} />
-            <Step
-              n={3}
-              title="Start Chap with the overlay it wrote from now on"
-              cmd="docker compose -f compose.yml -f compose.marketplace.yml up -d"
-            />
-          </ol>
+          <div className="d2-card flex items-center gap-2 py-2 pl-4 pr-2">
+            <code className="min-w-0 flex-1 overflow-x-auto whitespace-nowrap font-mono text-[14px] text-ink">
+              {cmd}
+            </code>
+            <CopyButton text={cmd} />
+          </div>
           <p className="mt-8 text-[15px] text-ink-2">
             Installs the verified stable version, {view.stable.tag} (
             <Code>{view.stable.image}</Code>).{" "}
