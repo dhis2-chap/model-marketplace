@@ -159,16 +159,16 @@ Vercel's SSO. So the tab is the history of what is actually live.
 ## Benchmarking
 
 The benchmark views on the site (the benchmarks page and each model's
-Benchmarks tab) are gated behind a "coming soon" state until real results
-exist — flip `BENCHMARKS_LIVE` in `site/src/lib/flags.ts` when they land.
+Benchmarks tab) are behind `BENCHMARKS_LIVE` in `site/src/lib/flags.ts`, and
+show "coming soon" when a build has no results.
 
-Results are read from Chap's benchmarking server at each deploy and only
-backtests of listed pins are kept — none of those has been run yet. Exactly
+Results are read from Chap's benchmarking server at each deploy (and hourly)
+and only backtests of listed pins are kept. Exactly
 how the comparison will be run — datasets, backtest parameters, ranking — is
 still being decided; the methodology will be documented in
 [benchmarks/README.md](benchmarks/README.md) once it is settled. For the underlying evaluation command, see the Chap guide to
 [evaluating models](https://chap.dhis2.org/chap-modeling-platform/external_models/running_models_in_chap/).
 
-Until a suite has run, the only quality signal on the site is each model's
-author-assessed status — which is why it is labelled as the authors' own
-claim everywhere it appears.
+For a model the server has not benchmarked, the only quality signal on the
+site is its author-assessed status — which is why it is labelled as the
+authors' own claim everywhere it appears.

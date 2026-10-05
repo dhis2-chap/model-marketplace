@@ -188,11 +188,13 @@ export interface ConfigurationView {
 export interface BenchmarksView {
   crpsByHorizon: number[];
   baseline: number[];
-  comparison: { name: string; mean: number; self: boolean }[];
+  /** Each model's best configuration on the primary record's dataset. */
+  comparison: { name: string; crps: number; self: boolean }[];
   /** Provenance + headline metrics of the primary record. */
   provenance: {
     dataset: string;
     versionTag: string;
+    configuration: string | null;
     evaluatedAt: string;
     harnessTool: string;
     runUrl: string | null;
@@ -292,23 +294,33 @@ function benchmarksView(
   benchmarks: Benchmark[],
 ): BenchmarksView | null {
   const records = recordsFor(model, benchmarks);
-  const primary = records.find((b) => b.metrics.crps_by_horizon) ?? records[0];
-  if (!primary) return null;
+  const first = records.find((b) => b.metrics.crps_by_horizon) ?? records[0];
+  if (!first) return null;
+  // Several configurations of one pin can run on a dataset and the server
+  // picks no winner, so the page shows the best one and names it.
+  const best = (rs: Benchmark[]) =>
+    rs.reduce<Benchmark | null>(
+      (a, b) => (a && a.metrics.crps <= b.metrics.crps ? a : b),
+      null,
+    );
+  const primary = best(
+    records.filter(
+      (b) => b.dataset === first.dataset && b.version === first.version,
+    ),
+  )!;
 
   const comparison = registry.models
     .map((m) => {
-      const onDataset = benchmarksFor(benchmarks, m.id).filter(
-        (b) => b.dataset === primary.dataset,
+      const top = best(
+        benchmarksFor(benchmarks, m.id).filter(
+          (b) => b.dataset === primary.dataset,
+        ),
       );
-      const mean =
-        onDataset.length > 0
-          ? onDataset.reduce((s, b) => s + b.metrics.crps, 0) / onDataset.length
-          : null;
-      return { name: presentationFor(m.id).abbrev, mean, self: m.id === model.id };
+      return top
+        ? { name: presentationFor(m.id).abbrev, crps: top.metrics.crps, self: m.id === model.id }
+        : null;
     })
-    .filter((c): c is { name: string; mean: number; self: boolean } =>
-      typeof c.mean === "number",
-    );
+    .filter((c) => c !== null);
 
   const skill = skillOf(primary);
   const headline: { label: string; value: string }[] = [
@@ -342,6 +354,7 @@ function benchmarksView(
     provenance: {
       dataset: primary.dataset,
       versionTag: primary.version,
+      configuration: primary.run?.configuration ?? null,
       evaluatedAt: primary.evaluated_at,
       harnessTool: primary.harness.tool,
       runUrl: primary.harness.run ?? null,

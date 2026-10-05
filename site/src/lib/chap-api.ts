@@ -46,7 +46,7 @@ export interface Specification {
  * The records of one specification that belong to a listed pin: the template
  * is a listed model's service, its digest is one of that model's pinned
  * commits and the configured model is one of its configurations (chap-admin
- * names them after the configuration keys). Backtests come newest first and
+ * names them "<service id>:<configuration key>"). Backtests come newest first and
  * only the newest per configured model is kept. Skipped backtests are
  * reported, not recorded.
  */
@@ -70,12 +70,14 @@ export function toBenchmarks(
     const version = model?.versions.find(
       (v) => v.commit === cm.modelTemplate.sourceDigest,
     );
+    const configuration = cm.name.slice(cm.modelTemplate.name.length + 1);
     const metrics = backtest.aggregateMetrics;
     const reason = !model
       ? "not a listed model"
       : !version
         ? `commit ${cm.modelTemplate.sourceDigest} is not a pin`
-        : !(cm.name in model.configurations)
+        : !cm.name.startsWith(`${cm.modelTemplate.name}:`) ||
+          !(configuration in model.configurations)
           ? "not a listed configuration"
           : metrics.crps === undefined
             ? "no metrics"
@@ -93,7 +95,7 @@ export function toBenchmarks(
       evaluated_at: (backtest.created ?? "").slice(0, 10),
       harness: { tool: `chap ${backtest.chapVersion ?? ""}`.trim() },
       run: {
-        configuration: cm.name,
+        configuration,
         horizon: suite.nPeriods,
         splits: suite.nSplits,
       },

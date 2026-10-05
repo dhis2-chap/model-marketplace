@@ -290,7 +290,9 @@ function BenchmarksTab({ view }: { view: ModelDetailView }) {
     <div>
       <h2 className={H2}>Benchmarks</h2>
       <p className={LEDE}>
-        CRPS — lower is better. Measured on {p.dataset} at {p.versionTag},{" "}
+        CRPS — lower is better. Measured on {p.dataset} at {p.versionTag}
+        {p.configuration ? <> with the {p.configuration} configuration</> : null}
+        ,{" "}
         {p.evaluatedAt}
         {p.runUrl ? (
           <>
@@ -335,7 +337,7 @@ function BenchmarksTab({ view }: { view: ModelDetailView }) {
         {b.comparison.length > 0 ? (
           <div className="d2-card p-5">
             <div className="mb-3 font-medium text-ink">
-              Model comparison · {p.dataset}
+              Model comparison · {p.dataset} · best configuration each
             </div>
             <ComparisonChart items={b.comparison} />
           </div>

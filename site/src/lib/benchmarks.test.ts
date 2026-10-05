@@ -128,19 +128,18 @@ describe("buildBenchmarkSuites", () => {
     const suite = suites[0];
 
     expect(suite.heading).toBe("Rwanda monthly · horizon 3");
-    expect(suite.countLine).toBe("1 of 7 listed models evaluated");
-    expect(suite.runContext).toContainEqual({
-      k: "Suite",
-      v: "chapkit_simple_multistep_model.monthly_climate",
-    });
+    expect(suite.countLine).toBe("1 of 5 listed models evaluated");
     expect(suite.runContext).toContainEqual({ k: "Observations", v: "2,808 rows" });
-    expect(suite.pendingNote).toMatch(/^Six listed models/);
+    expect(suite.pendingNote).toMatch(/^Four listed models/);
 
-    expect(suite.rows).toHaveLength(registry.models.length);
+    // Templates are scaffolding, never listed as a model awaiting a run.
+    expect(suite.rows).toHaveLength(
+      registry.models.filter((m) => m.kind !== "template").length,
+    );
     const [first, ...rest] = suite.rows;
     expect(first.measured).toBe(true);
     expect(first.pinLine).toBe(
-      `chapkit_simple_multistep_model@${shortCommit(multistepStable.commit)} · ${multistepStable.version}`,
+      `monthly_climate · chapkit_simple_multistep_model@${shortCommit(multistepStable.commit)} · ${multistepStable.version}`,
     );
     expect(first.suiteLine).toBe(
       `chapkit_simple_multistep_model.monthly_climate · ${multistepStable.commit.slice(0, 12)}…`,
@@ -150,14 +149,6 @@ describe("buildBenchmarkSuites", () => {
       expect(row.ncrps).toBeNull();
       expect(row.crps).toBeNull();
     }
-  });
-
-  it("reuses the suite's run parameters in an unmeasured row's command", () => {
-    const suite = buildBenchmarkSuites(registry, [smokeRun()])[0];
-    const pendingEwars = suite.rows.find((r) => r.modelId === ewars.id)!;
-    expect(pendingEwars.cmd).toBe(
-      `chap eval --model chapkit_ewars_model \\\n  --commit ${shortCommit(ewarsStable.commit)} --dataset rwanda-monthly \\\n  --horizon 3 --splits 1 --samples 200`,
-    );
   });
 
   it("ranks measured rows by normalised CRPS ascending", () => {
@@ -178,7 +169,7 @@ describe("buildBenchmarkSuites", () => {
       "auto_arima_chapkit",
       "chapkit_simple_multistep_model",
     ]);
-    expect(suite.countLine).toBe("2 of 7 listed models evaluated");
-    expect(suite.pendingNote).toMatch(/^Five listed models/);
+    expect(suite.countLine).toBe("2 of 5 listed models evaluated");
+    expect(suite.pendingNote).toMatch(/^Three listed models/);
   });
 });

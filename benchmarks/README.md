@@ -20,7 +20,8 @@ The deploy workflow (`.github/workflows/deploy.yml`) runs on every push to
 3. keeps the newest backtest per configured model that belongs to a listed
    pin — its model template is a listed model's `service_id`, its
    `sourceDigest` is one of that model's pinned commits and the configured
-   model is one of its configurations — and drops every other backtest;
+   model is named `<service_id>:<configuration key>` for one of its
+   configurations — and drops every other backtest;
 4. writes the records to the gitignored `benchmarks/results.json`, which the
    build validates against the registry and renders.
 
@@ -39,7 +40,7 @@ To fetch locally, put both variables in the gitignored `site/.env.local`
 
 ```bash
 # site/.env.local
-CHAP_API_URL=http://158.37.66.207:8000
+CHAP_API_URL=https://chap-benchmarking.dhis2.org
 CHAP_API_TOKEN=...
 ```
 
@@ -51,7 +52,7 @@ then run `pnpm fetch-benchmarks` in `site/`.
 | ----------------------- | --------------------------------------------- |
 | `model`, `version`      | the listed pin `modelTemplate` resolves to    |
 | `commit`                | `configuredModel.modelTemplate.sourceDigest`  |
-| `run.configuration`     | `configuredModel.name`                        |
+| `run.configuration`     | `configuredModel.name` after `<service_id>:`  |
 | `run.horizon`, `splits` | the specification's `nPeriods`, `nSplits`     |
 | `evaluated_at`          | `created`                                     |
 | `harness.tool`          | `chap <chapVersion>`                          |
@@ -65,5 +66,5 @@ A backtest whose metric computation failed (no `crps`) is skipped.
 ## Methodology — added soon
 
 Which suites the marketplace ranks on, and how, is not settled yet; a full
-methodology description will be added here. Until then the site's benchmark
-views stay behind `BENCHMARKS_LIVE` in `site/src/lib/flags.ts`.
+methodology description will be added here. Until then the site shows the
+server's results as recorded, provenance rather than a ranking.

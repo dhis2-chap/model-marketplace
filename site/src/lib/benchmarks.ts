@@ -109,8 +109,6 @@ export interface BenchmarkRowView {
   mem: number | null;
   /** Run-record panel subtitle: suite + full-ish commit, or the bare pin. */
   suiteLine: string;
-  /** The command that produced (or would produce) this row. */
-  cmd: string;
 }
 
 export interface BenchmarkSuiteView {
@@ -138,27 +136,6 @@ function periodUnit(periodType: string | undefined): string {
   return "periods";
 }
 
-type RunParams = NonNullable<Benchmark["run"]>;
-
-function evalCmd(
-  modelId: string,
-  pinShort: string,
-  dataset: string,
-  run: RunParams | undefined,
-): string {
-  const flags = [
-    run?.horizon !== undefined ? `--horizon ${run.horizon}` : null,
-    run?.splits !== undefined ? `--splits ${run.splits}` : null,
-    run?.samples !== undefined ? `--samples ${run.samples}` : null,
-  ]
-    .filter(Boolean)
-    .join(" ");
-  return (
-    `chap eval --model ${modelId} \\\n  --commit ${pinShort} --dataset ${dataset}` +
-    (flags ? ` \\\n  ${flags}` : "")
-  );
-}
-
 function suiteIdOf(bench: Benchmark): string | null {
   return bench.run?.configuration
     ? `${bench.model}.${bench.run.configuration}`
@@ -168,15 +145,15 @@ function suiteIdOf(bench: Benchmark): string | null {
 /**
  * One suite per dataset that has recorded runs: measured rows first (best
  * normalised CRPS first, plain CRPS as fallback), then every other listed
- * model at its stable pin as an unmeasured row. Reproduce commands for
- * unmeasured rows reuse the suite's run parameters so a filled-in row stays
- * comparable.
+ * model at its stable pin as an unmeasured row.
  */
 export function buildBenchmarkSuites(
   registry: Registry,
   records: Benchmark[],
 ): BenchmarkSuiteView[] {
   const byId = new Map(registry.models.map((m) => [m.id, m]));
+  // Templates are scaffolding, not something to forecast with.
+  const models = registry.models.filter((m) => m.kind !== "template");
   const datasets = [...new Set(records.map((b) => b.dataset))].sort();
 
   return datasets.map((dataset) => {
@@ -193,7 +170,7 @@ export function buildBenchmarkSuites(
           modelId: b.model,
           name: model.display_name,
           versionTag: b.version,
-          pinLine: `${b.model}@${shortCommit(b.commit)} · ${b.version}`,
+          pinLine: `${b.run?.configuration ? `${b.run.configuration} · ` : ""}${b.model}@${shortCommit(b.commit)} · ${b.version}`,
           measured: true,
           ncrps: b.metrics.norm_crps ?? null,
           crps: b.metrics.crps,
@@ -203,7 +180,6 @@ export function buildBenchmarkSuites(
           cpu: b.resources?.cpu_seconds ?? null,
           mem: b.resources?.peak_memory_mb ?? null,
           suiteLine: `${suiteIdOf(b) ?? b.harness.tool} · ${b.commit.slice(0, 12)}…`,
-          cmd: evalCmd(b.model, shortCommit(b.commit), dataset, b.run),
         };
       })
       .sort(
@@ -212,7 +188,7 @@ export function buildBenchmarkSuites(
       );
 
     const measuredModels = new Set(runs.map((b) => b.model));
-    const pendingRows = registry.models
+    const pendingRows = models
       .filter((m) => !measuredModels.has(m.id))
       .map((m): BenchmarkRowView => {
         const stable = stableVersion(m);
@@ -231,13 +207,10 @@ export function buildBenchmarkSuites(
           cpu: null,
           mem: null,
           suiteLine: `${m.id}@${shortCommit(stable.commit)}`,
-          cmd: evalCmd(m.id, shortCommit(stable.commit), dataset, params),
         };
       });
 
     const runContext: { k: string; v: string }[] = [];
-    const suiteId = suiteIdOf(primary);
-    if (suiteId) runContext.push({ k: "Suite", v: suiteId });
     runContext.push({ k: "Dataset", v: datasetName });
     if (params?.observations !== undefined) {
       runContext.push({
@@ -273,7 +246,7 @@ export function buildBenchmarkSuites(
         params?.horizon !== undefined
           ? `${datasetName} · horizon ${params.horizon}`
           : datasetName,
-      countLine: `${measuredModels.size} of ${registry.models.length} listed models evaluated`,
+      countLine: `${measuredModels.size} of ${models.length} listed models evaluated`,
       measured: measuredModels.size,
       runContext,
       pendingNote,

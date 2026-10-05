@@ -67,9 +67,9 @@ function BenchmarksComingSoon() {
 }
 
 export default function BenchmarksPage() {
-  if (!BENCHMARKS_LIVE) return <BenchmarksComingSoon />;
-
   const records = getBenchmarks();
+  if (!BENCHMARKS_LIVE || records.length === 0) return <BenchmarksComingSoon />;
+
   const suites = buildBenchmarkSuites(getRegistry(), records);
   const singleSplitSmoke = records.length === 1 && records[0].run?.splits === 1;
 

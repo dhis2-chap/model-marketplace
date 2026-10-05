@@ -6,7 +6,6 @@ import type {
   BenchmarkRowView,
   BenchmarkSuiteView,
 } from "@/lib/benchmarks";
-import { useCopy } from "./copy";
 
 /**
  * One benchmark suite: the sortable run table and the run-record
@@ -41,24 +40,6 @@ function fmtMem(v: number | null): string {
         minimumFractionDigits: 1,
         maximumFractionDigits: 1,
       })} MB`;
-}
-
-function CommandBlock({ cmd }: { cmd: string }) {
-  const { copied, copy } = useCopy();
-  return (
-    <div className="flex items-stretch gap-2">
-      <code className="min-w-0 flex-1 overflow-x-auto whitespace-pre rounded-[3px] border border-line bg-surface-2 px-[11px] py-[9px] font-mono text-[12px] leading-normal text-ink">
-        {cmd}
-      </code>
-      <button
-        type="button"
-        onClick={() => copy(cmd)}
-        className="shrink-0 cursor-pointer rounded-[3px] border border-line-strong bg-surface px-3.5 font-brand text-[12.5px] font-medium text-ink transition-colors hover:border-brand hover:text-brand"
-      >
-        {copied === cmd ? "Copied" : "Copy"}
-      </button>
-    </div>
-  );
 }
 
 function RunRecord({ row }: { row: BenchmarkRowView }) {
@@ -127,23 +108,14 @@ function RunRecord({ row }: { row: BenchmarkRowView }) {
               </span>
             </div>
           ))}
-          <div className="px-5 pb-[18px] pt-3.5">
-            <div className="mb-2 font-brand text-[10px] font-medium uppercase tracking-[0.1em] text-ink-3">
-              Reproduce
-            </div>
-            <CommandBlock cmd={row.cmd} />
-          </div>
         </div>
       ) : (
         <div className="p-5">
-          <p className="mb-4 text-[13.5px] leading-[1.6] text-ink-2">
-            No{" "}
-            <code className="font-mono text-[12.5px] text-ink">chap eval</code>{" "}
-            run has been recorded for this pin on this suite. Run it and the
-            row fills in — same dataset, horizon, splits and sample count as
-            the measured rows, so the numbers stay comparable.
+          <p className="text-[13.5px] leading-[1.6] text-ink-2">
+            The benchmarking server has no result for this pin on this suite
+            yet. It benchmarks every listed model whose period type and
+            covariates the dataset has, and the row fills in once it does.
           </p>
-          <CommandBlock cmd={row.cmd} />
         </div>
       )}
     </div>

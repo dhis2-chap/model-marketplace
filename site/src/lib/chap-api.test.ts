@@ -17,6 +17,7 @@ function backtest(overrides: {
   created?: string;
   metrics?: Record<string, number>;
 } = {}): Backtest {
+  const template = overrides.template ?? multistep.service_id;
   return {
     created: overrides.created ?? "2026-09-30T12:17:44.869682",
     chapVersion: "2.4.0",
@@ -30,9 +31,9 @@ function backtest(overrides: {
     },
     configuredModel: {
       id: overrides.id ?? 1,
-      name: overrides.name ?? "monthly_climate",
+      name: `${template}:${overrides.name ?? "monthly_climate"}`,
       modelTemplate: {
-        name: overrides.template ?? multistep.service_id,
+        name: template,
         sourceDigest: overrides.digest === undefined ? stable.commit : overrides.digest,
       },
     },
@@ -86,10 +87,10 @@ describe("toBenchmarks", () => {
     );
     expect(records).toEqual([]);
     expect(skipped).toEqual([
-      "naive_model: not a listed model",
-      `monthly_climate: commit ${"0".repeat(40)} is not a pin`,
-      "nightly: not a listed configuration",
-      "monthly_climate: no metrics",
+      "naive_model:naive_model: not a listed model",
+      `${multistep.service_id}:monthly_climate: commit ${"0".repeat(40)} is not a pin`,
+      `${multistep.service_id}:nightly: not a listed configuration`,
+      `${multistep.service_id}:monthly_climate: no metrics`,
     ]);
   });
 });

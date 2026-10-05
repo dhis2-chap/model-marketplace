@@ -120,7 +120,7 @@ export function CrpsByHorizonChart({
 export function ComparisonChart({
   items,
 }: {
-  items: { name: string; mean: number; self: boolean }[];
+  items: { name: string; crps: number; self: boolean }[];
 }) {
   return (
     <div>
@@ -137,9 +137,9 @@ export function ComparisonChart({
             />
             <YAxis domain={[0, 1.1]} ticks={[0, 0.4, 0.7, 1.1]} tick={AXIS_TICK} tickLine={false} axisLine={false} />
             <Tooltip content={ChartTooltip} cursor={{ fill: "var(--mp-surface-3)", fillOpacity: 0.4 }} />
-            <Bar dataKey="mean" name="mean CRPS" barSize={34} radius={[2, 2, 0, 0]} isAnimationActive={false}>
+            <Bar dataKey="crps" name="CRPS" barSize={34} radius={[2, 2, 0, 0]} isAnimationActive={false}>
               <LabelList
-                dataKey="mean"
+                dataKey="crps"
                 position="top"
                 formatter={(v: React.ReactNode) => Number(v).toFixed(2)}
                 style={{ fontSize: 10, fontFamily: "var(--font-mono)", fill: "var(--mp-text)" }}
