@@ -23,7 +23,7 @@ source:
   runtime_image: ghcr.io/dhis2-chap/chapkit-py
 
 attribution:
-  author: HISP West and Central Africa (adapted by Chap team)
+  author: HISP Oslo and HISP West and Central Africa
 
 compatibility:
   period_types: [monthly]
