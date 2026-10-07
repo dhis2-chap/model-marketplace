@@ -24,7 +24,7 @@ source:
   runtime_image: ghcr.io/dhis2-chap/chapkit-r-inla
 
 attribution:
-  author: DHIS2 Chap
+  author: CHAP team
   organization: HISP Centre, University of Oslo
 
 compatibility:
