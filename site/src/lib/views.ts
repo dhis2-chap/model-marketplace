@@ -15,11 +15,12 @@ import {
 import type {
   AssessedStatus,
   Benchmark,
+  MetricInfo,
   Model,
   ModelKind,
   ModelVersion,
 } from "./schema";
-import { benchmarksFor, skillOf } from "./benchmarks";
+import { benchmarksFor, metricViews, type MetricView } from "./benchmarks";
 import type { Proposals } from "./proposals";
 import {
   ASSESSED_STATUS_COPY,
@@ -186,8 +187,6 @@ export interface ConfigurationView {
 }
 
 export interface BenchmarksView {
-  crpsByHorizon: number[];
-  baseline: number[];
   /** Each model's best configuration on the primary record's dataset. */
   comparison: { name: string; crps: number; self: boolean }[];
   /** Provenance + headline metrics of the primary record. */
@@ -199,7 +198,8 @@ export interface BenchmarksView {
     harnessTool: string;
     runUrl: string | null;
   };
-  headline: { label: string; value: string }[];
+  /** Every metric of the primary record, named and described by chap-core. */
+  headline: MetricView[];
 }
 
 export interface ModelDetailView {
@@ -292,9 +292,10 @@ function benchmarksView(
   model: Model,
   registry: Registry,
   benchmarks: Benchmark[],
+  metrics: MetricInfo[],
 ): BenchmarksView | null {
   const records = recordsFor(model, benchmarks);
-  const first = records.find((b) => b.metrics.crps_by_horizon) ?? records[0];
+  const first = records[0];
   if (!first) return null;
   // Several configurations of one pin can run on a dataset and the server
   // picks no winner, so the page shows the best one and names it.
@@ -322,34 +323,9 @@ function benchmarksView(
     })
     .filter((c) => c !== null);
 
-  const skill = skillOf(primary);
-  const headline: { label: string; value: string }[] = [
-    { label: "Mean CRPS", value: primary.metrics.crps.toFixed(2) },
-    ...(primary.metrics.mae !== undefined
-      ? [{ label: "MAE", value: primary.metrics.mae.toFixed(1) }]
-      : []),
-    ...(primary.metrics.rmse !== undefined
-      ? [{ label: "RMSE", value: primary.metrics.rmse.toFixed(1) }]
-      : []),
-    ...(primary.metrics.norm_crps !== undefined
-      ? [
-          {
-            label: "Normalised CRPS",
-            value: primary.metrics.norm_crps.toFixed(6),
-          },
-        ]
-      : []),
-    ...(primary.metrics.coverage_80 !== undefined
-      ? [{ label: "Coverage 80%", value: primary.metrics.coverage_80.toFixed(2) }]
-      : []),
-    ...(skill !== null
-      ? [{ label: "Skill vs baseline", value: `+${skill.toFixed(2)}` }]
-      : []),
-  ];
+  const headline = metricViews(primary, metrics);
 
   return {
-    crpsByHorizon: primary.metrics.crps_by_horizon ?? [],
-    baseline: primary.metrics.baseline_crps_by_horizon ?? [],
     comparison: comparison.length > 1 ? comparison : [],
     provenance: {
       dataset: primary.dataset,
@@ -367,6 +343,7 @@ export function toDetailView(
   model: Model,
   registry: Registry,
   benchmarks: Benchmark[],
+  metrics: MetricInfo[],
   proposals: Proposals,
 ): ModelDetailView {
   const pres = presentationFor(model.id);
@@ -438,7 +415,7 @@ export function toDetailView(
         curl: configCurl(key, configuration.config),
       }),
     ),
-    benchmarks: benchmarksView(model, registry, benchmarks),
+    benchmarks: benchmarksView(model, registry, benchmarks, metrics),
     benchmarkSummary:
       benchmarks.length > 0
         ? {

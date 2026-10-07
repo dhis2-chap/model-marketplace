@@ -1,5 +1,5 @@
 import type { Registry } from "./registry";
-import type { Benchmark } from "./schema";
+import type { Benchmark, BenchmarkResults, MetricInfo } from "./schema";
 
 /**
  * Benchmark results come from the benchmarking server's chap API, read at
@@ -31,6 +31,7 @@ export interface Specification {
   id: number;
   dataset: { name: string };
   backtests: {
+    id: number;
     created: string | null;
     chapVersion: string | null;
     aggregateMetrics: Record<string, number>;
@@ -99,24 +100,21 @@ export function toBenchmarks(
         horizon: suite.nPeriods,
         splits: suite.nSplits,
       },
-      metrics: {
-        crps: metrics.crps,
-        norm_crps: metrics.crps_norm,
-        mae: metrics.mae,
-        rmse: metrics.rmse,
-        coverage_80: metrics.coverage_10_90,
-      },
+      metrics: { ...metrics, crps: metrics.crps },
     });
   }
   return { records, skipped };
 }
 
-/** Every listed pin's newest result on every suite. Throws on any failure. */
+/**
+ * Every listed pin's newest result on every suite, with chap-core's
+ * definitions of the metrics they carry. Throws on any failure.
+ */
 export async function fetchBenchmarks(
   registry: Registry,
   url: string,
   token: string,
-): Promise<Benchmark[]> {
+): Promise<BenchmarkResults> {
   async function get<T>(path: string): Promise<T> {
     const res = await fetch(`${url}${path}`, {
       headers: { Authorization: `Bearer ${token}` },
@@ -126,6 +124,7 @@ export async function fetchBenchmarks(
   }
 
   const records: Benchmark[] = [];
+  let anyBacktest: number | null = null;
   for (const suite of SUITES) {
     const query = new URLSearchParams({
       nPeriods: String(suite.nPeriods),
@@ -146,6 +145,7 @@ export async function fetchBenchmarks(
     const spec = await get<Specification>(
       `/v1/crud/backtest-specifications/${matches[0].id}`,
     );
+    anyBacktest ??= spec.backtests[0]?.id ?? null;
     const { records: found, skipped } = toBenchmarks(registry, suite, spec);
     console.log(
       `${suite.dataset}: ${found.length} recorded, ${skipped.length} skipped` +
@@ -153,5 +153,13 @@ export async function fetchBenchmarks(
     );
     records.push(...found);
   }
-  return records;
+  if (anyBacktest === null) return { metrics: [], results: records };
+
+  // chap-core's metric registry: the same whichever backtest is asked about.
+  const all = await get<MetricInfo[]>(`/v1/visualization/metrics/${anyBacktest}`);
+  const used = new Set(records.flatMap((r) => Object.keys(r.metrics)));
+  return {
+    metrics: all.filter((m) => used.has(m.id)),
+    results: records,
+  };
 }

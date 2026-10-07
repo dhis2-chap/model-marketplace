@@ -19,6 +19,7 @@ function backtest(overrides: {
 } = {}): Backtest {
   const template = overrides.template ?? multistep.service_id;
   return {
+    id: overrides.id ?? 1,
     created: overrides.created ?? "2026-09-30T12:17:44.869682",
     chapVersion: "2.4.0",
     aggregateMetrics: overrides.metrics ?? {
@@ -45,7 +46,7 @@ function spec(...backtests: Backtest[]): Specification {
 }
 
 describe("toBenchmarks", () => {
-  it("maps a listed pin's backtest onto a record", () => {
+  it("maps a listed pin's backtest onto a record, keeping every metric", () => {
     const { records, skipped } = toBenchmarks(registry, suite, spec(backtest()));
     expect(skipped).toEqual([]);
     expect(records).toEqual([
@@ -57,7 +58,14 @@ describe("toBenchmarks", () => {
         evaluated_at: "2026-09-30",
         harness: { tool: "chap 2.4.0" },
         run: { configuration: "monthly_climate", horizon: 3, splits: 2 },
-        metrics: { crps: 414.5, norm_crps: 0.006, mae: 539.1, rmse: 1247.8, coverage_80: 0.66 },
+        metrics: {
+          crps: 414.5,
+          crps_norm: 0.006,
+          mae: 539.1,
+          rmse: 1247.8,
+          coverage_10_90: 0.66,
+          mape: 25.2,
+        },
       },
     ]);
   });

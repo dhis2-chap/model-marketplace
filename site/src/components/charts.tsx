@@ -5,9 +5,7 @@ import {
   BarChart,
   CartesianGrid,
   Cell,
-  ComposedChart,
   LabelList,
-  Line,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -53,66 +51,6 @@ function ChartTooltip({
             {String(p.name)}: {Number(p.value).toFixed(2)}
           </div>
         ))}
-    </div>
-  );
-}
-
-export function CrpsByHorizonChart({
-  crps,
-  baseline,
-  shortName,
-}: {
-  crps: number[];
-  baseline: number[];
-  shortName: string;
-}) {
-  const hasBaseline = baseline.length > 0;
-  const data = crps.map((v, i) => ({
-    h: `h${i + 1}`,
-    model: v,
-    baseline: baseline[i],
-  }));
-  return (
-    <div>
-      <div className="h-[200px]">
-        <ResponsiveContainer width="100%" height="100%">
-          <ComposedChart data={data} margin={{ top: 10, right: 8, bottom: 0, left: -22 }}>
-            <CartesianGrid vertical={false} stroke="var(--mp-border)" />
-            <XAxis dataKey="h" tick={AXIS_TICK} tickLine={false} axisLine={false} />
-            <YAxis domain={[0, 1.4]} ticks={[0, 0.5, 0.9, 1.4]} tick={AXIS_TICK} tickLine={false} axisLine={false} />
-            <Tooltip content={ChartTooltip} cursor={{ stroke: "var(--mp-border-strong)" }} />
-            {hasBaseline ? (
-              <Line
-                dataKey="baseline"
-                name="baseline"
-                stroke="var(--mp-text-3)"
-                strokeWidth={1.6}
-                strokeDasharray="4 3"
-                dot={false}
-                isAnimationActive={false}
-              />
-            ) : null}
-            <Line
-              dataKey="model"
-              name={shortName}
-              stroke="var(--mp-brand)"
-              strokeWidth={2.2}
-              dot={{ r: 3, fill: "var(--mp-surface)", stroke: "var(--mp-brand)", strokeWidth: 1.8 }}
-              isAnimationActive={false}
-            />
-          </ComposedChart>
-        </ResponsiveContainer>
-      </div>
-      <div className="mt-2.5 flex items-center gap-4 text-[11px] text-ink-2">
-        <span className="flex items-center gap-1.5">
-          <span className="h-0.5 w-3 bg-brand" /> {shortName}
-        </span>
-        {hasBaseline ? (
-          <span className="flex items-center gap-1.5">
-            <span className="h-0.5 w-3 bg-ink-3" /> baseline
-          </span>
-        ) : null}
-      </div>
     </div>
   );
 }

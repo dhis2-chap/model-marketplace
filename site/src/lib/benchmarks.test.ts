@@ -6,16 +6,34 @@ import {
   buildBenchmarkSuites,
   loadBenchmarks,
   RESULTS_FILE,
-  skillOf,
 } from "./benchmarks";
 import { loadRegistry, shortCommit, stableVersion } from "./registry";
-import type { Benchmark } from "./schema";
+import type { Benchmark, MetricInfo } from "./schema";
 
 const registry = loadRegistry();
 const ewars = registry.models.find((m) => m.id === "chapkit_ewars_model")!;
 const ewarsStable = stableVersion(ewars);
 const multistep = registry.models.find((m) => m.id === "chapkit_simple_multistep_model")!;
 const multistepStable = stableVersion(multistep);
+
+function metric(id: string, displayName: string): MetricInfo {
+  return {
+    id,
+    displayName,
+    description: `${displayName} description`,
+    unit: null,
+    target: null,
+    targetBehavior: "closest",
+    optimizationDirection: "minimize",
+  };
+}
+
+const METRICS = [
+  metric("crps", "CRPS"),
+  metric("crps_norm", "CRPS Normalized"),
+  metric("mae", "MAE"),
+  metric("rmse", "RMSE"),
+];
 
 function benchmark(overrides: Partial<Benchmark> = {}): Benchmark {
   return {
@@ -45,7 +63,7 @@ function smokeRun(overrides: Partial<Benchmark> = {}): Benchmark {
       splits: 1,
       samples: 200,
     },
-    metrics: { crps: 42.6692, mae: 57.0358, rmse: 108.3282, norm_crps: 0.045345 },
+    metrics: { crps: 42.6692, mae: 57.0358, rmse: 108.3282, crps_norm: 0.045345 },
     resources: { wall_seconds: 56.61, cpu_seconds: 22.05, peak_memory_mb: 2061.8 },
     ...overrides,
   });
@@ -63,28 +81,39 @@ describe("loadBenchmarks", () => {
 
   function write(...records: Benchmark[]) {
     fs.mkdirSync(path.join(root, "benchmarks"));
-    fs.writeFileSync(path.join(root, RESULTS_FILE), JSON.stringify(records));
+    fs.writeFileSync(
+      path.join(root, RESULTS_FILE),
+      JSON.stringify({ metrics: METRICS, results: records }),
+    );
   }
 
-  it("returns [] when no results were fetched", () => {
-    expect(loadBenchmarks(registry, root)).toEqual([]);
+  it("returns nothing when no results were fetched", () => {
+    expect(loadBenchmarks(registry, root)).toEqual({ metrics: [], results: [] });
   });
 
-  it("loads valid records", () => {
+  it("loads valid records and the metric definitions", () => {
     write(benchmark());
-    const loaded = loadBenchmarks(registry, root);
-    expect(loaded).toHaveLength(1);
-    expect(loaded[0].metrics.crps).toBe(0.5);
+    const { metrics, results } = loadBenchmarks(registry, root);
+    expect(results).toHaveLength(1);
+    expect(results[0].metrics.crps).toBe(0.5);
+    expect(metrics).toEqual(METRICS);
   });
 
   it("round-trips the run, extra metric and resource fields", () => {
     write(smokeRun());
-    const [loaded] = loadBenchmarks(registry, root);
+    const [loaded] = loadBenchmarks(registry, root).results;
     expect(loaded.run?.configuration).toBe("monthly_climate");
     expect(loaded.run?.samples).toBe(200);
     expect(loaded.metrics.rmse).toBeCloseTo(108.3282);
-    expect(loaded.metrics.norm_crps).toBeCloseTo(0.045345);
+    expect(loaded.metrics.crps_norm).toBeCloseTo(0.045345);
     expect(loaded.resources?.peak_memory_mb).toBeCloseTo(2061.8);
+  });
+
+  it("rejects a metric chap-core's definitions do not describe", () => {
+    write(benchmark({ metrics: { crps: 0.5, mystery: 1 } }));
+    expect(() => loadBenchmarks(registry, root)).toThrow(
+      /metric "mystery" has no definition/,
+    );
   });
 
   it("rejects a record that fails the schema", () => {
@@ -110,20 +139,13 @@ describe("loadBenchmarks", () => {
   });
 });
 
-describe("skillOf", () => {
-  it("derives skill only when the baseline is stored", () => {
-    expect(skillOf(benchmark({ metrics: { crps: 0.5, baseline_crps: 1.0 } }))).toBe(0.5);
-    expect(skillOf(benchmark())).toBeNull();
-  });
-});
-
 describe("buildBenchmarkSuites", () => {
   it("is empty while the store is empty", () => {
-    expect(buildBenchmarkSuites(registry, [])).toEqual([]);
+    expect(buildBenchmarkSuites(registry, [], METRICS)).toEqual([]);
   });
 
   it("builds one suite per dataset: measured rows, then every other pin as not run", () => {
-    const suites = buildBenchmarkSuites(registry, [smokeRun()]);
+    const suites = buildBenchmarkSuites(registry, [smokeRun()], METRICS);
     expect(suites).toHaveLength(1);
     const suite = suites[0];
 
@@ -144,8 +166,22 @@ describe("buildBenchmarkSuites", () => {
     expect(first.suiteLine).toBe(
       `chapkit_simple_multistep_model.monthly_climate · ${multistepStable.commit.slice(0, 12)}…`,
     );
+    // The run record carries every metric, named and described by chap-core.
+    expect(first.metrics.map((m) => m.label)).toEqual([
+      "CRPS",
+      "CRPS Normalized",
+      "MAE",
+      "RMSE",
+    ]);
+    expect(first.metrics[2]).toEqual({
+      id: "mae",
+      label: "MAE",
+      value: "57.04",
+      description: "MAE description",
+    });
     for (const row of rest) {
       expect(row.measured).toBe(false);
+      expect(row.metrics).toEqual([]);
       expect(row.ncrps).toBeNull();
       expect(row.crps).toBeNull();
     }
@@ -161,10 +197,10 @@ describe("buildBenchmarkSuites", () => {
         version: arimaStable.version,
         commit: arimaStable.commit,
         run: undefined,
-        metrics: { crps: 39.2, norm_crps: 0.041 },
+        metrics: { crps: 39.2, crps_norm: 0.041 },
         resources: undefined,
       }),
-    ])[0];
+    ], METRICS)[0];
     expect(suite.rows.slice(0, 2).map((r) => r.modelId)).toEqual([
       "auto_arima_chapkit",
       "chapkit_simple_multistep_model",

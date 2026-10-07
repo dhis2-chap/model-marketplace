@@ -25,11 +25,14 @@ const token = process.env.CHAP_API_TOKEN;
 async function main() {
   if (!url || !token) throw new Error("CHAP_API_URL and CHAP_API_TOKEN must be set");
   const registry = loadRegistry();
-  const records = await fetchBenchmarks(registry, url.replace(/\/$/, ""), token);
+  const fetched = await fetchBenchmarks(registry, url.replace(/\/$/, ""), token);
   const file = path.join(registry.root, RESULTS_FILE);
-  fs.writeFileSync(file, `${JSON.stringify(records, null, 2)}\n`);
+  fs.writeFileSync(file, `${JSON.stringify(fetched, null, 2)}\n`);
   loadBenchmarks(registry, registry.root);
-  console.log(`wrote ${records.length} record${records.length === 1 ? "" : "s"} to ${RESULTS_FILE}`);
+  const n = fetched.results.length;
+  console.log(
+    `wrote ${n} record${n === 1 ? "" : "s"} and ${fetched.metrics.length} metric definitions to ${RESULTS_FILE}`,
+  );
 }
 
 main().catch((error) => {

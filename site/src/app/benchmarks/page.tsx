@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { BenchmarkSuite } from "@/components/BenchmarksClient";
-import { buildBenchmarkSuites, getBenchmarks } from "@/lib/benchmarks";
+import { BenchmarkSuites } from "@/components/BenchmarksClient";
+import {
+  buildBenchmarkSuites,
+  getBenchmarks,
+  getMetricDefinitions,
+} from "@/lib/benchmarks";
 import { BENCHMARKS_LIVE } from "@/lib/flags";
 import { getRegistry } from "@/lib/registry";
 
@@ -70,13 +74,13 @@ export default function BenchmarksPage() {
   const records = getBenchmarks();
   if (!BENCHMARKS_LIVE || records.length === 0) return <BenchmarksComingSoon />;
 
-  const suites = buildBenchmarkSuites(getRegistry(), records);
+  const suites = buildBenchmarkSuites(getRegistry(), records, getMetricDefinitions());
   const singleSplitSmoke = records.length === 1 && records[0].run?.splits === 1;
 
   return (
     <main>
       <section className="border-b border-line bg-surface">
-        <div className="mx-auto grid max-w-[1240px] items-end gap-x-14 gap-y-10 px-5 pb-10 pt-11 sm:px-8 sm:pt-16 lg:grid-cols-[minmax(0,1fr)_400px]">
+        <div className="mx-auto max-w-[1240px] px-5 pb-10 pt-11 sm:px-8 sm:pt-16">
           <div>
             <span className="font-mono text-[10.5px] uppercase tracking-[0.18em] text-exp">
               {records.length === 0
@@ -98,32 +102,39 @@ export default function BenchmarksPage() {
                   : `${records.length} runs have been recorded so far — still early, so read this as provenance rather than a ranking. Rows without a run stay empty on purpose.`}
             </p>
           </div>
-          {suites.length === 1 ? (
-            <div className="d2-card px-5 py-[18px]">
-              <div className="mb-3 font-brand text-[10px] font-medium uppercase tracking-[0.1em] text-ink-3">
-                Run context — identical for every row
-              </div>
-              <div>
-                {suites[0].runContext.map((c) => (
-                  <div
-                    key={c.k}
-                    className="flex items-baseline justify-between gap-4 border-t border-line py-[7px]"
-                  >
-                    <span className="text-[12.5px] text-ink-2">{c.k}</span>
-                    <span className="text-right font-mono text-[12.5px] text-ink">
-                      {c.v}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : null}
         </div>
       </section>
 
-      {suites.map((suite) => (
-        <BenchmarkSuite key={suite.dataset} suite={suite} />
-      ))}
+      <BenchmarkSuites suites={suites} />
+
+      {suites.length > 0 ? (
+        <section className="mx-auto max-w-[1240px] px-5 sm:px-8 pt-9">
+          <div className="d2-card px-[26px] py-6">
+            <div className="font-brand text-[15px] font-medium text-ink">
+              Methodology — added soon
+            </div>
+            <p className="mt-1 max-w-[72ch] text-[13px] leading-[1.6] text-ink-2">
+              Exactly how the benchmark suites are run — harness, datasets,
+              isolation, backtest parameters, ranking — is still being
+              decided. A full methodology description will be published here
+              and in the repo&apos;s{" "}
+              <code className="font-mono text-[12px] text-ink">
+                benchmarks/README.md
+              </code>{" "}
+              once it is settled. Until then, each row&apos;s run record
+              documents what was actually recorded for it.
+            </p>
+            <a
+              href="https://chap.dhis2.org/chap-modeling-platform/external_models/running_models_in_chap/"
+              target="_blank"
+              rel="noreferrer"
+              className="mt-3 inline-flex font-brand text-[12.5px] font-medium text-brand hover:text-brand-dark"
+            >
+              Read the Chap evaluation documentation ↗
+            </a>
+          </div>
+        </section>
+      ) : null}
 
       {suites.length === 0 ? (
         <section className="mx-auto max-w-[1240px] px-5 sm:px-8 pt-9">
@@ -143,8 +154,8 @@ export default function BenchmarksPage() {
       <section className="mx-auto max-w-[1240px] px-5 sm:px-8 pb-24 pt-9">
         <div className="flex flex-wrap items-center justify-between gap-5 border-t border-line pt-5">
           <span className="text-[13px] text-ink-2">
-            Per-model benchmark charts — horizon curves, baseline comparison,
-            country breakdown — stay on each model&apos;s detail page.
+            Each model&apos;s detail page shows its best configuration&apos;s
+            metrics and how it compares with the other listed models.
           </span>
           <Link
             href="/"

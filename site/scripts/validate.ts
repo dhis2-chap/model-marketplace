@@ -30,7 +30,7 @@ try {
     console.log(`      image   ${imageRef(model, stable)}`);
   }
 
-  const benchmarks = loadBenchmarks(registry, registry.root);
+  const benchmarks = loadBenchmarks(registry, registry.root).results;
   console.log(
     `\n${RESULTS_FILE} OK — ${benchmarks.length} record${benchmarks.length === 1 ? "" : "s"}`,
   );

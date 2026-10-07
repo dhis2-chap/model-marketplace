@@ -22,8 +22,11 @@ The deploy workflow (`.github/workflows/deploy.yml`) runs on every push to
    `sourceDigest` is one of that model's pinned commits and the configured
    model is named `<service_id>:<configuration key>` for one of its
    configurations — and drops every other backtest;
-4. writes the records to the gitignored `benchmarks/results.json`, which the
-   build validates against the registry and renders.
+4. reads chap-core's metric definitions (name, description, unit, target,
+   direction) from `GET /v1/visualization/metrics/{backtest_id}` — the same
+   list whichever backtest is asked about — and keeps those the records use;
+5. writes `{ metrics, results }` to the gitignored `benchmarks/results.json`,
+   which the build validates against the registry and renders.
 
 Any failure — no token, an unreachable server, a suite that does not resolve
 to exactly one specification, a record the registry rejects — fails the
@@ -56,12 +59,12 @@ then run `pnpm fetch-benchmarks` in `site/`.
 | `run.horizon`, `splits` | the specification's `nPeriods`, `nSplits`     |
 | `evaluated_at`          | `created`                                     |
 | `harness.tool`          | `chap <chapVersion>`                          |
-| `metrics.crps`          | `aggregateMetrics.crps`                       |
-| `metrics.norm_crps`     | `aggregateMetrics.crps_norm`                  |
-| `metrics.mae`, `rmse`   | `aggregateMetrics.mae`, `rmse`                |
-| `metrics.coverage_80`   | `aggregateMetrics.coverage_10_90`             |
+| `metrics`               | `aggregateMetrics`, verbatim — every metric   |
 
-A backtest whose metric computation failed (no `crps`) is skipped.
+Metrics keep chap's ids (`crps`, `crps_norm`, `mae`, `coverage_10_90`, ...)
+and the site names and describes them with chap-core's own definitions; a
+metric with no definition fails the build. A backtest whose metric
+computation failed (no `crps`) is skipped.
 
 ## Methodology — added soon
 

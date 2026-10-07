@@ -8,7 +8,12 @@ import {
   type Registry,
 } from "./registry";
 import { datasetNameFor } from "./presentation";
-import { benchmarkSchema, type Benchmark } from "./schema";
+import {
+  benchmarkResultsSchema,
+  type Benchmark,
+  type BenchmarkResults,
+  type MetricInfo,
+} from "./schema";
 
 /**
  * Build-time loader for benchmark results. They are fetched from the
@@ -16,7 +21,8 @@ import { benchmarkSchema, type Benchmark } from "./schema";
  * the gitignored <repo>/benchmarks/results.json; a build without that file —
  * CI, local dev — has no results. Every record is validated like the registry,
  * and any violation throws and fails the build: model, version, commit and
- * configuration must resolve against the registry.
+ * configuration must resolve against the registry, and every metric must be
+ * one chap-core's definitions (stored alongside) describe.
  */
 
 export const RESULTS_FILE = path.join("benchmarks", "results.json");
@@ -24,19 +30,20 @@ export const RESULTS_FILE = path.join("benchmarks", "results.json");
 export function loadBenchmarks(
   registry: Registry,
   root: string,
-): Benchmark[] {
+): BenchmarkResults {
   const file = path.join(root, RESULTS_FILE);
-  if (!fs.existsSync(file)) return [];
+  if (!fs.existsSync(file)) return { metrics: [], results: [] };
 
-  const parsed = benchmarkSchema
-    .array()
-    .safeParse(JSON.parse(fs.readFileSync(file, "utf8")));
+  const parsed = benchmarkResultsSchema.safeParse(
+    JSON.parse(fs.readFileSync(file, "utf8")),
+  );
   if (!parsed.success) {
     throw new Error(`${RESULTS_FILE} is invalid:\n${parsed.error.message}`);
   }
 
   const byId = new Map(registry.models.map((m) => [m.id, m]));
-  return parsed.data.map((bench) => {
+  const defined = new Set(parsed.data.metrics.map((m) => m.id));
+  const results = parsed.data.results.map((bench) => {
     const label = `${RESULTS_FILE}: ${bench.model}@${bench.version} on ${bench.dataset}`;
     const model = byId.get(bench.model);
     if (!model) {
@@ -59,16 +66,32 @@ export function loadBenchmarks(
         `${label}: configuration "${config}" is not in models/${bench.model}.yaml`,
       );
     }
+    const undefinedMetric = Object.keys(bench.metrics).find(
+      (id) => !defined.has(id),
+    );
+    if (undefinedMetric) {
+      throw new Error(`${label}: metric "${undefinedMetric}" has no definition`);
+    }
     return bench;
   });
+  return { metrics: parsed.data.metrics, results };
 }
 
-let cached: Benchmark[] | null = null;
+let cached: BenchmarkResults | null = null;
+
+function loaded(): BenchmarkResults {
+  cached ??= loadBenchmarks(getRegistry(), getRegistry().root);
+  return cached;
+}
 
 /** Benchmarks for the registry the site is building, loaded once. */
 export function getBenchmarks(): Benchmark[] {
-  cached ??= loadBenchmarks(getRegistry(), getRegistry().root);
-  return cached;
+  return loaded().results;
+}
+
+/** chap-core's definitions of the metrics those benchmarks carry. */
+export function getMetricDefinitions(): MetricInfo[] {
+  return loaded().metrics;
 }
 
 export function benchmarksFor(
@@ -78,10 +101,33 @@ export function benchmarksFor(
   return records.filter((b) => b.model === modelId);
 }
 
-/** Derived, never stored: skill vs. the stored baseline, when present. */
-export function skillOf(bench: Benchmark): number | null {
-  const { crps, baseline_crps } = bench.metrics;
-  return baseline_crps ? 1 - crps / baseline_crps : null;
+/** A metric as the pages show it: chap-core's name and description. */
+export interface MetricView {
+  id: string;
+  label: string;
+  value: string;
+  description: string;
+}
+
+/** Four significant figures, plus chap's display unit (MAPE's "%"). */
+function formatMetric(value: number, unit: string | null): string {
+  const v = value.toLocaleString("en-US", { maximumSignificantDigits: 4 });
+  return unit ? `${v}${unit === "%" ? "" : " "}${unit}` : v;
+}
+
+/** Every metric of a record, in chap-core's order. */
+export function metricViews(
+  bench: Benchmark,
+  metrics: MetricInfo[],
+): MetricView[] {
+  return metrics
+    .filter((m) => bench.metrics[m.id] !== undefined)
+    .map((m) => ({
+      id: m.id,
+      label: m.displayName,
+      value: formatMetric(bench.metrics[m.id], m.unit),
+      description: m.description,
+    }));
 }
 
 /* ---------- benchmark comparisons: recorded runs, one suite per dataset ---------- */
@@ -100,6 +146,8 @@ export interface BenchmarkRowView {
   /** "chapkit_ewars_model@fa880a1 · 1.0.0" */
   pinLine: string;
   measured: boolean;
+  /** Every metric of the run, for the run-record panel; [] when unmeasured. */
+  metrics: MetricView[];
   ncrps: number | null;
   crps: number | null;
   mae: number | null;
@@ -150,6 +198,7 @@ function suiteIdOf(bench: Benchmark): string | null {
 export function buildBenchmarkSuites(
   registry: Registry,
   records: Benchmark[],
+  metrics: MetricInfo[],
 ): BenchmarkSuiteView[] {
   const byId = new Map(registry.models.map((m) => [m.id, m]));
   // Templates are scaffolding, not something to forecast with.
@@ -172,7 +221,8 @@ export function buildBenchmarkSuites(
           versionTag: b.version,
           pinLine: `${b.run?.configuration ? `${b.run.configuration} · ` : ""}${b.model}@${shortCommit(b.commit)} · ${b.version}`,
           measured: true,
-          ncrps: b.metrics.norm_crps ?? null,
+          metrics: metricViews(b, metrics),
+          ncrps: b.metrics.crps_norm ?? null,
           crps: b.metrics.crps,
           mae: b.metrics.mae ?? null,
           rmse: b.metrics.rmse ?? null,
@@ -199,6 +249,7 @@ export function buildBenchmarkSuites(
           versionTag: stable.version,
           pinLine: `${m.id}@${shortCommit(stable.commit)} · ${stable.version}`,
           measured: false,
+          metrics: [],
           ncrps: null,
           crps: null,
           mae: null,
