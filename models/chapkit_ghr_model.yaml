@@ -23,7 +23,7 @@ source:
   runtime_image: ghcr.io/dhis2-chap/chapkit-r-inla
 
 attribution:
-  author: Global Health Resilience group, BSC (adapted to Chap by Chap team)
+  author: Global Health Resilience group, BSC (adapted by Chap team)
   organization: Barcelona Supercomputing Center
   citation: >-
     Lowe R, Lee SA, O'Reilly KM et al. (2021) Combined effects of

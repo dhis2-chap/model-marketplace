@@ -182,7 +182,7 @@ configurations:                  # verified, copy-pasteable configurations
 - `channels.stable` must point at a version with `status: verified`.
 - `attribution.author` credits the people who built the model. When the Chap
   team packaged someone else's model as a chapkit service, say so in the
-  author line — `Author (adapted to Chap by Chap team)`. No personal contact
+  author line — `Author (adapted by Chap team)`. No personal contact
   details: the listing carries no e-mail addresses or GitHub handles.
 - `versions[].verified_by` lists the three approving maintainers of the PR
   that added the pin. `[]` on a verified pin means the pin was verified by

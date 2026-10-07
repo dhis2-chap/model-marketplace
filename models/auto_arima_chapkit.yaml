@@ -23,7 +23,7 @@ source:
   runtime_image: ghcr.io/dhis2-chap/chapkit-r-tidyverse
 
 attribution:
-  author: Harsha (adapted to Chap by Chap team)
+  author: Harsha (adapted by Chap team)
   organization: Cardiff University
 
 compatibility:
