@@ -100,7 +100,7 @@ export function repoOrg(model: Model): string {
   return repoSlug(model).split("/")[1] ?? "";
 }
 
-/** "chap-models/chapkit_ewars_model" — the slug without the host. */
+/** "chap-models/chapkit_ghr_model" — the slug without the host. */
 export function repoPath(model: Model): string {
   return repoSlug(model).split("/").slice(1).join("/");
 }

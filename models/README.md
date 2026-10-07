@@ -24,7 +24,7 @@ declares.
 | `maturity: stable \| experimental` | `kind: model \| template` plus `assessed_status`, the author's own chapkit `AssessedStatus` |
 | — | `service_id`, the id the service registers with chap-core under |
 | `source.repository` (+ optional `mlproject_name`) | `source.repository`, `source.image`, `source.runtime_image` |
-| — | `attribution` — author, organization, contact, citation, from the service metadata |
+| — | `attribution` — author, organization, citation, from the service metadata |
 | `compatibility.max_prediction_length` | `compatibility.min_prediction_periods` / `max_prediction_periods` / `requires_geo` |
 | `covariates.additional_continuous` | `covariates.defaults` plus `covariates.allow_free_additional` |
 | `versions[].commit` | `versions[].commit`, `image_tag`, `chapkit` |
@@ -90,12 +90,8 @@ source:
 attribution:                     # from MLServiceInfo.model_metadata
   author: Somebody
   organization: Some Institute   # optional
-  contact: somebody@example.org  # optional
   citation: >-                   # optional
     A paper or a data citation.
-
-maintainers:                     # GitHub handles responsible for the LISTING
-  - somebody
 
 compatibility:
   period_types: [monthly]        # monthly | weekly | ...
@@ -184,10 +180,10 @@ configurations:                  # verified, copy-pasteable configurations
 - `display_name` is normalised for the catalog: no `(chapkit)` suffix (every
   listed model is a chapkit service), and never a raw repository name.
 - `channels.stable` must point at a version with `status: verified`.
-- `maintainers` lists the GitHub handles responsible for the listing — not
-  necessarily the model's authors, who are recorded under `attribution`. The
-  current entries were backfilled from each source repository's contributors;
-  corrections land like everything else, by PR.
+- `attribution.author` credits the people who built the model. When the CHAP
+  team packaged someone else's model as a chapkit service, say so in the
+  author line — `Author (adapted to CHAP by CHAP team)`. No personal contact
+  details: the listing carries no e-mail addresses or GitHub handles.
 - `versions[].verified_by` lists the three approving maintainers of the PR
   that added the pin. `[]` on a verified pin means the pin was verified by
   the merge gate itself without named approvals on record — true for the

@@ -27,13 +27,6 @@ source:
 attribution:
   author: DHIS2 Chap
   organization: HISP Centre, University of Oslo
-  contact: chap@dhis2.org
-
-# GitHub handles responsible for this listing — backfilled from the source
-# repository's contributors; corrections welcome by PR.
-maintainers:
-  - mortenoh
-  - edvinstava
 
 compatibility:
   period_types: [monthly]

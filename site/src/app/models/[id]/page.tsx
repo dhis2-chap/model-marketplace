@@ -78,8 +78,6 @@ export default async function ModelPage({
         <AuthorPanel
           author={view.attribution.author}
           organization={view.attribution.organization}
-          contact={view.attribution.contact}
-          maintainers={view.maintainers}
         />
       </div>
     </>

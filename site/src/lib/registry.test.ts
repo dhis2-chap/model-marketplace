@@ -42,21 +42,21 @@ describe("the real registry", () => {
   });
 
   it("derives the source pin in both display and chap-consumable form", () => {
-    const ewars = registry.models.find((m) => m.id === "chapkit_ewars_model");
-    expect(ewars).toBeDefined();
-    const stable = stableVersion(ewars!);
-    expect(displayPin(ewars!, stable)).toBe(
-      "github.com/chap-models/chapkit_ewars_model@964eea8",
+    const ghr = registry.models.find((m) => m.id === "chapkit_ghr_model");
+    expect(ghr).toBeDefined();
+    const stable = stableVersion(ghr!);
+    expect(displayPin(ghr!, stable)).toBe(
+      "github.com/chap-models/chapkit_ghr_model@dfb2e3f",
     );
-    expect(fullPin(ewars!, stable)).toBe(
-      "https://github.com/chap-models/chapkit_ewars_model@964eea8bfdb194ca8985723216e94f1ac63aa4f1",
+    expect(fullPin(ghr!, stable)).toBe(
+      "https://github.com/chap-models/chapkit_ghr_model@dfb2e3fdd25cbf7a369cf078361814056e7fe709",
     );
   });
 
   it("derives the deployable image pin from the same commit", () => {
-    const ewars = registry.models.find((m) => m.id === "chapkit_ewars_model")!;
-    expect(imageRef(ewars, stableVersion(ewars))).toBe(
-      "ghcr.io/chap-models/chapkit_ewars_model:sha-964eea8",
+    const ghr = registry.models.find((m) => m.id === "chapkit_ghr_model")!;
+    expect(imageRef(ghr, stableVersion(ghr))).toBe(
+      "ghcr.io/chap-models/chapkit_ghr_model:sha-dfb2e3f",
     );
   });
 
@@ -87,7 +87,6 @@ describe("schema refinements", () => {
       runtime_image: "ghcr.io/dhis2-chap/chapkit-py",
     },
     attribution: { author: "Someone" },
-    maintainers: [],
     compatibility: {
       period_types: ["monthly"],
       min_prediction_periods: 1,

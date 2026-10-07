@@ -43,7 +43,6 @@ and the format is documented with an annotated example in
 
 | Model | `assessed_status` | Framework | Horizon |
 |---|---|---|---|
-| [CHAP-EWARS](models/chapkit_ewars_model.yaml) | orange | R · INLA | 0–100 |
 | [Rwanda Malaria BYM](models/chapkit_rwanda_malaria_bym_model.yaml) | gray | R · INLA | 1–24 |
 | [Simple Multistep](models/chapkit_simple_multistep_model.yaml) | orange | Python · scikit-learn + skpro | 1–100 |
 | [Auto-ARIMA](models/auto_arima_chapkit.yaml) | red | R · fable | 0–12 |
@@ -139,7 +138,7 @@ Vercel's SSO. So the tab is the history of what is actually live.
 ### Honest-data rules
 
 - Everything rendered from the YAML is real: models, pins, channels,
-  configurations, maintainers — and benchmark results present in
+  configurations, attribution — and benchmark results present in
   `benchmarks/`.
 - There are no mock benchmark figures anywhere. A model with no real results
   shows no scores at all — not an illustrative sparkline, not a placeholder

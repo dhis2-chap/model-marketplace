@@ -29,13 +29,6 @@ export const COV_LABEL: Record<CovariateMode, string> = {
 };
 
 export const PRESENTATION: Record<string, Presentation> = {
-  chapkit_ewars_model: {
-    framework: "R · INLA",
-    language: "R",
-    covMode: "both",
-    shortName: "CHAP-EWARS",
-    abbrev: "EWARS",
-  },
   chapkit_rwanda_malaria_bym_model: {
     framework: "R · INLA",
     language: "R",

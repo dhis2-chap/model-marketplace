@@ -213,11 +213,9 @@ export interface ModelDetailView {
   repo: string;
   repoUrl: string;
   org: string;
-  maintainers: string[];
   attribution: {
     author: string;
     organization: string | null;
-    contact: string | null;
     citation: string | null;
   };
   framework: string;
@@ -376,11 +374,9 @@ export function toDetailView(
     repo: repoSlug(model),
     repoUrl: model.source.repository,
     org: repoOrg(model),
-    maintainers: model.maintainers,
     attribution: {
       author: model.attribution.author,
       organization: model.attribution.organization ?? null,
-      contact: model.attribution.contact ?? null,
       citation: model.attribution.citation ?? null,
     },
     framework: pres.framework,

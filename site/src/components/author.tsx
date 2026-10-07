@@ -1,8 +1,4 @@
-/**
- * Who made a model, from the model YAML's `attribution`. Maintainers are
- * the people who keep the listing working — not authors — so they are
- * named separately on the model page and never shown beside the credit.
- */
+/** Who made a model, from the model YAML's `attribution`. */
 
 /** Compact credit for the catalog card. */
 export function AuthorLine({
@@ -29,13 +25,9 @@ export function AuthorLine({
 export function AuthorPanel({
   author,
   organization,
-  contact,
-  maintainers,
 }: {
   author: string;
   organization: string | null;
-  contact: string | null;
-  maintainers: string[];
 }) {
   return (
     <section
@@ -50,35 +42,6 @@ export function AuthorPanel({
       </div>
       {organization ? (
         <div className="mt-1 text-[15px] text-ink-2">{organization}</div>
-      ) : null}
-      {contact ? (
-        <a
-          href={`mailto:${contact}`}
-          className="mt-2 inline-block text-[14px] text-brand hover:underline [overflow-wrap:anywhere]"
-        >
-          {contact}
-        </a>
-      ) : null}
-      {maintainers.length > 0 ? (
-        <div className="mt-4 border-t border-line pt-4">
-          <div className="text-[13px] font-medium uppercase tracking-[0.08em] text-ink-3">
-            Maintainers
-          </div>
-          <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
-            {maintainers.map((h) => (
-              <li key={h}>
-                <a
-                  href={`https://github.com/${h}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-[14px] text-ink-2 hover:text-brand"
-                >
-                  @{h}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
       ) : null}
     </section>
   );
