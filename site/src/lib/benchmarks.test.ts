@@ -12,17 +12,17 @@ import { loadRegistry, shortCommit, stableVersion } from "./registry";
 import type { Benchmark } from "./schema";
 
 const registry = loadRegistry();
-const ewars = registry.models.find((m) => m.id === "chapkit_ewars_model")!;
-const ewarsStable = stableVersion(ewars);
+const ghr = registry.models.find((m) => m.id === "chapkit_ghr_model")!;
+const ghrStable = stableVersion(ghr);
 const multistep = registry.models.find((m) => m.id === "chapkit_simple_multistep_model")!;
 const multistepStable = stableVersion(multistep);
 
 function benchmark(overrides: Partial<Benchmark> = {}): Benchmark {
   return {
     schema_version: 1,
-    model: ewars.id,
-    version: ewarsStable.version,
-    commit: ewarsStable.commit,
+    model: ghr.id,
+    version: ghrStable.version,
+    commit: ghrStable.commit,
     dataset: "dengue-brazil-monthly",
     evaluated_at: "2026-08-31",
     harness: { tool: "chap evaluate-ensemble" },
@@ -139,13 +139,13 @@ describe("buildBenchmarkSuites", () => {
     const suite = suites[0];
 
     expect(suite.heading).toBe("Laos admin-1 monthly · horizon 3");
-    expect(suite.countLine).toBe("1 of 7 listed models evaluated");
+    expect(suite.countLine).toBe("1 of 6 listed models evaluated");
     expect(suite.runContext).toContainEqual({
       k: "Suite",
       v: "chapkit_simple_multistep_model.monthly_climate",
     });
     expect(suite.runContext).toContainEqual({ k: "Observations", v: "2,808 rows" });
-    expect(suite.pendingNote).toMatch(/^Six listed models/);
+    expect(suite.pendingNote).toMatch(/^Five listed models/);
 
     expect(suite.rows).toHaveLength(registry.models.length);
     const [first, ...rest] = suite.rows;
@@ -165,9 +165,9 @@ describe("buildBenchmarkSuites", () => {
 
   it("reuses the suite's run parameters in an unmeasured row's command", () => {
     const suite = buildBenchmarkSuites(registry, [smokeRun()])[0];
-    const pendingEwars = suite.rows.find((r) => r.modelId === ewars.id)!;
-    expect(pendingEwars.cmd).toBe(
-      `chap eval --model chapkit_ewars_model \\\n  --commit ${shortCommit(ewarsStable.commit)} --dataset laos-admin1-monthly \\\n  --horizon 3 --splits 1 --samples 200`,
+    const pendingGhr = suite.rows.find((r) => r.modelId === ghr.id)!;
+    expect(pendingGhr.cmd).toBe(
+      `chap eval --model chapkit_ghr_model \\\n  --commit ${shortCommit(ghrStable.commit)} --dataset laos-admin1-monthly \\\n  --horizon 3 --splits 1 --samples 200`,
     );
   });
 
@@ -189,7 +189,7 @@ describe("buildBenchmarkSuites", () => {
       "auto_arima_chapkit",
       "chapkit_simple_multistep_model",
     ]);
-    expect(suite.countLine).toBe("2 of 7 listed models evaluated");
-    expect(suite.pendingNote).toMatch(/^Five listed models/);
+    expect(suite.countLine).toBe("2 of 6 listed models evaluated");
+    expect(suite.pendingNote).toMatch(/^Four listed models/);
   });
 });
