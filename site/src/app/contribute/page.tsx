@@ -30,9 +30,7 @@ source:
 
 attribution:
   author: Your Name
-  contact: you@example.org
-
-maintainers: [your-github-handle]
+  organization: Your Institute
 
 compatibility:
   period_types: [monthly]

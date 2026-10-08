@@ -56,12 +56,12 @@ describe("approvingReviewers", () => {
 
 describe("proposedPinsInFile", () => {
   const registry = loadRegistry();
-  const ewars = registry.models.find((m) => m.id === "chapkit_ewars_model")!;
-  const v1 = ewars.versions[0];
+  const ghr = registry.models.find((m) => m.id === "chapkit_ghr_model")!;
+  const v1 = ghr.versions[0];
 
   const headWithNewPin = [
-    "id: chapkit_ewars_model",
-    "display_name: CHAP-EWARS",
+    "id: chapkit_ghr_model",
+    "display_name: GHRmodel",
     "versions:",
     "  - version: 1.1.0",
     `    commit: ${"a".repeat(40)}`,
@@ -72,11 +72,11 @@ describe("proposedPinsInFile", () => {
   ].join("\n");
 
   it("reports only version tags main does not already pin", () => {
-    const pins = proposedPinsInFile("models/chapkit_ewars_model.yaml", headWithNewPin, ewars);
+    const pins = proposedPinsInFile("models/chapkit_ghr_model.yaml", headWithNewPin, ghr);
     expect(pins).toEqual([
       {
-        modelId: "chapkit_ewars_model",
-        displayName: "CHAP-EWARS",
+        modelId: "chapkit_ghr_model",
+        displayName: "GHRmodel",
         isNewModel: false,
         versionTag: "1.1.0",
         commit: "a".repeat(40),
@@ -86,19 +86,19 @@ describe("proposedPinsInFile", () => {
 
   it("treats a re-pinned existing tag as a proposal", () => {
     const repinned = headWithNewPin.replace(v1.commit, "b".repeat(40));
-    const pins = proposedPinsInFile("models/chapkit_ewars_model.yaml", repinned, ewars);
+    const pins = proposedPinsInFile("models/chapkit_ghr_model.yaml", repinned, ghr);
     expect(pins.map((p) => p.versionTag).sort()).toEqual([v1.version, "1.1.0"].sort());
   });
 
   it("reports nothing when the file matches what main lists", () => {
     const unchanged = [
-      "id: chapkit_ewars_model",
+      "id: chapkit_ghr_model",
       "versions:",
       `  - version: ${v1.version}`,
       `    commit: ${v1.commit}`,
     ].join("\n");
     expect(
-      proposedPinsInFile("models/chapkit_ewars_model.yaml", unchanged, ewars),
+      proposedPinsInFile("models/chapkit_ghr_model.yaml", unchanged, ghr),
     ).toEqual([]);
   });
 

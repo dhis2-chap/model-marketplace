@@ -103,11 +103,8 @@ export const modelSchema = z
     attribution: z.object({
       author: z.string().min(1),
       organization: z.string().min(1).optional(),
-      contact: z.string().email().optional(),
       citation: z.string().min(1).optional(),
     }),
-    /** GitHub handles responsible for the *listing*. */
-    maintainers: z.array(z.string()).default([]),
     compatibility: z.object({
       period_types: z.array(z.string()).min(1),
       min_prediction_periods: z.number().int().nonnegative(),

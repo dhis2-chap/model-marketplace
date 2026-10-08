@@ -143,7 +143,7 @@ export interface BenchmarkRowView {
   modelId: string;
   name: string;
   versionTag: string;
-  /** "chapkit_ewars_model@fa880a1 · 1.0.0" */
+  /** "chapkit_ghr_model@dfb2e3f · 0.1.3" */
   pinLine: string;
   measured: boolean;
   /** Every metric of the run, for the run-record panel; [] when unmeasured. */
