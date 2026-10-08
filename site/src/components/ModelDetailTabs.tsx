@@ -8,7 +8,7 @@ import type { ModelDetailView } from "@/lib/views";
 import { AssessedStatusBadge, ChannelChip, StatusBadge } from "./badges";
 import { CodePanel } from "./CodePanel";
 import { CopyButton } from "./copy";
-import { ComparisonChart, CrpsByHorizonChart } from "./charts";
+import { ComparisonChart } from "./charts";
 
 type Tab = "overview" | "versions" | "configs" | "benchmarks" | "install";
 
@@ -290,7 +290,9 @@ function BenchmarksTab({ view }: { view: ModelDetailView }) {
     <div>
       <h2 className={H2}>Benchmarks</h2>
       <p className={LEDE}>
-        CRPS — lower is better. Measured on {p.dataset} at {p.versionTag},{" "}
+        CRPS — lower is better. Measured on {p.dataset} at {p.versionTag}
+        {p.configuration ? <> with the {p.configuration} configuration</> : null}
+        ,{" "}
         {p.evaluatedAt}
         {p.runUrl ? (
           <>
@@ -308,34 +310,27 @@ function BenchmarksTab({ view }: { view: ModelDetailView }) {
         .
       </p>
       {b.headline.length > 0 ? (
-        <dl className="d2-card mb-5 grid grid-cols-2 gap-4 px-5 py-4 sm:grid-cols-4">
+        <dl className="d2-card mb-5 grid gap-x-6 gap-y-5 px-5 py-4 sm:grid-cols-2 lg:grid-cols-3">
           {b.headline.map((h) => (
-            <div key={h.label}>
+            <div key={h.id}>
               <dd className="font-brand text-[22px] font-medium text-ink">
                 {h.value}
               </dd>
               <dt className="mt-1 text-[14px] text-ink-2">{h.label}</dt>
+              {h.description ? (
+                <dd className="mt-0.5 text-[12.5px] leading-[1.45] text-ink-3">
+                  {h.description}
+                </dd>
+              ) : null}
             </div>
           ))}
         </dl>
       ) : null}
       <div className="grid gap-5 lg:grid-cols-2">
-        {b.crpsByHorizon.length > 0 ? (
-          <div className="d2-card p-5">
-            <div className="mb-3 font-medium text-ink">
-              CRPS by forecast horizon
-            </div>
-            <CrpsByHorizonChart
-              crps={b.crpsByHorizon}
-              baseline={b.baseline}
-              shortName={view.shortName}
-            />
-          </div>
-        ) : null}
         {b.comparison.length > 0 ? (
           <div className="d2-card p-5">
             <div className="mb-3 font-medium text-ink">
-              Model comparison · {p.dataset}
+              Model comparison · {p.dataset} · best configuration each
             </div>
             <ComparisonChart items={b.comparison} />
           </div>

@@ -6,11 +6,20 @@ name: deploy
 # The build is the same `next build` CI runs, so invalid registry YAML fails
 # here too. CI is a separate workflow, though: a push whose tests fail still
 # deploys, and the approval rule on main is what keeps that from happening.
+#
+# It also bakes in the benchmark results, read from the benchmarking server's
+# chap API with CHAP_API_TOKEN. That token can write to the server, so it is
+# only ever used here: this workflow never runs on pull requests, forked or
+# not. The server runs pending benchmarks every 15 minutes; the hourly
+# schedule keeps the published leaderboard at most an hour behind it.
 
 on:
   push:
     branches:
       - main
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
 
 concurrency:
   group: deploy-${{ github.ref }}
@@ -24,6 +33,8 @@ jobs:
   deploy:
     name: deploy to vercel
     runs-on: ubuntu-latest
+    # A manual run can name any branch; only main is published.
+    if: github.ref == 'refs/heads/main'
     # Naming an environment is what puts each run in the Deployments view;
     # `url` is that record's "View deployment" link. It resolves after the job,
     # so it can read a step output.
@@ -49,6 +60,17 @@ jobs:
           node-version: 24
           cache: pnpm
           cache-dependency-path: site/pnpm-lock.yaml
+
+      # Fails the job, before anything is built, if the results cannot be
+      # read, so a deploy never replaces the leaderboard with an empty one.
+      - name: fetch benchmarks
+        working-directory: site
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm fetch-benchmarks
+        env:
+          CHAP_API_URL: https://chap-benchmarking.dhis2.org
+          CHAP_API_TOKEN: ${{ secrets.CHAP_API_TOKEN }}
 
       - name: deploy
         id: deploy

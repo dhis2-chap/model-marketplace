@@ -12,8 +12,9 @@ site in `site/` is a build-time rendering of it. No auth, no server state.
 - `models/*.yaml` — one file per model: metadata, configurations, version pins
   (exact 40-char commit **plus** the `sha-<short>` image tag built from it).
   Schema documented in `models/README.md`; currently `schema_version: 2`.
-- `benchmarks/` — benchmark record store, one YAML per
-  (model, version, dataset). Currently empty: no benchmarks have been run.
+- `benchmarks/` — docs only. Results are fetched from Chap's benchmarking
+  server's chap API at deploy time (`pnpm fetch-benchmarks`) into the
+  gitignored `benchmarks/results.json`; see `benchmarks/README.md`.
 - `site/` — Next.js App Router site, pnpm. Loads registry, models, and
   benchmarks at build time through the zod schema in `site/src/lib/schema.ts`;
   invalid data fails the build.
@@ -44,12 +45,19 @@ site in `site/` is a build-time rendering of it. No auth, no server state.
 - **Templates are not models.** `kind: template` marks scaffolding (the two
   minimalist examples). Counted, filtered and labelled separately; never
   presented as something to forecast with.
-- **Benchmarks are not run yet, and the methodology is undecided.** How the
-  suites will be run (harness, datasets, backtest parameters, ranking) is an
-  open question. Never document a benchmark methodology as decided — docs and
-  site copy say it will be "added soon". All benchmark views are gated behind
-  `BENCHMARKS_LIVE = false` in `site/src/lib/flags.ts`; flip it only when real
-  results land in `benchmarks/`.
+- **Benchmark results come from the benchmarking server, at deploy time.**
+  Only backtests of listed pins (template = `service_id`, `sourceDigest` = a
+  pinned commit, configured model = `<service_id>:<configuration key>`) are
+  kept. Templates never appear on the leaderboard.
+  `CHAP_API_TOKEN` can write to that server: it is used only in
+  `deploy.yml`, which must never run on `pull_request`. The deploy fails if
+  the fetch fails — never ship an empty leaderboard in place of the real one.
+- **The benchmark methodology is undecided.** How the suites are ranked
+  (datasets, backtest parameters, ranking) is an open question. Never
+  document a benchmark methodology as decided — docs and site copy say it
+  will be "added soon". The benchmark views are behind `BENCHMARKS_LIVE` in
+  `site/src/lib/flags.ts` (on since real results landed, 2026-10-05) and
+  fall back to "coming soon" when a build has no results.
 - **No invented figures anywhere.** The mock benchmark fixtures were deleted
   along with the catalog sparklines and the synthesized CRPS spread band. A
   model with no real record shows no score at all. Do not reintroduce

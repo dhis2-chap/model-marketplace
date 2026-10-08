@@ -124,9 +124,10 @@ export const ASSESSED_STATUS_ORDER: AssessedStatus[] = [
   "gray",
 ];
 
-/** Display names for the dataset ids used in benchmarks/. */
+/** Display names for the suite dataset ids in chap-api.ts. */
 export const DATASET_NAME: Record<string, string> = {
-  "laos-admin1-monthly": "Laos admin-1 monthly",
+  "rwanda-monthly": "Rwanda monthly",
+  "nepal-monthly": "Nepal monthly",
 };
 
 export function datasetNameFor(id: string): string {
